@@ -1,0 +1,225 @@
+
+.adminShell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.mainContent {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: #fff;
+  padding: 10px 2rem;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+}
+.pageHeader h1 {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.pageHeader p {
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.backBtn {
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.backBtn:hover {
+  background: var(--border);
+}
+
+.filterTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tab:hover {
+  color: var(--navy);
+}
+
+.active {
+  color: var(--red) !important;
+  border-bottom-color: var(--red) !important;
+}
+
+.container {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-mid);
+}
+
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty svg {
+  width: 48px;
+  height: 48px;
+  stroke: var(--text-light);
+  margin-bottom: 16px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty h3 {
+  font-size: 1.2rem;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+
+.empty p {
+  color: var(--text-mid);
+  font-size: 0.9rem;
+}
+
+.errorBanner {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.table thead {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tbody tr:hover {
+  background: rgba(30, 58, 95, 0.02);
+}
+
+.bookingId {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.guestInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.guestInfo strong {
+  font-size: 0.9rem;
+}
+
+.guestInfo small {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.status_pending {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.status_approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status_confirmed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.actionBtn {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+}
+
+.actionBtn:hover {
+  background: var(--navy-dark);
+}

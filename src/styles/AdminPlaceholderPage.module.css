@@ -1,0 +1,63 @@
+.placeholderPage {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+}
+
+.brandHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.brandHeader img {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.brandHeader h1 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.brandHeader p {
+  margin: 0;
+  color: var(--text-mid);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+
+.card p {
+  color: var(--text-mid);
+  margin-bottom: 24px;
+}
+
+.backBtn {
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}

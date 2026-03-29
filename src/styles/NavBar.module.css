@@ -1,0 +1,131 @@
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+
+  height: 80px; 
+  padding: 0 2.5rem;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  background: linear-gradient(180deg, #0b1c2c, #0f2740);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+}
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;   
+  overflow: hidden;    
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex: 1;
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandName {
+  font-family: 'DM Sans', serif;
+  font-size: 1.7rem;        
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+}
+
+.infinity {
+  color: #ffffff;
+}
+
+.garden {
+  color: #aee6ff;           
+  font-weight: 700;
+}
+
+.brand:hover .brandName {
+  text-shadow: 0 3px 10px rgba(255,255,255,0.3);
+}
+
+.brandSub {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.08em;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.link {
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: var(--transition);
+  letter-spacing: 0.01em;
+}
+
+.link:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+.active {
+  color: #fff !important;
+  background: rgba(255,255,255,0.12);
+  font-weight: 600;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .brandSub { display: none; }
+
+  .brandName {
+    font-size: 1.3rem;
+  }
+
+  .link {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,294 @@
+.wrapper {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 2rem 3rem;
+}
+
+.successCard {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.checkIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.checkIcon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.successCard h1 {
+  font-size: 2rem;
+  color: var(--navy);
+  margin-bottom: 0.5rem;
+}
+
+.successCard p {
+  color: var(--text-mid);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.refBox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 1rem 2rem;
+}
+
+.refLabel {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  margin-bottom: 0.3rem;
+}
+
+.refId {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navy);
+  font-family: 'DM Sans', serif;
+  letter-spacing: 0.04em;
+}
+
+.detailCard {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.detailCard h2 {
+  font-size: 1.3rem;
+  color: var(--navy);
+  margin-bottom: 1.25rem;
+}
+
+.roomRow {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.roomThumb {
+  width: 100px;
+  height: 70px;
+  border-radius: var(--radius);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.roomName {
+  font-size: 1.1rem;
+  color: var(--navy);
+  margin-bottom: 0.3rem;
+}
+
+.roomMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+.roomMeta svg {
+  width: 13px;
+  height: 13px;
+}
+
+.datesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+
+.dateLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--text-light);
+  margin-bottom: 0.3rem;
+}
+
+.dateLabel svg {
+  width: 13px;
+  height: 13px;
+}
+
+.dateVal {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 0.2rem;
+}
+
+.dateSub {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+.priceBreakdown {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.87rem;
+  color: var(--text-mid);
+  margin-bottom: 0.5rem;
+}
+
+.priceTotal {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.guestSection {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.guestSection h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 1rem;
+}
+
+.guestItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.guestItem svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-light);
+  flex-shrink: 0;
+}
+
+.guestLabel {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-light);
+  margin-bottom: 0.1rem;
+}
+
+.guestVal {
+  display: block;
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.whatsNext {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.whatsNext h4 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.87rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  margin-bottom: 0.75rem;
+}
+
+.whatsNext ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.whatsNext li {
+  font-size: 0.82rem;
+  color: #1e40af;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.whatsNext li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #3b82f6;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.actions .btn-red,
+.actions .btn-outline-navy {
+  justify-content: center;
+  padding: 14px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .actions { grid-template-columns: 1fr; }
+  .datesGrid { grid-template-columns: 1fr; }
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;     
+  justify-content: center; 
+  text-align: center;
+}
+
+.viewBtn:hover {
+  background:#1a3d68;
+}
