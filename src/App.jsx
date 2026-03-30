@@ -11,6 +11,8 @@ import MyBookingsPage    from './pages/MyBookingsPage';
 import AdminLoginPage    from './pages/admin/AdminLoginPage';
 import AdminDashboard    from './pages/admin/AdminDashboard';
 import AdminReservations from './pages/admin/AdminReservations';
+import AdminUserManagement from './pages/admin/AdminUserManagement';
+import AdminNotifications from './pages/admin/AdminNotifications';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Toast             from './components/ui/Toast';
 
@@ -47,7 +49,8 @@ function AppRoutes() {
         {/* Protected admin routes */}
         <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/reservations" element={<ProtectedRoute><AdminReservations /></ProtectedRoute>} />
-        <Route path="/admin/users" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
+        <Route path="/admin/notifications" element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>} />
         <Route path="/admin/facilities" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
         <Route path="/admin/payments" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
