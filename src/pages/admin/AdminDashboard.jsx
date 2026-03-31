@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import { adminAPI } from '../../utils/api';
+import { FaBell } from 'react-icons/fa';
 import styles from '../../styles/AdminDashboard.module.css';
 
 export default function AdminDashboard() {
@@ -46,6 +47,10 @@ export default function AdminDashboard() {
     navigate('/');
   };
 
+  const handleNotifications = () => {
+    navigate('/admin/notifications');
+  };
+
   return (
     <div className={styles.adminShell}>
       <AdminSidebar />
@@ -57,14 +62,19 @@ export default function AdminDashboard() {
               <h1>Admin Dashboard</h1>
               <p>Infinity Garden Resort Reservation Management System</p>
             </div>
-            <button className={styles.logoutBtn} onClick={handleLogout}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Logout
-            </button>
+            <div className={styles.headerActions}>
+              <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">
+                <FaBell />
+              </button>
+              <button className={styles.logoutBtn} onClick={handleLogout}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+              </button>
+            </div>
           </div>
         </div>
 

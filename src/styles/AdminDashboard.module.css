@@ -27,6 +27,47 @@
   align-items: center;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notifyBtn,
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.notifyBtn {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.notifyBtn svg,
+.logoutBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.notifyBtn:hover,
+.logoutBtn:hover {
+  background: rgba(255,255,255,0.25);
+}
+
 .title h1 {
   font-size: 1.8rem;
   font-weight: 700;
@@ -51,15 +92,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
-}
-
-.logoutBtn:hover {
-  background: rgba(255,255,255,0.25);
-}
-
-.logoutBtn svg {
-  width: 16px;
-  height: 16px;
 }
 
 .container {
