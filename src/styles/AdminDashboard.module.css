@@ -418,3 +418,71 @@
   .headerContent { flex-direction: column; gap: 14px; align-items: flex-start; }
   .container { padding: 20px 1rem; }
 }
+.titleArea h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.titleArea p {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.tableActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.exportBtn {
+  background: var(--navy);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.paymentMethod {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.priceCell {
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.statusPaid {
+  color: #10b981;
+  background: #ecfdf5;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+}
+
+.statusPending {
+  color: #f59e0b;
+  background: #fffbe6;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+}
