@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import { facilitiesAPI } from '../../utils/api';
 import { ROOMS } from '../../data/rooms';
@@ -26,7 +25,6 @@ function normalizeFacility(item) {
 }
 
 export default function AdminFacilities() {
-  const navigate = useNavigate();
   const [facilities, setFacilities] = useState([]);
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [editedFacility, setEditedFacility] = useState(null);
@@ -101,8 +99,8 @@ export default function AdminFacilities() {
 
   const handleEditFacility = (facility) => {
     setEditedFacility(facility);
-    setSelectedFacility(facility);
     setShowForm(true);
+    setSelectedFacility(null);
     setForm({
       name: facility.name,
       type: facility.type,
@@ -119,20 +117,8 @@ export default function AdminFacilities() {
     });
   };
 
-  const handleDeleteFacility = async (facilityId) => {
-    const confirmed = window.confirm('Delete this facility? This cannot be undone.');
-    if (!confirmed) return;
-
-    try {
-      const success = await facilitiesAPI.delete(facilityId);
-      if (!success) throw new Error('Delete failed');
-      setFacilities((prev) => prev.filter((facility) => facility.id !== facilityId));
-      if (selectedFacility?.id === facilityId) setSelectedFacility(null);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-      setError('Unable to delete facility. The backend may be unavailable.');
-    }
+  const handleClosePreview = () => {
+    setSelectedFacility(null);
   };
 
   const handleSubmit = async (event) => {
@@ -259,7 +245,7 @@ export default function AdminFacilities() {
                       <th>Guests</th>
                       <th>Price</th>
                       <th>Status</th>
-                      <th>Action</th>
+                      <th>Preview</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -279,11 +265,8 @@ export default function AdminFacilities() {
                           </span>
                         </td>
                         <td>
-                          <button className={styles.actionBtn} onClick={() => handleEditFacility(facility)}>
-                            Edit
-                          </button>
-                          <button className={styles.deleteBtn} onClick={() => handleDeleteFacility(facility.id)}>
-                            Delete
+                          <button className={styles.previewBtn} onClick={() => handleSelectFacility(facility)}>
+                            View
                           </button>
                         </td>
                       </tr>
@@ -293,65 +276,49 @@ export default function AdminFacilities() {
               )}
             </div>
 
-            <div className={styles.detailPanel}>
-              {selectedFacility ? (
-                <div className={styles.detailCard}>
-                  <div className={styles.detailHeader}>
+          </div>
+          {selectedFacility && (
+            <div className={styles.previewBackdrop}>
+              <div className={styles.previewModal}>
+                <div className={styles.previewHeader}>
+                  <div>
+                    <p className={styles.previewLabel}>{selectedFacility.type}</p>
                     <h2>{selectedFacility.name}</h2>
-                    <span className={styles.detailType}>{selectedFacility.type}</span>
                   </div>
-                  {selectedFacility.img && (
-                    <div className={styles.imageWrapper}>
+                </div>
+                <div className={styles.previewContent}>
+                  {selectedFacility.img ? (
+                    <div className={styles.previewImageWrapper}>
                       <img src={selectedFacility.img} alt={selectedFacility.name} />
                     </div>
+                  ) : (
+                    <div className={styles.previewNoImage}>No image available</div>
                   )}
-                  <p>{selectedFacility.description}</p>
-                  <div className={styles.detailGrid}>
-                    <div>
-                      <strong>Subtype</strong>
-                      <p>{selectedFacility.subtype}</p>
-                    </div>
-                    <div>
-                      <strong>Guests</strong>
-                      <p>{selectedFacility.guests}</p>
-                    </div>
-                    <div>
-                      <strong>Size</strong>
-                      <p>{selectedFacility.size} sqm</p>
-                    </div>
-                    <div>
-                      <strong>Beds</strong>
-                      <p>{selectedFacility.beds || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <strong>Price</strong>
-                      <p>₱{selectedFacility.price.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <strong>Status</strong>
-                      <p>{selectedFacility.available ? 'Available' : 'Unavailable'}</p>
-                    </div>
+                  <div className={styles.previewDetails}>
+                    <p>{selectedFacility.description}</p>
+                    <div className={styles.previewGrid}>
+                    <div><strong>Subtype</strong><span>{selectedFacility.subtype}</span></div>
+                    <div><strong>Guests</strong><span>{selectedFacility.guests}</span></div>
+                    <div><strong>Size</strong><span>{selectedFacility.size} sqm</span></div>
+                    <div><strong>Price</strong><span>₱{selectedFacility.price.toLocaleString()}</span></div>
+                    <div><strong>Status</strong><span>{selectedFacility.available ? 'Available' : 'Unavailable'}</span></div>
+                    <div><strong>Beds</strong><span>{selectedFacility.beds || 'N/A'}</span></div>
+                    <div><strong>Amenities</strong><span>{selectedFacility.amenities.join(', ') || 'None'}</span></div>
+                    <div><strong>Features</strong><span>{selectedFacility.features.join(', ') || 'None'}</span></div>
                   </div>
-                  <div className={styles.tagGroup}>
-                    <div>
-                      <strong>Amenities</strong>
-                      <p>{selectedFacility.amenities.join(', ') || 'None'}</p>
-                    </div>
-                    <div>
-                      <strong>Features</strong>
-                      <p>{selectedFacility.features.join(', ') || 'None'}</p>
-                    </div>
                   </div>
                 </div>
-              ) : (
-                <div className={styles.emptyState}>
-                  <h3>Facility details</h3>
-                  <p>Select an item from the list to preview its details here.</p>
+                <div className={styles.previewFooter}>
+                  <button className={styles.editPreviewBtn} onClick={() => handleEditFacility(selectedFacility)}>
+                    Edit
+                  </button>
+                  <button className={styles.cancelBtn} onClick={handleClosePreview}>
+                    Close
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-
+          )}
           {showForm && (
             <div className={styles.modalBackdrop}>
               <div className={styles.modal}>
