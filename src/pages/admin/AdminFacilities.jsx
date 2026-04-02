@@ -34,7 +34,6 @@ export default function AdminFacilities() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [filterType, setFilterType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -96,15 +95,13 @@ export default function AdminFacilities() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const openPreview = (facility) => {
+  const handleSelectFacility = (facility) => {
     setSelectedFacility(facility);
-    setShowPreview(true);
   };
 
   const handleEditFacility = (facility) => {
     setEditedFacility(facility);
     setSelectedFacility(facility);
-    setShowPreview(false);
     setShowForm(true);
     setForm({
       name: facility.name,
@@ -269,7 +266,7 @@ export default function AdminFacilities() {
                     {visibleFacilities.map((facility) => (
                       <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
                         <td>
-                          <button className={styles.tableLink} onClick={() => openPreview(facility)}>
+                          <button className={styles.tableLink} onClick={() => handleSelectFacility(facility)}>
                             {facility.name}
                           </button>
                         </td>
@@ -282,8 +279,11 @@ export default function AdminFacilities() {
                           </span>
                         </td>
                         <td>
-                          <button className={styles.actionBtn} onClick={() => openPreview(facility)}>
-                            View
+                          <button className={styles.actionBtn} onClick={() => handleEditFacility(facility)}>
+                            Edit
+                          </button>
+                          <button className={styles.deleteBtn} onClick={() => handleDeleteFacility(facility.id)}>
+                            Delete
                           </button>
                         </td>
                       </tr>
@@ -292,19 +292,12 @@ export default function AdminFacilities() {
                 </table>
               )}
             </div>
-          </div>
 
-          {showPreview && selectedFacility && (
-            <div className={styles.modalBackdrop}>
-              <div className={`${styles.modal} ${styles.previewModal}`}>
-                <div className={styles.modalHeader}>
-                  <h2>{selectedFacility.name}</h2>
-                  <button className={styles.closeBtn} onClick={() => setShowPreview(false)}>
-                    ×
-                  </button>
-                </div>
+            <div className={styles.detailPanel}>
+              {selectedFacility ? (
                 <div className={styles.detailCard}>
                   <div className={styles.detailHeader}>
+                    <h2>{selectedFacility.name}</h2>
                     <span className={styles.detailType}>{selectedFacility.type}</span>
                   </div>
                   {selectedFacility.img && (
@@ -349,18 +342,15 @@ export default function AdminFacilities() {
                       <p>{selectedFacility.features.join(', ') || 'None'}</p>
                     </div>
                   </div>
-                  <div className={styles.formActions}>
-                    <button className={styles.actionBtn} onClick={() => { handleEditFacility(selectedFacility); }}>
-                      Edit
-                    </button>
-                    <button className={styles.cancelBtn} onClick={() => setShowPreview(false)}>
-                      Close
-                    </button>
-                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className={styles.emptyState}>
+                  <h3>Facility details</h3>
+                  <p>Select an item from the list to preview its details here.</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {showForm && (
             <div className={styles.modalBackdrop}>

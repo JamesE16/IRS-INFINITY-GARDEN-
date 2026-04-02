@@ -193,6 +193,91 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
+.calendar{
+background:#fff;
+border-radius:12px;
+padding:20px;
+margin-top:25px;
+border:1px solid #e5e7eb;
+}
+
+.calendarHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.calendarHeader button{
+background:var(--navy);
+color:white;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.daysRow,.row{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+}
+
+.dayName{
+text-align:center;
+font-size:12px;
+color:#94a3b8;
+}
+
+.cell{
+text-align:center;
+padding:12px;
+min-height:60px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.cell:hover{
+background:#f1f5f9;
+}
+
+.reserved{
+background:#3b82f6;
+color:white;
+font-weight:600;
+}
+
+.disabled{
+opacity:.3;
+}
+
+.modalOverlay{
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+background:rgba(0,0,0,0.4);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.modal{
+background:white;
+padding:25px;
+border-radius:12px;
+width:300px;
+}
+
+.closeBtn{
+margin-top:15px;
+padding:8px 14px;
+border:none;
+background:var(--navy);
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
 
 @media (max-width: 768px) {
   .headerContent {

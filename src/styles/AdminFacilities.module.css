@@ -5,11 +5,8 @@
 
 .mainContent {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   background: #f8fafc;
   padding: 2rem;
-  overflow: hidden;
 }
 
 .header {
@@ -110,26 +107,20 @@
 
 .container {
   margin-top: 1.5rem;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2.1fr 1fr;
   gap: 1.5rem;
-  min-height: 0;
 }
 
-.listPanel {
+.listPanel,
+.detailPanel {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 1rem;
   padding: 1rem;
-  min-height: 0;
-  max-height: calc(100vh - 260px);
-  overflow: auto;
 }
 
 .table {
@@ -176,6 +167,12 @@
 .unavailable {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.detailCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .detailHeader {
@@ -254,107 +251,6 @@
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
 }
 
-.previewModal {
-  width: min(100%, 700px);
-  max-width: 700px;
-  max-height: none;
-  overflow: visible;
-  padding: 1rem;
-}
-
-.previewModal .detailCard {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  grid-template-areas:
-    "image header"
-    "image description"
-    "image details"
-    "image tags"
-    "image actions";
-  gap: 0.75rem;
-  min-height: 0;
-  align-items: start;
-}
-
-.previewModal .detailHeader {
-  grid-area: header;
-}
-
-.previewModal .detailCard > p {
-  grid-area: description;
-  font-size: 0.9rem;
-  line-height: 1.35;
-  margin: 0;
-}
-
-.previewModal .detailGrid {
-  grid-area: details;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.previewModal .imageWrapper {
-  grid-area: image;
-  width: 220px;
-  height: 160px;
-  min-height: 160px;
-  border-radius: 1rem;
-  overflow: hidden;
-  background: #f1f5f9;
-}
-
-.previewModal .imageWrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.previewModal .tagGroup {
-  grid-area: tags;
-  gap: 0.5rem;
-}
-
-.previewModal .formActions {
-  grid-area: actions;
-  justify-content: flex-start;
-  gap: 0.5rem;
-}
-
-.previewModal .detailType {
-  font-size: 0.78rem;
-  padding: 0.3rem 0.6rem;
-}
-
-.previewModal .modalHeader h2 {
-  font-size: 1.05rem;
-  margin: 0;
-}
-
-.previewModal .detailGrid div strong {
-  display: block;
-  font-size: 0.78rem;
-  margin-bottom: 0.25rem;
-}
-
-.previewModal .detailGrid div p {
-  font-size: 0.86rem;
-  margin: 0;
-}
-
-.previewModal .formActions {
-  grid-column: 2;
-  justify-content: flex-start;
-  gap: 0.5rem;
-}
-
-.previewModal .actionBtn,
-.previewModal .cancelBtn {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.85rem;
-}
-
 .modalHeader {
   display: flex;
   justify-content: space-between;
@@ -403,8 +299,7 @@
 }
 
 .actionBtn,
-.deleteBtn,
-.cancelBtn {
+.deleteBtn {
   margin-right: 0.5rem;
   padding: 0.45rem 0.8rem;
   border-radius: 0.75rem;

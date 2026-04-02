@@ -9,15 +9,13 @@ import {
   FaBuilding,
   FaMoneyBillWave,
   FaClock,
-  FaChartBar,
-  FaBell
+  FaChartBar
 } from 'react-icons/fa';
 
 const links = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
   { to: '/admin/users', label: 'User Management', icon: <FaUsers /> },
   { to: '/admin/reservations', label: 'Reservation Management', icon: <FaCalendarCheck /> },
-  { to: '/admin/notifications', label: 'Notification Management', icon: <FaBell /> },
   { to: '/admin/facilities', label: 'Facilities & Room Management', icon: <FaBuilding /> },
   { to: '/admin/logs', label: 'Payments & Transaction', icon: <FaMoneyBillWave /> },
   { to: '/admin/schedule', label: 'Schedule Management', icon: <FaClock /> },
