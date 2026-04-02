@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import { adminAPI } from '../../utils/api';
-import { FaBell } from 'react-icons/fa';
 import styles from '../../styles/AdminDashboard.module.css';
 
 import {
@@ -66,10 +65,6 @@ export default function AdminDashboard() {
     localStorage.removeItem('adminSession');
     localStorage.removeItem('adminRole');
     navigate('/');
-  };
-
-  const handleNotifications = () => {
-    navigate('/admin/notifications');
   };
 
   const reservations = [
@@ -177,14 +172,6 @@ export default function AdminDashboard() {
             </div>
 
             <div className={styles.headerActions}>
-
-              <button
-                className={styles.notifyBtn}
-                onClick={handleNotifications}
-                aria-label="View notifications"
-              >
-                <FaBell />
-              </button>
 
               <button
                 className={styles.logoutBtn}
