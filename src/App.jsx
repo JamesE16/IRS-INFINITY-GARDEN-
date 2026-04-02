@@ -11,8 +11,8 @@ import MyBookingsPage    from './pages/MyBookingsPage';
 import AdminLoginPage    from './pages/admin/AdminLoginPage';
 import AdminDashboard    from './pages/admin/AdminDashboard';
 import AdminReservations from './pages/admin/AdminReservations';
+import AdminFacilities   from './pages/admin/AdminFacilities';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
-import AdminFacilities from './pages/admin/AdminFacilities';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Toast             from './components/ui/Toast';
 
