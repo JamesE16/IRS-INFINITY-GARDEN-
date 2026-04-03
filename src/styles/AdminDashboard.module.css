@@ -486,3 +486,194 @@
   gap: 5px;
   width: fit-content;
 }
+.paymentContainer { padding: 2rem; }
+.paymentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.financialGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.financeCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.incomeTitle { color: #10b981; border-bottom: 2px solid #ecfdf5; padding-bottom: 10px; }
+.expenseTitle { color: #ef4444; border-bottom: 2px solid #fef2f2; padding-bottom: 10px; }
+.summaryTitle { color: var(--navy); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+
+.financeList { flex: 1; margin-top: 1rem; }
+
+.financeItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.itemMain { display: flex; flex-direction: column; }
+.itemDate { font-size: 0.75rem; color: #94a3b8; }
+.itemDesc { font-size: 0.9rem; font-weight: 500; color: #334155; }
+
+.incomeAmount { color: #10b981; font-weight: 600; }
+.expenseAmount { color: #ef4444; font-weight: 600; }
+
+.cardTotal {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px dashed #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.5rem 0;
+  font-weight: 500;
+}
+
+.netRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+}
+
+.profit { color: #10b981; }
+
+.btnGold {
+  background: #c5a059;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnOutline {
+  background: white;
+  border: 1px solid #cbd5e1;
+  padding: 10px 18px;
+  border-radius: 6px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.adminMain {
+  padding: 0;
+  background: #f8fbff; /* Soft light blue background from your photos */
+  width: 100%;
+}
+
+.topHeader {
+  background: white;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.chevron { font-size: 0.7rem; }
+
+.paymentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.whiteCard {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+  border: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.incomeHeading { color: #10b981; border-left: 4px solid #10b981; padding-left: 10px; }
+.expenseHeading { color: #ef4444; border-left: 4px solid #ef4444; padding-left: 10px; }
+
+.addBtnSmall {
+  background: #0f172a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.transactionRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.rowInfo { display: flex; flex-direction: column; }
+.rowDate { font-size: 0.75rem; color: #94a3b8; }
+.rowLabel { font-size: 0.9rem; font-weight: 600; color: #1e293b; }
+
+.amtPositive { color: #10b981; font-weight: 700; }
+.amtNegative { color: #ef4444; font-weight: 700; }
+
+.cardFooter {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.summaryRow { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.cardDivider { border: 0; border-top: 1px solid #e2e8f0; margin: 1rem 0; }
+.netProfitRow { display: flex; justify-content: space-between; align-items: center; }
+.totalAmt { font-size: 1.5rem; color: #0f172a; }
+
+.printBtn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}

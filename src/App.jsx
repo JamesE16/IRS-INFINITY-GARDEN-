@@ -15,7 +15,7 @@ import AdminFacilities   from './pages/admin/AdminFacilities';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Toast             from './components/ui/Toast';
-import AdminPaymentManagement from './pages/admin/AdminPaymentManagement';
+import PaymentManagement from './pages/admin/PaymentManagement';
 
 export default function App() {
   return (
@@ -53,9 +53,9 @@ function AppRoutes() {
         <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
         <Route path="/admin/facilities" element={<ProtectedRoute><AdminFacilities /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
-        <Route path="/admin/payments" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
+        <Route path="/admin/payments" element={<ProtectedRoute><PaymentManagement /></ProtectedRoute>} />
         <Route path="/admin/logs" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
-        <Route path="/admin/logs" element={<ProtectedRoute><AdminPaymentManagement /></ProtectedRoute>} />
+        
       </Routes>
     </>
   );

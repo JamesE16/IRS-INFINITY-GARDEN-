@@ -17,7 +17,7 @@ const links = [
   { to: '/admin/users', label: 'User Management', icon: <FaUsers /> },
   { to: '/admin/reservations', label: 'Reservation Management', icon: <FaCalendarCheck /> },
   { to: '/admin/facilities', label: 'Facilities & Room Management', icon: <FaBuilding /> },
-  { to: '/admin/logs', label: 'Payments & Transaction', icon: <FaMoneyBillWave /> },
+  { to: '/admin/payments', label: 'Payments & Transaction', icon: <FaMoneyBillWave /> },
   { to: '/admin/schedule', label: 'Schedule Management', icon: <FaClock /> },
   { to: '/admin/reports', label: 'Reports', icon: <FaChartBar /> },
 ];
