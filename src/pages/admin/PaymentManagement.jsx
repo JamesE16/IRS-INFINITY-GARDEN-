@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
-import { reservationsAPI } from '../../utils/api'; // Connecting to your existing API
+import { reservationsAPI } from '../../utils/api'; 
 import styles from '../../styles/AdminDashboard.module.css';
 import { FaPlus, FaPrint, FaChevronRight, FaWallet } from 'react-icons/fa';
 
