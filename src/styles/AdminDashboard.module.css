@@ -677,3 +677,282 @@
   gap: 8px;
   font-weight: 500;
 }
+
+.cardBodyCenter {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.cardBodyCenter h2 {
+  font-size: 2.2rem;
+  margin: 0;
+  color: #1e293b;
+}
+
+.cardBodyCenter p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 5px;
+}
+
+.statusActive {
+  background: #dcfce7;
+  color: #166534;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* --- REPORTS PAGE LAYOUT --- */
+.reportHeader {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 10px;
+}
+
+.reportHeader h2 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.reportGridContainer {
+  display: grid;
+  grid-template-columns: 1fr 320px; /* Main content vs Filter Sidebar */
+  gap: 25px;
+  align-items: start;
+}
+
+/* --- QUICK REPORT DASHBOARD --- */
+.quickReportDashboard {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+}
+
+.statCardsRow {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.smallStatCard {
+  flex: 1;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.smallStatCard p {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.statMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.statMain strong {
+  font-size: 1.8rem;
+  color: #1e293b;
+}
+
+.trendPos {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* --- GRAPHS & ANALYTICS --- */
+.graphsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.graphCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  padding: 15px;
+  border-radius: 10px;
+  position: relative;
+}
+
+.graphCard h3 {
+  font-size: 1.5rem;
+  margin: 10px 0;
+}
+
+.downloadBtn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* --- FILTER SIDEBAR (RIGHT COLUMN) --- */
+.reportFilters {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 20px;
+}
+
+.filterGroup {
+  margin-bottom: 25px;
+}
+
+.filterGroup h4 {
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.filterGroup label {
+  display: block;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.filterGroup select, 
+.filterGroup input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.dateTabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.dateTabs button {
+  flex: 1;
+  padding: 5px;
+  font-size: 0.7rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+}
+
+.activeTab {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  border-color: #3b82f6 !important;
+}
+
+.generateMainBtn {
+  width: 100%;
+  background: #1e293b;
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* --- GENERATE REPORT MODAL --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.reportModal {
+  background: #fff;
+  width: 450px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modalHeader {
+  padding: 15px 20px;
+  background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modalBody {
+  padding: 20px;
+}
+
+.modalBody label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.modalBody select, 
+.modalBody input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.modalDates {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modalFooter {
+  padding: 15px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #f8fafc;
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.generateBtn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
