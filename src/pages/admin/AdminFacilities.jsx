@@ -189,10 +189,10 @@ export default function AdminFacilities() {
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
-          <div className={styles.pageHeader}>
+          <div className={styles.headerContent}>
             <div className={styles.title}>
               <h1>Facilities & Room Management</h1>
-              <p>Manage facility listings, room details, and availability for the resort.</p>
+              <p>Infinity Garden Resort Reservation Management System</p>
             </div>
             <div className={styles.headerActions}>
               <button className={styles.addBtn} onClick={() => { resetForm(); setShowForm(true); }}>
@@ -200,8 +200,9 @@ export default function AdminFacilities() {
               </button>
             </div>
           </div>
+        </div>
 
-          <div className={styles.actionBar}>
+        <div className={styles.actionBar}>
             <div>
               <span>{facilityCounts.filtered} of {facilityCounts.all} facilities</span>
             </div>
@@ -220,7 +221,6 @@ export default function AdminFacilities() {
               />
             </div>
           </div>
-        </div>
 
         <div className={styles.container}>
           {error && <div className={styles.errorBanner}>{error}</div>}
@@ -229,7 +229,7 @@ export default function AdminFacilities() {
             <div className={styles.listPanel}>
               {isLoading ? (
                 <div className={styles.emptyState}>
-                  <h3>Loading facilities…</h3>
+                  <h3>Loading facilities...</h3>
                 </div>
               ) : visibleFacilities.length === 0 ? (
                 <div className={styles.emptyState}>
@@ -389,7 +389,7 @@ export default function AdminFacilities() {
                       Cancel
                     </button>
                     <button type="submit" className={styles.saveBtn} disabled={isSaving}>
-                      {isSaving ? 'Saving…' : editedFacility ? 'Save Changes' : 'Add Facility'}
+                      {isSaving ? 'Saving...' : editedFacility ? 'Save Changes' : 'Add Facility'}
                     </button>
                   </div>
                 </form>

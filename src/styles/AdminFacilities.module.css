@@ -6,29 +6,47 @@
 .mainContent {
   flex: 1;
   background: #f8fafc;
-  padding: 2rem;
+  padding: 0 2rem 2rem;
+  
 }
 
 .header {
-  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--navy, #1a3c8f) 0%, var(--navy-light, #2d55c7) 100%);
+  color: #fff;
+  padding: 10px 2rem;
+  border-bottom: 2px solid rgba(255,255,255,0.1);
+  margin-bottom: 0;
+  margin-left: -2rem;
+  margin-right: -2rem;
+}
+
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .pageHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
   gap: 1rem;
 }
 
 .title h1 {
   margin: 0;
   font-size: 1.9rem;
+  font-weight: 700;
 }
 
 .title p {
-  color: #475569;
+  color: rgba(255,255,255,0.8);
   margin: 0.5rem 0 0;
+  font-size: 0.9rem;
 }
 
 .headerActions {
@@ -92,13 +110,37 @@
 .filters input,
 .field input,
 .field select,
-.field textarea {
+.field textarea,
+.fieldWide input,
+.fieldWide select,
+.fieldWide textarea {
   width: 100%;
-  border: 1px solid #cbd5e1;
+  border: 2px solid #e2e8f0;
   border-radius: 0.75rem;
   padding: 0.85rem 1rem;
   background: #fff;
   color: #0f172a;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.fieldWide input:focus,
+.fieldWide select:focus,
+.fieldWide textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.field textarea,
+.fieldWide textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
 }
 
 .filters input {
@@ -119,7 +161,25 @@
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 1rem;
-  padding: 1rem;
+  padding: 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.table {
+  margin: 0;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff;
+  box-shadow: inset 0 -1px 0 #e2e8f0;
+}
+
+.table th {
+  background: #fff;
 }
 
 .previewBtn {
@@ -297,9 +357,16 @@
   border-collapse: collapse;
 }
 
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #fff;
+}
+
 .table th,
 .table td {
-  text-align: left;
+  text-align: center;
   padding: 0.85rem 0.75rem;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -307,6 +374,7 @@
 .table th {
   color: #334155;
   font-size: 0.95rem;
+  background: #fff;
 }
 
 .tableLink {
@@ -438,25 +506,27 @@
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .fieldWide {
   grid-column: span 2;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
 .field label {
   font-weight: 600;
   color: #334155;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
 }
 
 .formActions {
