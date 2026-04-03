@@ -875,84 +875,187 @@
   font-weight: 600;
 }
 
-/* --- GENERATE REPORT MODAL --- */
+.downloadBtn, 
+.generateMainBtn, 
+.generateBtn, 
+.downloadLink,
+.printReportBtn {
+  background-color: #1e293b !important;
+  color: white !important;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease; /* Smooth hover transition */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* --- HOVER STATES --- */
+.downloadBtn:hover, 
+.generateMainBtn:hover, 
+.generateBtn:hover, 
+.downloadLink:hover,
+.printReportBtn:hover {
+  background-color: #334155 !important; /* Lighter shade on hover */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0 6px 12px rgba(30, 41, 59, 0.2);
+}
+
+.viewLink {
+  color: #1e293b;
+  background: transparent;
+  border: 2px solid #1e293b;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewLink:hover {
+  background-color: #f1f5f9;
+  transform: translateY(-2px);
+}
+
+/* --- CARD HOVERS & SHADOWS --- */
+.smallStatCard, .graphCard, .reportFilters, .quickReportDashboard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.smallStatCard:hover, .graphCard:hover {
+  transform: translateY(-5px); /* Stronger lift for cards */
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* --- ALIGNMENT FIX --- */
+.actionCenterContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: center; /* Centers buttons horizontally */
+  align-items: center;    /* Centers buttons vertically */
+}
+
+.reportTable td {
+  vertical-align: middle;
+  padding: 12px;
+}
+
+/* --- MODAL STYLING --- */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 5; left: 5; right: 5; bottom: 5;
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(2px); /* Adds a modern blur effect */
+}
+/* --- Maximizing Space --- */
+.reportsFullContent {
+  flex: 1;
+  padding: 1.5rem;
+  background-color: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dashboardMainArea {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  width: 100%;
+}
+
+/* --- DARK BLUE THEME (#1e293b) --- */
+.darkActionBtn, 
+.generateMainBtn, 
+.generateBtn, 
+.downloadLink,
+.printReportBtn {
+  background-color: #1e293b !important;
+  color: white !important;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- HOVER EFFECTS --- */
+.darkActionBtn:hover, 
+.generateMainBtn:hover, 
+.generateBtn:hover, 
+.downloadLink:hover,
+.printReportBtn:hover {
+  background-color: #334155 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(30, 41, 59, 0.2);
+}
+
+/* --- MAXIMIZED LAYOUT & ALIGNMENT --- */
+.mainReportContainer {
+  flex: 1;
+  padding: 24px;
+  background-color: #f8fbff;
+}
+
+.reportGridContainer {
+  display: grid;
+  grid-template-columns: 1fr 320px; 
+  gap: 24px;
+}
+
+.actionCenterContainer {
+  display: flex;
+  gap: 12px;
+  justify-content: center; /* PERFECTLY CENTERED IN TABLE */
+  align-items: center;
+}
+
+/* --- CARD HOVERS --- */
+.smallStatCard, .graphCard, .reportFilters, .quickReportDashboard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.smallStatCard:hover, .graphCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
+}
+/* --- MODAL --- */
+.modalOverlay {
+  position: fixed;
+  top: 5; left: 5; right: 5; bottom: 5;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
 .reportModal {
-  background: #fff;
-  width: 450px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.modalHeader {
-  padding: 15px 20px;
-  background: #f8fafc;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.modalBody {
-  padding: 20px;
-}
-
-.modalBody label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 5px;
-  font-size: 0.9rem;
-}
-
-.modalBody select, 
-.modalBody input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-}
-
-.modalDates {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.modalFooter {
-  padding: 15px 20px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  background: #f8fafc;
-}
-
-.cancelBtn {
-  padding: 8px 16px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.generateBtn {
-  padding: 8px 16px;
-  background: #3b82f6;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  background: rgba(255, 255, 255, 0.932);
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }

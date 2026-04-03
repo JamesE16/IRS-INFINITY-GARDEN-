@@ -1,72 +1,88 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import styles from '../../styles/AdminDashboard.module.css';
 import { reservationsAPI } from '../../utils/api';
 import { 
   FaCalendarAlt, FaUsers, FaChartPie, FaChartLine, 
-  FaDownload, FaPlus, FaFilter, FaFileAlt 
+  FaDownload, FaPlus, FaChevronRight 
 } from 'react-icons/fa';
 
 const AdminReports = () => {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [dateRange, setDateRange] = useState({ start: '2026-03-07', end: '2026-03-10' });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await reservationsAPI.getAllReservations();
-        setData(res);
-      } catch (err) { console.error(err); }
+        setData(res || []);
+      } catch (err) { 
+        console.error("Fetch error:", err); 
+      }
     };
     fetchData();
   }, []);
 
+  const filteredData = useMemo(() => {
+    return data.filter(item => {
+      const itemDate = item.created_at?.split('T')[0];
+      return itemDate >= dateRange.start && itemDate <= dateRange.end;
+    });
+  }, [data, dateRange]);
+
+  const handlePrint = () => {
+    setShowModal(false);
+    // Timeout ensures the modal is gone before the print dialog captures the screen
+    setTimeout(() => {
+      window.print();
+    }, 150);
+  };
+
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fbff' }}>
+    <div className={styles.adminLayout} style={{ display: 'flex', minHeight: '100vh' }}>
       <AdminSidebar activePage="/admin/reports" />
 
-      <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
-        <header className={styles.reportHeader}>
-          <h2>REPORTS</h2>
+      <main className={styles.mainReportContainer}>
+        <header className={styles.topHeader}>
+          <div className={styles.breadcrumb}>
+            <span>Admin</span> <FaChevronRight size={10} /> <strong>Reports</strong>
+          </div>
         </header>
 
         <div className={styles.reportGridContainer}>
-          {/* --- LEFT COLUMN: ANALYTICS --- */}
           <div className={styles.analyticsColumn}>
+            {/* Quick Report Dashboard */}
             <section className={styles.quickReportDashboard}>
               <h3>Quick Report Dashboard</h3>
               <div className={styles.statCardsRow}>
                 <div className={styles.smallStatCard}>
                   <p>Total Reservations</p>
-                  <div className={styles.statMain}>
-                    <strong>120</strong> <FaCalendarAlt />
-                  </div>
+                  <div className={styles.statMain}><strong>120</strong> <FaCalendarAlt /></div>
                   <span className={styles.trendPos}>+20 last week</span>
                 </div>
                 <div className={styles.smallStatCard}>
                   <p>Total Guests</p>
-                  <div className={styles.statMain}>
-                    <strong>101</strong> <FaUsers />
-                  </div>
+                  <div className={styles.statMain}><strong>101</strong> <FaUsers /></div>
                 </div>
                 <div className={styles.smallStatCard}>
-                  <p>Facility Usage Breakdown</p>
+                  <p>Facility Usage</p>
                   <div className={styles.chartPlaceholder}><FaChartPie /></div>
                 </div>
               </div>
 
               <div className={styles.graphsRow}>
                 <div className={styles.graphCard}>
-                  <p>Occupancy Report (Current Month)</p>
-                  <h3>78.5% <small>Occupancy</small></h3>
+                  <p>Occupancy Report</p>
+                  <h3>78.5%</h3>
                   <div className={styles.miniGraph}><FaChartLine /></div>
-                  <button className={styles.downloadBtn}><FaDownload /> Download</button>
+                  <button className={styles.downloadBtn} onClick={() => setShowModal(true)}>Download</button>
                 </div>
                 <div className={styles.graphCard}>
-                  <p>Revenue Over Time (Q3 2026)</p>
+                  <p>Revenue Over Time</p>
                   <h3>₱145,200.00</h3>
-                  <div className={styles.barGraphPlaceholder}>{/* Bar graph mock */}</div>
-                  <button className={styles.downloadBtn}><FaDownload /> Download</button>
+                  <div className={styles.barGraphPlaceholder}></div>
+                  <button className={styles.downloadBtn} onClick={() => setShowModal(true)}>Download</button>
                 </div>
               </div>
             </section>
@@ -76,7 +92,7 @@ const AdminReports = () => {
               <div className={styles.tableHeader}>
                 <h3>Generated Reports</h3>
                 <button className={styles.printReportBtn} onClick={() => setShowModal(true)}>
-                  <FaPlus /> Print Report
+                  <FaPlus /> + Print Report
                 </button>
               </div>
               <table className={styles.reportTable}>
@@ -85,24 +101,20 @@ const AdminReports = () => {
                     <th>Report ID</th>
                     <th>Type</th>
                     <th>Date Generated</th>
-                    <th>Generated By</th>
-                    <th>Actions</th>
+                    <th style={{ textAlign: 'center' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {id: 'REP-001', type: 'Reservations', date: 'March 07, 2026'},
-                    {id: 'REP-002', type: 'Payments', date: 'March 08, 2026'},
-                    {id: 'REP-003', type: 'Facilities', date: 'March 09, 2026'},
-                  ].map(report => (
-                    <tr key={report.id}>
-                      <td>{report.id}</td>
-                      <td>{report.type}</td>
-                      <td>{report.date}</td>
-                      <td>Admin</td>
+                  {filteredData.map((report, idx) => (
+                    <tr key={idx}>
+                      <td>REP-00{idx + 1}</td>
+                      <td>{report.facility_name || 'Reservations'}</td>
+                      <td>{report.created_at?.split('T')[0] || '2026-03-07'}</td>
                       <td>
-                        <button className={styles.viewLink}>View</button>
-                        <button className={styles.downloadLink}>Download</button>
+                        <div className={styles.actionContainer}>
+                          <button className={styles.viewLink} onClick={() => setShowModal(true)}>View</button>
+                          <button className={styles.downloadLink} onClick={() => setShowModal(true)}>Download</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -111,47 +123,25 @@ const AdminReports = () => {
             </section>
           </div>
 
-          {/* --- RIGHT COLUMN: FILTERS --- */}
+          {/* Filter Sidebar */}
           <aside className={styles.reportFilters}>
-            <div className={styles.filterGroup}>
-              <h4>Report Type</h4>
-              <label>Filter by Report Type</label>
-              <select><option>All Types</option></select>
-              <label>Filter by Facility</label>
-              <select><option>All Facilities</option></select>
-              <label>Generated by</label>
-              <select><option>Admin</option></select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <h4>Date Range</h4>
-              <div className={styles.dateTabs}>
-                <button className={styles.activeTab}>Today</button>
-                <button>Weekly</button>
-                <button>Monthly</button>
-              </div>
-              <input type="date" value="2026-03-07" />
-              <span>to</span>
-              <input type="date" value="2026-03-10" />
-            </div>
-
-            <div className={styles.exportSection}>
-              <h4>Export Report</h4>
-              <label><input type="radio" checked /> Export as PDF</label>
-              <label><input type="radio" /> Export as Excel</label>
-              <button className={styles.generateMainBtn}>Generate Report</button>
-            </div>
+            <h4>Report Type</h4>
+            <select className={styles.sidebarSelect}><option>All Types</option></select>
+            <h4>Date Range</h4>
+            <input type="date" value={dateRange.start} onChange={(e) => setDateRange({...dateRange, start: e.target.value})} />
+            <input type="date" value={dateRange.end} onChange={(e) => setDateRange({...dateRange, end: e.target.value})} />
+            <button className={styles.generateMainBtn} onClick={() => setShowModal(true)}>Generate Report</button>
           </aside>
         </div>
-      </div>
+      </main>
 
-      {/* --- GENERATE REPORT MODAL (Matching image_968fe9) --- */}
+      {/* Generate Report Modal */}
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.reportModal}>
             <div className={styles.modalHeader}>
               <h3>Generate Report</h3>
-              <button onClick={() => setShowModal(false)}>&times;</button>
+              <button className={styles.closeBtn} onClick={() => setShowModal(false)}>&times;</button>
             </div>
             <div className={styles.modalBody}>
               <label>Report Type</label>
@@ -162,12 +152,14 @@ const AdminReports = () => {
               <input type="text" value="Admin" readOnly />
               <label>Date Range</label>
               <div className={styles.modalDates}>
-                <input type="date" /> <span>—</span> <input type="date" />
+                <input type="text" value={dateRange.start} readOnly />
+                <span>—</span>
+                <input type="text" value={dateRange.end} readOnly />
               </div>
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
-              <button className={styles.generateBtn}>Generate Report</button>
+              <button className={styles.generateBtn} onClick={handlePrint}>Generate Report</button>
             </div>
           </div>
         </div>
