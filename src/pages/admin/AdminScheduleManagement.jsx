@@ -1,6 +1,11 @@
-import styles from "../styles/AdminScheduleManagement.module.css";
+<<<<<<< HEAD
+=======
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminSidebar from '../../components/admin/AdminSidebar';
+import styles from "../../styles/AdminScheduleManagement.module.css";
 
-export default function ScheduleManagement() {
+export default function AdminScheduleManagement() {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat"];
 
   const dates = [
@@ -55,3 +60,4 @@ export default function ScheduleManagement() {
     </div>
   );
 }
+>>>>>>> parent of f226b94 (Merge branch 'main' of https://github.com/JamesE16/IRS-INFINITY-GARDEN-)
