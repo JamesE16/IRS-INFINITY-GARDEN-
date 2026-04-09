@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
@@ -60,4 +58,3 @@ export default function AdminScheduleManagement() {
     </div>
   );
 }
->>>>>>> parent of f226b94 (Merge branch 'main' of https://github.com/JamesE16/IRS-INFINITY-GARDEN-)
