@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AdminSidebar from '../../components/admin/AdminSidebar';
-import styles from "../../styles/AdminScheduleManagement.module.css";
+import styles from "../styles/AdminScheduleManagement.module.css";
 
-export default function AdminScheduleManagement() {
+export default function ScheduleManagement() {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thurs", "Fri", "Sat"];
 
   const dates = [
