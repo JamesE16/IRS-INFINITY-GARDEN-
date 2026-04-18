@@ -17,7 +17,7 @@ import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Toast             from './components/ui/Toast';
 import PaymentManagement from './pages/admin/PaymentManagement';
 import AdminReports from './pages/admin/AdminReports';
-import AdminScheduleManagement from './pages/admin/AdminScheduleManagement'
+import AdminScheduleManagement from "./pages/admin/AdminScheduleManagement";
 
 export default function App() {
   return (
