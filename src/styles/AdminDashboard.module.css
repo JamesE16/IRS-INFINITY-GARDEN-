@@ -82,12 +82,12 @@
   background: rgba(255,255,255,0.15);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.25);
-  padding: 10px 18px;  /* ENHANCED: standardized padding */
-  border-radius: 8px;  /* ENHANCED: standardized border-radius */
+  padding: 10px 18px;  
+  border-radius: 8px;  
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;  /* ENHANCED: improved transition */
+  transition: all 0.15s ease;  
 }
 .logoutBtn svg {
   width: 16px;
@@ -95,7 +95,7 @@
 }
 .logoutBtn:hover {
   background: rgba(255,255,255,0.28);
-  border-color: rgba(255,255,255,0.35);  /* ENHANCED: added border hover */
+  border-color: rgba(255,255,255,0.35); 
 }
 
 /* ===== MAIN CONTAINER ===== */

@@ -1,9 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import AdminSidebar from '../../components/admin/AdminSidebar';
-import { adminAPI } from '../../utils/api';
-import { FaBell } from 'react-icons/fa';
-import styles from '../../styles/AdminDashboard.module.css';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import AdminSidebar from "../../components/admin/AdminSidebar";
 
 import {
   format,
@@ -18,104 +15,111 @@ import {
   isSameDay
 } from "date-fns";
 
-// ─── MOCK DATA (remove when backend is ready) ─────────────────────────────────
-const MOCK_STATS = {
-  total_reservations: 45,
-  approved_count: 32,
-  pending_count: 8,
-  cancelled_count: 5,
-  total_revenue: 124500,
-  average_booking_value: 2767,
-  total_guests: 200,
-  repeat_guests: 45,
-};
+import styles from "../../styles/AdminScheduleManagement.module.css";
 
-const MOCK_RESERVATIONS = [
-  { date: "2026-04-07", name: "Cristalyn Llarenas",      room: "Pavilion A",  guests: 5 },
-  { date: "2026-04-11", name: "James Higoy",   room: "Cottage 3",   guests: 3 },
-  { date: "2026-04-20", name: "Joanna Cooper",   room: "Pavilion B",  guests: 8 },
-  { date: "2026-04-24", name: "Sheena Emperador",  room: "Room 201",    guests: 2 },
-  { date: "2026-04-29", name: "Zean Marquez", room: "Pavilion A",  guests: 6 },
+// ───────── FULL YEAR RESERVATIONS (WITH NAMES + STATUS) ─────────
+const reservations = [
+  // JANUARY
+  { date: "2026-01-03", label: "Pavilion A", customer: "Juan Dela Cruz", status: "pending" },
+  { date: "2026-01-07", label: "Garde Cottage", customer: "Maria Santos", status: "approved" },
+  { date: "2026-01-12", label: "Room 101", customer: "John Reyes", status: "pending" },
+  { date: "2026-01-15", label: "New Year Event - Pavilion B", customer: "ABC Corp", status: "approved" },
+
+  // FEBRUARY
+  { date: "2026-02-02", label: "Cottage 2", customer: "Ana Lopez", status: "pending" },
+  { date: "2026-02-05", label: "Room 102", customer: "Carlos Mendoza", status: "approved" },
+
+  // MARCH
+  { date: "2026-03-03", label: "Cottage 3", customer: "Elena Cruz", status: "pending" },
+  { date: "2026-03-06", label: "Room 101", customer: "Miguel Torres", status: "approved" },
+
+  // APRIL
+  { date: "2026-04-03", label: "Cottage 1", customer: "Sofia Reyes", status: "pending" },
+  { date: "2026-04-07", label: "Pavilion A", customer: "David Lim", status: "approved" },
+  { date: "2026-04-11", label: "Cottage 3", customer: "Isabella Garcia", status: "pending" },
+  { date: "2026-04-15", label: "Room 101", customer: "Andres Cruz", status: "approved" },
+  { date: "2026-04-20", label: "Wedding Event - Pavilion B", customer: "Grace Tan", status: "pending" },
+  { date: "2026-04-24", label: "Room 201", customer: "Mark Villanueva", status: "approved" },
+
+  // MAY
+  { date: "2026-05-02", label: "Pavilion A", customer: "Liam Santos", status: "pending" },
+  { date: "2026-05-06", label: "Room 102", customer: "Noah Reyes", status: "approved" },
+
+  // JUNE
+  { date: "2026-06-01", label: "Room 101", customer: "Emma Garcia", status: "pending" },
+  { date: "2026-06-05", label: "Cottage 3", customer: "Lucas Mendoza", status: "approved" },
+
+  // JULY
+  { date: "2026-07-02", label: "Cottage 1", customer: "Sophia Cruz", status: "pending" },
+  { date: "2026-07-06", label: "Room 101", customer: "Ethan Lim", status: "approved" },
+
+  // AUGUST
+  { date: "2026-08-03", label: "Room 102", customer: "Olivia Santos", status: "pending" },
+  { date: "2026-08-07", label: "Cottage 2", customer: "James Reyes", status: "approved" },
+
+  // SEPTEMBER
+  { date: "2026-09-02", label: "Room 101", customer: "Ava Cruz", status: "pending" },
+  { date: "2026-09-06", label: "Cottage 3", customer: "Benjamin Garcia", status: "approved" },
+
+  // OCTOBER
+  { date: "2026-10-03", label: "Cottage 1", customer: "Charlotte Lim", status: "pending" },
+  { date: "2026-10-07", label: "Room 102", customer: "Daniel Mendoza", status: "approved" },
+
+  // NOVEMBER
+  { date: "2026-11-02", label: "Room 101", customer: "Amelia Reyes", status: "pending" },
+  { date: "2026-11-06", label: "Cottage 2", customer: "Henry Santos", status: "approved" },
+
+  // DECEMBER
+  { date: "2026-12-01", label: "Room 101", customer: "Mia Cruz", status: "pending" },
+  { date: "2026-12-05", label: "Cottage 3", customer: "Alexander Garcia", status: "approved" },
+  { date: "2026-12-20", label: "Wedding Event - Pavilion B", customer: "Sophia & Mark", status: "approved" },
+  { date: "2026-12-31", label: "New Year Countdown - Pavilion A", customer: "Event Group", status: "pending" }
 ];
 
-// ─── STAT CARD COMPONENT ──────────────────────────────────────────────────────
-function StatCard({ label, value, iconBg, iconStroke, children }) {
-  return (
-    <div className={styles.statCard}>
-      <div className={styles.statIcon} style={{ background: iconBg }}>
-        <svg viewBox="0 0 24 24" fill="none" stroke={iconStroke} strokeWidth="2">
-          {children}
-        </svg>
-      </div>
-      <div className={styles.statContent}>
-        <p className={styles.statLabel}>{label}</p>
-        <p className={styles.statValue}>{value}</p>
-      </div>
-    </div>
-  );
-}
-
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function AdminDashboard() {
+export default function AdminScheduleManagement() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState(null);
-  const [error, setError] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedReservation, setSelectedReservation] = useState(null);
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const summary = await adminAPI.getReservationSummary();
-        const guestReport = await adminAPI.getGuestReport();
-        setStats({ ...summary, ...guestReport });
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
+  const [activeTab, setActiveTab] = useState("pending");
 
-        // DYNAMIC: uncomment to fetch real calendar reservations
-        // const calendarData = await adminAPI.getCalendarReservations();
-        // setReservations(calendarData);
-
-      } catch (err) {
-        console.log('Using demo data (backend offline)');
-        setStats(MOCK_STATS);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminEmail');
-    localStorage.removeItem('isAdminLoggedIn');
-    localStorage.removeItem('adminSession');
-    localStorage.removeItem('adminRole');
-    navigate('/');
-  };
-
-  const handleNotifications = () => navigate('/admin/notifications');
-
-  // ── Calendar helpers ────────────────────────────────────────────────────────
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
+  // FILTER
+  const filteredReservations = reservations.filter(r => {
+    const resDate = new Date(r.date);
+    const sameMonth = isSameMonth(resDate, currentDate);
+    const statusMatch = activeTab === "all" ? true : r.status === activeTab;
+    return sameMonth && statusMatch;
+  });
+
+  const getCount = (type) => {
+    return reservations.filter(r => {
+      const resDate = new Date(r.date);
+      const sameMonth = isSameMonth(resDate, currentDate);
+      return type === "all" ? sameMonth : sameMonth && r.status === type;
+    }).length;
+  };
+
   const renderHeader = () => (
-    <div className={styles.calendarHeader}>
-      <button className={styles.calNavBtn} onClick={prevMonth}>◀</button>
-      <h3 className={styles.calMonthLabel}>{format(currentDate, "MMMM yyyy")}</h3>
-      <button className={styles.calNavBtn} onClick={nextMonth}>▶</button>
+    <div className={styles.calHeader}>
+      <button onClick={prevMonth} className={styles.navBtn}>◀</button>
+      <h2>{format(currentDate, "MMMM yyyy")}</h2>
+      <button onClick={nextMonth} className={styles.navBtn}>▶</button>
     </div>
   );
 
   const renderDays = () => {
-    const days = [];
     const startDate = startOfWeek(currentDate);
-    for (let i = 0; i < 7; i++) {
-      days.push(
-        <div key={i} className={styles.dayName}>
-          {format(addDays(startDate, i), "EEE")}
-        </div>
-      );
-    }
-    return <div className={styles.daysRow}>{days}</div>;
+    return (
+      <div className={styles.daysRow}>
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className={styles.dayName}>
+            {format(addDays(startDate, i), "EEE").toUpperCase()}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const renderCells = () => {
@@ -130,207 +134,80 @@ export default function AdminDashboard() {
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const reservation = reservations.find(r => isSameDay(new Date(r.date), day));
-        const isToday = isSameDay(day, new Date());
-        const notThisMonth = !isSameMonth(day, monthStart);
+        const event = filteredReservations.find(r =>
+          isSameDay(new Date(r.date), day)
+        );
+
+        const isDisabled = !isSameMonth(day, monthStart);
 
         days.push(
           <div
             key={day.toString()}
-            className={[
-              styles.cell,
-              notThisMonth  ? styles.disabled  : "",
-              reservation   ? styles.reserved  : "",
-              isToday && !reservation ? styles.today : "",
-            ].join(" ")}
-            onClick={() => reservation && setSelectedReservation(reservation)}
+            className={`${styles.cell} ${isDisabled ? styles.disabled : ""} ${event ? styles.hasEvent : ""}`}
           >
-            <span className={styles.cellDay}>{format(day, "d")}</span>
-            {reservation && (
-              <span className={styles.cellEvent}>
-                <span className={styles.cellEventDot} />
-                {reservation.room}
-              </span>
+            <span className={styles.date}>{format(day, "d")}</span>
+
+            {event && (
+              <div className={styles.event}>
+                <span className={styles.dot}></span>
+                {event.label} - {event.customer} ({event.status})
+              </div>
             )}
           </div>
         );
+
         day = addDays(day, 1);
       }
+
       rows.push(
-        <div className={styles.row} key={day.toString()}>{days}</div>
+        <div className={styles.row} key={day.toString()}>
+          {days}
+        </div>
       );
       days = [];
     }
+
     return <div>{rows}</div>;
   };
-
-  // DYNAMIC: replace these with real availability data from API
-  const availableRooms    = 10;
-  const availableCottages = 4;
-  const availablePavilion = 0;
 
   return (
     <div className={styles.adminShell}>
       <AdminSidebar />
 
       <div className={styles.mainContent}>
-
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.title}>
-              <h1>Schedule Management</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
-            </div>
-            <div className={styles.headerActions}>
-              <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">
-                <FaBell />
-              </button>
-              <button className={styles.logoutBtn} onClick={handleLogout}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                  <polyline points="16 17 21 12 16 7"/>
-                  <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                Logout
-              </button>
-            </div>
+        <div className={styles.topHeader}>
+          <div>
+            <h1>Schedule Management</h1>
+            <p>Create and Manage Schedules</p>
           </div>
+
+          <button className={styles.backBtn} onClick={() => navigate("/admin/dashboard")}>
+            ← Back to Dashboard
+          </button>
         </div>
 
-        {/* ── Main Content ────────────────────────────────────────────── */}
-        <div className={styles.container}>
+        <div className={styles.tabs}>
+          {["pending", "approved", "all"].map(tab => (
+            <button
+              key={tab}
+              className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+            </button>
+          ))}
+        </div>
 
-          {error && (
-            <div className={styles.errorBanner}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-              <p>{error}</p>
-            </div>
-          )}
+        <div className={styles.calendarBox}>
+          <h3>Reservation Calendar and Availability</h3>
 
-          {/* ── Stat Cards ─────────────────────────────────────────────── */}
-          <div className={styles.statsGrid}>
-
-            <StatCard label="Total Reservations Today" value={stats?.total_reservations ?? 0}
-              iconBg="#dbeafe" iconStroke="#0284c7">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-            </StatCard>
-
-            <StatCard label="Total Guests" value={stats?.total_guests ?? 0}
-              iconBg="#e0f2fe" iconStroke="#0369a1">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </StatCard>
-
-            <StatCard label="Approved" value={stats?.approved_count ?? 0}
-              iconBg="#dcfce7" iconStroke="#16a34a">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
-            </StatCard>
-
-            <StatCard label="Pending" value={stats?.pending_count ?? 0}
-              iconBg="#fef9c3" iconStroke="#eab308">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </StatCard>
-
-            <StatCard label="Cancelled" value={stats?.cancelled_count ?? 0}
-              iconBg="#fee2e2" iconStroke="#dc2626">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
-            </StatCard>
-
-            <StatCard
-              label="Revenue Today"
-              value={`₱${(stats?.total_revenue ?? 0).toLocaleString()}`}
-              iconBg="#fce7f3" iconStroke="#db2777">
-              <line x1="12" y1="1" x2="12" y2="23"/>
-              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </StatCard>
-
+          <div className={styles.calendar}>
+            {renderHeader()}
+            {renderDays()}
+            {renderCells()}
           </div>
-
-          {/* ── Calendar + Sidebar ──────────────────────────────────────── */}
-          <div className={styles.calendarLayout}>
-
-            <div className={styles.calendarWrap}>
-              <h2 className={styles.sectionTitle}>Reservation Calendar and Availability</h2>
-              <div className={styles.calendar}>
-                {renderHeader()}
-                {renderDays()}
-                {renderCells()}
-              </div>
-            </div>
-
-            <div className={styles.sidebarSummary}>
-
-              <div className={styles.summarySection}>
-                <p className={styles.summarySectionTitle}>Reservation Summary</p>
-                <div className={styles.summaryRow}>
-                  <span>Current Stays</span>
-                  <strong>{stats?.approved_count ?? 0}</strong>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>Upcoming Reservations</span>
-                  <strong>{stats?.pending_count ?? 0}</strong>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>Pending</span>
-                  <strong className={styles.summaryAmber}>{stats?.pending_count ?? 0}</strong>
-                </div>
-              </div>
-
-              <div className={styles.summarySection}>
-                <p className={styles.summarySectionTitle}>Reservation Availability</p>
-                <div className={styles.summaryRow}>
-                  <span>Available Rooms</span>
-                  <strong>{availableRooms}</strong>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>Available Cottage</span>
-                  <strong>{availableCottages}</strong>
-                </div>
-                <div className={styles.summaryRow}>
-                  <span>Available Pavilion</span>
-                  <strong className={availablePavilion === 0 ? styles.summaryRed : ""}>
-                    {availablePavilion}
-                  </strong>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
         </div>
       </div>
-
-      {/* ── Reservation Detail Modal ─────────────────────────────────── */}
-      {selectedReservation && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedReservation(null)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>Reservation Details</h3>
-              <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.modalRow}><span>Name</span><strong>{selectedReservation.name}</strong></div>
-              <div className={styles.modalRow}><span>Room / Facility</span><strong>{selectedReservation.room}</strong></div>
-              <div className={styles.modalRow}><span>Guests</span><strong>{selectedReservation.guests}</strong></div>
-              <div className={styles.modalRow}><span>Date</span><strong>{selectedReservation.date}</strong></div>
-            </div>
-            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
