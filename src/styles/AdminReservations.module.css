@@ -1,4 +1,3 @@
-
 .adminShell {
   display: flex;
   min-height: 100vh;
@@ -10,53 +9,58 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  
-}
-
-.pageHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
 }
 
 .header {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   color: #fff;
-  padding: 10px 2rem;
+  padding: 20px 2rem; 
   border-bottom: 2px solid rgba(255,255,255,0.1);
 }
+
+.pageHeader {
+  max-width: 1400px;  
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px; 
+  padding: 0;  
+  flex-wrap: wrap;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;  
+  flex: 1;
+}
+
 .pageHeader h1 {
-  font-size: 1.8rem;
+  font-size: 1.8rem; 
   color: #fff;
-  margin-bottom: 4px;
+  margin: 0;  
+  line-height: 1.2;  
+  font-weight: 700;
 }
 
 .pageHeader p {
-  color: #fff;
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);  
+  font-size: 0.95rem;  
+  margin: 0;  
+  line-height: 1.3;  
 }
 
-.backBtn {
-  background: #fff;
-  border: 1px solid var(--border);
-  padding: 10px 16px;
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: var(--transition);
-  font-weight: 500;
-}
-
-.backBtn:hover {
-  background: var(--border);
-}
-
+/* ===== FILTER TABS ===== */
 .filterTabs {
   display: flex;
   gap: 8px;
   margin-bottom: 24px;
   border-bottom: 1px solid var(--border);
+  max-width: 1400px;  
+  margin-left: auto; 
+  margin-right: auto;  
+  padding: 0 2rem;  
 }
 
 .tab {
@@ -65,14 +69,15 @@
   border-bottom: 3px solid transparent;
   padding: 12px 16px;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;  
   color: var(--text-mid);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease;  
 }
 
 .tab:hover {
   color: var(--navy);
+  border-bottom-color: rgba(26, 60, 143, 0.3);  
 }
 
 .active {
@@ -80,11 +85,17 @@
   border-bottom-color: var(--red) !important;
 }
 
+/* ===== CONTAINER ===== */
 .container {
   background: #fff;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
+  max-width: 1400px;  
+  margin: 0 auto;  
+  margin-left: 2rem;  
+  margin-right: 2rem;  
+  margin-bottom: 2rem;  
 }
 
 .loading {
@@ -129,6 +140,7 @@
   font-size: 0.9rem;
 }
 
+/* ===== TABLE ===== */
 .tableWrapper {
   overflow-x: auto;
 }
@@ -147,7 +159,7 @@
 .table th {
   padding: 12px 16px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;  
   color: var(--navy);
 }
 
@@ -187,9 +199,9 @@
 
 .status {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 6px 12px; 
   border-radius: 20px;
-  font-size: 0.72rem;
+  font-size: 0.8rem;  
   font-weight: 600;
 }
 
@@ -212,14 +224,51 @@
   background: var(--navy);
   color: #fff;
   border: none;
-  padding: 6px 12px;
-  border-radius: var(--radius);
-  font-size: 0.75rem;
+  padding: 8px 14px;  
+  border-radius: 8px;  
+  font-size: 0.85rem;  
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease;  
   font-weight: 600;
 }
 
 .actionBtn:hover {
   background: var(--navy-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 60, 143, 0.2);  
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 960px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterTabs {
+    flex-direction: column;
+  }
+
+  .header {
+    padding: 16px 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 12px 1rem;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.3rem;
+  }
+
+  .container {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .filterTabs {
+    padding: 0 1rem;
+  }
 }

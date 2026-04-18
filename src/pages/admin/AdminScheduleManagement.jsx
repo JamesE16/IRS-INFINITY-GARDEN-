@@ -180,7 +180,7 @@ export default function AdminDashboard() {
           <div className={styles.headerContent}>
             <div className={styles.title}>
               <h1>Schedule Management</h1>
-              <p>Schedule Availabilities for Facilities in Inifinity Garden System.</p>
+              <p>Infinity Garden Resort Reservation Management System</p>
             </div>
             <div className={styles.headerActions}>
               <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">

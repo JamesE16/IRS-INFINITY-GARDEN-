@@ -177,10 +177,15 @@ export default function AdminUserManagement() {
           <div className={styles.pageHeader}>
             <div className={styles.title}>
               <h1>User Management</h1>
-              <p>Manage admin and staff accounts in the Infinity Garden system.</p>
+              <p>Infinity Garden Resort Reservation Management System</p>
             </div>
-            <button className={styles.addBtn} onClick={() => setShowModal(true)}>
-              + Add User
+            {/* EXACT LOGOUT BUTTON STYLE */}
+            <button className={styles.headerBtn} onClick={() => setShowModal(true)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add User
             </button>
           </div>
         </div>

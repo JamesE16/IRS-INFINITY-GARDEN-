@@ -84,117 +84,114 @@ export default function AdminReservations() {
         {/* Header */}
         <div className={styles.header}>
          <div className={styles.pageHeader}>
-          <div>
+          <div className={styles.title}>
             <h1>Reservation Management</h1>
-            <p>Review and approve pending bookings</p>
+            <p>Infinity Garden Resort Reservation Management System</p>
           </div>
-          <button className={styles.backBtn} onClick={() => navigate('/admin/dashboard')}>
-            ← Back to Dashboard
-          </button>
          </div>
         </div>
 
-      {/* Filter tabs */}
-      <div className={styles.filterTabs}>
-        {['pending', 'approved', 'all'].map(tab => (
-          <button
-            key={tab}
-            className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
-            onClick={() => setFilter(tab)}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)} ({
-              reservations.length
-            })
-          </button>
-        ))}
-      </div>
+       {/* Filter tabs */}
+       <div className={styles.filterTabs}>
+         {['pending', 'approved', 'all'].map(tab => (
+           <button
+             key={tab}
+             className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
+             onClick={() => setFilter(tab)}
+           >
+             {tab.charAt(0).toUpperCase() + tab.slice(1)} ({
+               reservations.length
+             })
+           </button>
+         ))}
+       </div>
 
-      {/* Content */}
-      <div className={styles.container}>
-        {error && (
-          <div className={styles.errorBanner}>
-            <p>{error}</p>
-          </div>
-        )}
+       {/* Content */}
+       <div className={styles.container}>
+         {error && (
+           <div className={styles.errorBanner}>
+             <p>{error}</p>
+           </div>
+         )}
 
-        {isLoading ? (
-          <div className={styles.loading}>Loading reservations...</div>
-        ) : reservations.length === 0 ? (
-          <div className={styles.empty}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <h3>No reservations found</h3>
-            <p>There are no {filter} reservations at the moment.</p>
-          </div>
-        ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Booking ID</th>
-                  <th>Guest</th>
-                  <th>Facility</th>
-                  <th>Check-in</th>
-                  <th>Check-out</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reservations.map(res => (
-                  <tr key={res.id}>
-                    <td className={styles.bookingId}>{res.booking_id}</td>
-                    <td>
-                      <div className={styles.guestInfo}>
-                        <strong>{res.guest_name}</strong>
-                        <small>{res.guest_email}</small>
-                      </div>
-                    </td>
-                    <td>{res.facility_name}</td>
-                    <td>{new Date(res.check_in).toLocaleDateString()}</td>
-                    <td>{new Date(res.check_out).toLocaleDateString()}</td>
-                    <td className={styles.amount}>₱{parseFloat(res.total_amount).toLocaleString()}</td>
-                    <td>
-                      <span className={`${styles.status} ${styles[`status_${res.status}`]}`}>
-                        {res.status.charAt(0).toUpperCase() + res.status.slice(1)}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className={styles.actionBtn}
-                        onClick={() => setSelectedReservation(res)}
-                      >
-                        Review
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+         {isLoading ? (
+           <div className={styles.loading}>Loading reservations...</div>
+         ) : reservations.length === 0 ? (
+           <div className={styles.empty}>
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+               <rect x="3" y="4" width="18" height="18" rx="2"/>
+               <line x1="16" y1="2" x2="16" y2="6"/>
+               <line x1="8" y1="2" x2="8" y2="6"/>
+               <line x1="3" y1="10" x2="21" y2="10"/>
+             </svg>
+             <h3>No reservations found</h3>
+             <p>There are no {filter} reservations at the moment.</p>
+           </div>
+         ) : (
+           <div className={styles.tableWrapper}>
+             <table className={styles.table}>
+               <thead>
+                 <tr>
+                   <th>Booking ID</th>
+                   <th>Guest</th>
+                   <th>Facility</th>
+                   <th>Check-in</th>
+                   <th>Check-out</th>
+                   <th>Amount</th>
+                   <th>Status</th>
+                   <th>Actions</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {reservations.map(res => (
+                   <tr key={res.id}>
+                     <td className={styles.bookingId}>{res.booking_id}</td>
+                     <td>
+                       <div className={styles.guestInfo}>
+                         <strong>{res.guest_name}</strong>
+                         <small>{res.guest_email}</small>
+                       </div>
+                     </td>
+                     <td>{res.facility_name}</td>
+                     <td>{new Date(res.check_in).toLocaleDateString()}</td>
+                     <td>{new Date(res.check_out).toLocaleDateString()}</td>
+                     <td className={styles.amount}>₱{parseFloat(res.total_amount).toLocaleString()}</td>
+                     <td>
+                       <span className={`${styles.status} ${styles[`status_${res.status}`]}`}>
+                         {res.status.charAt(0).toUpperCase() + res.status.slice(1)}
+                       </span>
+                     </td>
+                     <td>
+                       <button
+                         className={styles.actionBtn}
+                         onClick={() => setSelectedReservation(res)}
+                       >
+                         Review
+                       </button>
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+           </div>
+         )}
+       </div>
 
-      {/* Review Modal */}
-      {selectedReservation && (
-        <ReservationReviewModal
-          reservation={selectedReservation}
-          notes={approvalNotes}
-          onNotesChange={setApprovalNotes}
-          onApprove={handleApprove}
-          onReject={handleReject}
-          onClose={() => {
-            setSelectedReservation(null);
-            setApprovalNotes('');
-          }}
-        />
-      )}
-      </div>
+       {/* Review Modal */}
+       {selectedReservation && (
+         <ReservationReviewModal
+           reservation={selectedReservation}
+           notes={approvalNotes}
+           onNotesChange={setApprovalNotes}
+           onApprove={handleApprove}
+           onReject={handleReject}
+           onClose={() => {
+             setSelectedReservation(null);
+             setApprovalNotes('');
+           }}
+         />
+       )}
+       </div>
     </div>
   );
 }
