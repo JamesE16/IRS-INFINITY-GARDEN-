@@ -1,21 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
+import uuid
 
 # ============================================================
 # USER ROLES / STAFF
 # ============================================================
 
 class UserProfile(models.Model):
-    """Extended user profile with role information"""
+    """Extended user profile with role information for Admins and Staff"""
     ROLE_CHOICES = [
-        ('client', 'Client'),
         ('staff', 'Staff'),
         ('admin', 'Administrator'),
     ]
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='staff')
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -32,48 +32,30 @@ class UserProfile(models.Model):
 # FACILITIES / ROOMS
 # ============================================================
 
-class RoomType(models.Model):
-    """Types of accommodations"""
+class Facility(models.Model):
+    """Facilities: Rooms, Cottages, Pavilions"""
     TYPE_CHOICES = [
-        ('Room', 'Standard Room'),
+        ('Room', 'Room'),
         ('Cottage', 'Cottage'),
-        ('Gazebo', 'Gazebo'),
         ('Pavilion', 'Pavilion'),
     ]
     
-    name = models.CharField(max_length=50, choices=TYPE_CHOICES)
-    description = models.TextField()
-    
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        unique_together = ('name',)
-
-
-class Facility(models.Model):
-    """Rooms, cottages, pavilions, gazebos"""
-    external_id = models.CharField(max_length=10, unique=True)  # r1, c1, g1, p1, etc
     name = models.CharField(max_length=100)
-    description = models.TextField()
-    room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
-    subtype = models.CharField(max_length=50)  # Standard, Deluxe, etc
-    max_guests = models.IntegerField()
-    size_sqm = models.IntegerField()
-    beds = models.CharField(max_length=100)
-    price_per_night = models.DecimalField(max_digits=10, decimal_places=2)
-    amenities = models.JSONField(default=list)  # ["WiFi", "AC", "TV"]
-    features = models.JSONField(default=list)   # ["Housekeeping", "BBQ Grill"]
-    image_url = models.URLField()
-    is_active = models.BooleanField(default=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    capacity = models.IntegerField()  # max guests
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # price per night
+    availability_status = models.BooleanField(default=True)  # is available
+    description = models.TextField(blank=True)
+    amenities = models.JSONField(default=list)
+    image_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.name} ({self.room_type.name})"
+        return f"{self.name} ({self.type})"
     
     class Meta:
-        ordering = ['room_type', 'name']
+        ordering = ['type', 'name']
 
 
 class BlackoutDate(models.Model):
@@ -97,24 +79,25 @@ class BlackoutDate(models.Model):
 # ============================================================
 
 class Reservation(models.Model):
-    """Guest reservations"""
+    """Guest reservations - no user account required"""
     STATUS_CHOICES = [
-        ('pending', 'Pending Review'),
-        ('approved', 'Approved'),
+        ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
         ('checked_in', 'Checked In'),
         ('checked_out', 'Checked Out'),
         ('cancelled', 'Cancelled'),
     ]
     
-    booking_id = models.CharField(max_length=50, unique=True)
+    reservation_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4, editable=False)
     facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name='reservations')
-    guest = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reservations')
     
-    # Guest details (from form submission)
-    guest_name = models.CharField(max_length=100)
-    guest_email = models.EmailField()
-    guest_phone = models.CharField(max_length=20)
+    # Guest details (captured directly)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    contact = models.CharField(max_length=20)  # phone
+    email = models.EmailField()
+    address = models.TextField()
+    valid_id = models.CharField(max_length=100)  # ID details
     
     # Reservation details
     check_in = models.DateField()
@@ -124,14 +107,12 @@ class Reservation(models.Model):
     
     # Pricing
     nights = models.IntegerField()
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
-    tax_amount = models.DecimalField(max_digits=12, decimal_places=2)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     
-    # Status & workflow
+    # Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
-    # Review notes (admin)
+    # Admin review
     reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reservations')
     reviewed_at = models.DateTimeField(null=True, blank=True)
     review_notes = models.TextField(blank=True)
@@ -140,66 +121,94 @@ class Reservation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"{self.booking_id} - {self.facility.name} ({self.status})"
+        return f"{self.reservation_id} - {self.facility.name} ({self.status})"
     
     class Meta:
         ordering = ['-created_at']
-        unique_together = ('facility', 'check_in', 'check_out', 'status')
 
 
 # ============================================================
-# PAYMENTS & TRANSACTIONS
+# PAYMENTS
 # ============================================================
 
 class Payment(models.Model):
-    """Payment records for reservations"""
-    PAYMENT_STATUS_CHOICES = [
+    """Payment records linked to reservations"""
+    VERIFICATION_STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('refunded', 'Refunded'),
-    ]
-    
-    PAYMENT_METHOD_CHOICES = [
-        ('credit_card', 'Credit Card'),
-        ('debit_card', 'Debit Card'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('paypal', 'PayPal'),
-        ('cash', 'Cash'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
     ]
     
     reservation = models.OneToOneField(Reservation, on_delete=models.CASCADE, related_name='payment')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
-    transaction_id = models.CharField(max_length=100, unique=True)
-    status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    reference_number = models.CharField(max_length=100, unique=True)
+    proof_of_payment = models.FileField(upload_to='payments/', blank=True, null=True)  # or URLField if needed
+    verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='pending')
     
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return f"Payment for {self.reservation.booking_id} - {self.status}"
+        return f"Payment for {self.reservation.reservation_id} - {self.verification_status}"
     
     class Meta:
         ordering = ['-created_at']
 
 
+# ============================================================
+# NOTIFICATIONS & SCHEDULE
+# ============================================================
+
+class Notification(models.Model):
+    """Notifications for extension requests, etc., linked to reservations"""
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Notification for {self.reservation.reservation_id}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
+class Schedule(models.Model):
+    """Schedules linked to reservations for blackout dates or extensions"""
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='schedules')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.CharField(max_length=200, default="Extension")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Schedule for {self.reservation.reservation_id} ({self.start_date} to {self.end_date})"
+    
+    class Meta:
+        ordering = ['reservation', 'start_date']
+
+
+# ============================================================
+# TRANSACTION LOG
+# ============================================================
+
 class TransactionLog(models.Model):
     """Audit log for all transactions"""
     ACTION_CHOICES = [
         ('reservation_created', 'Reservation Created'),
-        ('reservation_approved', 'Reservation Approved'),
+        ('reservation_confirmed', 'Reservation Confirmed'),
         ('reservation_cancelled', 'Reservation Cancelled'),
-        ('payment_received', 'Payment Received'),
-        ('payment_refunded', 'Payment Refunded'),
+        ('payment_verified', 'Payment Verified'),
         ('check_in', 'Check-in'),
         ('check_out', 'Check-out'),
+        ('extension_requested', 'Extension Requested'),
     ]
     
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='transaction_logs', null=True, blank=True)
+    action = models.CharField(max_length=30, choices=ACTION_CHOICES)
     details = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
     

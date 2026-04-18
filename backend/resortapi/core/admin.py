@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
-    UserProfile, RoomType, Facility, BlackoutDate,
-    Reservation, Payment, TransactionLog
+    UserProfile, Facility, BlackoutDate,
+    Reservation, Payment, Notification, Schedule, TransactionLog
 )
 
 
@@ -13,16 +13,11 @@ class UserProfileAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
 
 
-@admin.register(RoomType)
-class RoomTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
-
-
 @admin.register(Facility)
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ['external_id', 'name', 'room_type', 'price_per_night', 'is_active']
-    list_filter = ['room_type', 'is_active', 'created_at']
-    search_fields = ['name', 'external_id']
+    list_display = ['name', 'type', 'capacity', 'price', 'availability_status']
+    list_filter = ['type', 'availability_status', 'created_at']
+    search_fields = ['name', 'type']
     readonly_fields = ['created_at', 'updated_at']
 
 
@@ -35,23 +30,37 @@ class BlackoutDateAdmin(admin.ModelAdmin):
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ['booking_id', 'facility', 'guest_name', 'check_in', 'check_out', 'status', 'total_amount']
+    list_display = ['reservation_id', 'facility', 'first_name', 'last_name', 'check_in', 'check_out', 'status', 'total_amount']
     list_filter = ['status', 'created_at', 'check_in']
-    search_fields = ['booking_id', 'guest_name', 'guest_email']
-    readonly_fields = ['booking_id', 'created_at', 'updated_at']
+    search_fields = ['reservation_id', 'first_name', 'last_name', 'email']
+    readonly_fields = ['reservation_id', 'created_at', 'updated_at']
 
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['transaction_id', 'reservation', 'amount', 'status', 'paid_at']
-    list_filter = ['status', 'payment_method', 'created_at']
-    search_fields = ['transaction_id', 'reservation__booking_id']
+    list_display = ['reference_number', 'reservation', 'amount', 'verification_status', 'paid_at']
+    list_filter = ['verification_status', 'created_at']
+    search_fields = ['reference_number', 'reservation__reservation_id']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['reservation', 'message', 'is_read', 'created_at']
+    list_filter = ['is_read', 'created_at']
+    search_fields = ['reservation__reservation_id', 'message']
+
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ['reservation', 'start_date', 'end_date', 'reason']
+    list_filter = ['created_at']
+    search_fields = ['reservation__reservation_id', 'reason']
 
 
 @admin.register(TransactionLog)
 class TransactionLogAdmin(admin.ModelAdmin):
     list_display = ['action', 'user', 'reservation', 'created_at']
     list_filter = ['action', 'created_at']
-    search_fields = ['user__email', 'reservation__booking_id']
+    search_fields = ['user__email', 'reservation__reservation_id']
     readonly_fields = ['created_at']

@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from resortapi.core.views import (
     UserViewSet, UserProfileViewSet,
-    RoomTypeViewSet, FacilityViewSet, BlackoutDateViewSet,
+    FacilityViewSet, BlackoutDateViewSet,
     ReservationViewSet, PaymentViewSet, ReportViewSet, TransactionLogViewSet
 )
 
@@ -14,7 +14,6 @@ router.register(r'users', UserViewSet, basename='user')
 router.register(r'profiles', UserProfileViewSet, basename='profile')
 
 # Facilities
-router.register(r'room-types', RoomTypeViewSet, basename='room-type')
 router.register(r'facilities', FacilityViewSet, basename='facility')
 router.register(r'blackout-dates', BlackoutDateViewSet, basename='blackout-date')
 

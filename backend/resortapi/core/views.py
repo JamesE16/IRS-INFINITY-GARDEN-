@@ -9,15 +9,15 @@ from django.db.models import Sum, Count, Q
 from datetime import timedelta
 
 from .models import (
-    UserProfile, RoomType, Facility, BlackoutDate,
-    Reservation, Payment, TransactionLog
+    UserProfile, Facility, BlackoutDate,
+    Reservation, Payment, Notification, Schedule, TransactionLog
 )
 from .serializers import (
     UserSerializer, UserProfileSerializer, UserCreateSerializer,
-    RoomTypeSerializer, FacilitySerializer, BlackoutDateSerializer,
+    FacilitySerializer, BlackoutDateSerializer,
     ReservationListSerializer, ReservationDetailSerializer, ReservationCreateSerializer,
     ReservationApproveSerializer, PaymentSerializer, TransactionLogSerializer,
-    ReservationReportSerializer
+    ReservationReportSerializer, NotificationSerializer, ScheduleSerializer
 )
 
 
@@ -119,16 +119,9 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 # FACILITY MANAGEMENT
 # ============================================================
 
-class RoomTypeViewSet(viewsets.ModelViewSet):
-    """Manage room types"""
-    queryset = RoomType.objects.all()
-    serializer_class = RoomTypeSerializer
-    permission_classes = [AllowAny]
-
-
 class FacilityViewSet(viewsets.ModelViewSet):
     """Manage facilities (rooms, cottages, pavilions, gazebos)"""
-    queryset = Facility.objects.filter(is_active=True)
+    queryset = Facility.objects.filter(availability_status=True)
     serializer_class = FacilitySerializer
     
     def get_permissions(self):
@@ -225,7 +218,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             # Check for conflicts
             conflict = Reservation.objects.filter(
                 facility_id=facility_id,
-                status__in=['approved', 'confirmed', 'checked_in'],
+                status__in=['confirmed', 'checked_in'],
                 check_in__lt=check_out,
                 check_out__gt=check_in
             ).exists()
@@ -236,18 +229,12 @@ class ReservationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_409_CONFLICT
                 )
             
-            # Generate booking ID
-            booking_id = f"BK{timezone.now().timestamp():.0f}"
-            
             reservation = Reservation.objects.create(
-                booking_id=booking_id,
-                guest=request.user,
                 **serializer.validated_data
             )
             
             # Log transaction
             TransactionLog.objects.create(
-                user=request.user,
                 action='reservation_created',
                 reservation=reservation,
                 details={'method': 'web'}
