@@ -178,12 +178,9 @@ export default function AdminScheduleManagement() {
         <div className={styles.topHeader}>
           <div>
             <h1>Schedule Management</h1>
-            <p>Create and Manage Schedules</p>
+            <p>Infinity Garden Resort Reservation Management System</p>
           </div>
 
-          <button className={styles.backBtn} onClick={() => navigate("/admin/dashboard")}>
-            ← Back to Dashboard
-          </button>
         </div>
 
         <div className={styles.tabs}>
