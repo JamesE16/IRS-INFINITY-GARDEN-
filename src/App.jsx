@@ -13,6 +13,7 @@ import AdminDashboard    from './pages/admin/AdminDashboard';
 import AdminReservations from './pages/admin/AdminReservations';
 import AdminFacilities   from './pages/admin/AdminFacilities';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
+import AdminFeedbackManagement from './pages/admin/AdminFeedbackManagement';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
 import Toast             from './components/ui/Toast';
 import PaymentManagement from './pages/admin/PaymentManagement';
@@ -56,6 +57,7 @@ function AppRoutes() {
         <Route path="/admin/facilities" element={<ProtectedRoute><AdminFacilities /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute><AdminReports /></ProtectedRoute>} />
         <Route path="/admin/payments" element={<ProtectedRoute><PaymentManagement /></ProtectedRoute>} />
+        <Route path="/admin/feedbacks" element={<ProtectedRoute><AdminFeedbackManagement /></ProtectedRoute>} />
         <Route path="/admin/logs" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
         <Route path="/admin/schedule" element={<ProtectedRoute><AdminScheduleManagement /></ProtectedRoute>} />
       </Routes>

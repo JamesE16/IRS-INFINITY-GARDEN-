@@ -217,3 +217,31 @@ class TransactionLog(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+class Feedback(models.Model):
+    """Guest feedback submissions to be reviewed by admin."""
+
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('reviewed', 'Reviewed'),
+        ('resolved', 'Resolved'),
+        ('archived', 'Archived'),
+    ]
+
+    feedback_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4, editable=False)
+    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True, related_name='feedbacks')
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField()
+    rating = models.PositiveSmallIntegerField(default=5)
+    comment = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.feedback_id} - {self.first_name} {self.last_name} ({self.status})"
+
+    class Meta:
+        ordering = ['-submitted_at']

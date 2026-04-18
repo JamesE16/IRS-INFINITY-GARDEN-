@@ -9,7 +9,8 @@ import {
   FaBuilding,
   FaMoneyBillWave,
   FaClock,
-  FaChartBar
+  FaChartBar,
+  FaComments
 } from 'react-icons/fa';
 
 const links = [
@@ -18,6 +19,7 @@ const links = [
   { to: '/admin/reservations', label: 'Reservation Management', icon: <FaCalendarCheck /> },
   { to: '/admin/facilities', label: 'Facilities & Room Management', icon: <FaBuilding /> },
   { to: '/admin/payments', label: 'Payments & Transaction', icon: <FaMoneyBillWave /> },
+  { to: '/admin/feedbacks', label: 'Feedback Management', icon: <FaComments /> },
   { to: '/admin/schedule', label: 'Schedule Management', icon: <FaClock /> },
   { to: '/admin/reports', label: 'Reports', icon: <FaChartBar /> },
 ];

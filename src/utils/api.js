@@ -259,6 +259,34 @@ export const adminAPI = {
     return response.json();
   },
 
+  getFeedbacks: async (status = 'all', search = '') => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (search) params.append('search', search);
+
+    const response = await fetch(`${API_BASE_URL}/feedbacks/?${params}`, {
+      credentials: 'include'
+    });
+    return response.json();
+  },
+
+  getFeedbackById: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/feedbacks/${id}/`, {
+      credentials: 'include'
+    });
+    return response.json();
+  },
+
+  updateFeedbackStatus: async (id, status) => {
+    const response = await fetch(`${API_BASE_URL}/feedbacks/${id}/update_status/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status })
+    });
+    return response.json();
+  }
+,
   // Transaction Logs
   getTransactionLogs: async (action = null) => {
     const params = new URLSearchParams();

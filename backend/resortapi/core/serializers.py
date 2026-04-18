@@ -2,7 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
     UserProfile, Facility, BlackoutDate,
-    Reservation, Payment, Notification, Schedule, TransactionLog
+    Reservation, Payment, Notification, Schedule, TransactionLog,
+    Feedback
 )
 
 
@@ -155,6 +156,23 @@ class PaymentSerializer(serializers.ModelSerializer):
             'reference_number', 'proof_of_payment', 'verification_status', 'paid_at',
             'created_at', 'updated_at'
         ]
+
+
+class FeedbackSerializer(serializers.ModelSerializer):
+    guest_name = serializers.SerializerMethodField()
+    reservation_reference = serializers.CharField(source='reservation.reservation_id', read_only=True)
+
+    class Meta:
+        model = Feedback
+        fields = [
+            'id', 'feedback_id', 'reservation', 'reservation_reference',
+            'first_name', 'last_name', 'guest_name', 'email', 'rating',
+            'comment', 'status', 'submitted_at', 'updated_at'
+        ]
+        read_only_fields = ['feedback_id', 'submitted_at', 'updated_at']
+
+    def get_guest_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
 
 # ============================================================

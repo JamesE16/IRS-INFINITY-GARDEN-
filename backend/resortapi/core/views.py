@@ -10,13 +10,13 @@ from datetime import timedelta
 
 from .models import (
     UserProfile, Facility, BlackoutDate,
-    Reservation, Payment, Notification, Schedule, TransactionLog
+    Reservation, Payment, Notification, Schedule, TransactionLog, Feedback
 )
 from .serializers import (
     UserSerializer, UserProfileSerializer, UserCreateSerializer,
     FacilitySerializer, BlackoutDateSerializer,
     ReservationListSerializer, ReservationDetailSerializer, ReservationCreateSerializer,
-    ReservationApproveSerializer, PaymentSerializer, TransactionLogSerializer,
+    ReservationApproveSerializer, PaymentSerializer, FeedbackSerializer, TransactionLogSerializer,
     ReservationReportSerializer, NotificationSerializer, ScheduleSerializer
 )
 
@@ -362,6 +362,47 @@ class PaymentViewSet(viewsets.ModelViewSet):
             payments = Payment.objects.all()
         
         serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
+
+
+class FeedbackViewSet(viewsets.ModelViewSet):
+    """Manage guest feedback submissions"""
+    queryset = Feedback.objects.all()
+    serializer_class = FeedbackSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        queryset = Feedback.objects.all()
+        status_filter = self.request.query_params.get('status')
+        search = self.request.query_params.get('search')
+
+        if status_filter and status_filter.lower() != 'all':
+            queryset = queryset.filter(status=status_filter.lower())
+
+        if search:
+            queryset = queryset.filter(
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(comment__icontains=search) |
+                Q(feedback_id__icontains=search) |
+                Q(reservation__reservation_id__icontains=search)
+            )
+
+        return queryset.order_by('-submitted_at')
+
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        feedback = self.get_object()
+        status_value = request.data.get('status')
+
+        if status_value not in dict(Feedback.STATUS_CHOICES):
+            return Response({'error': 'Invalid status value'}, status=status.HTTP_400_BAD_REQUEST)
+
+        feedback.status = status_value
+        feedback.save()
+
+        serializer = self.get_serializer(feedback)
         return Response(serializer.data)
 
 

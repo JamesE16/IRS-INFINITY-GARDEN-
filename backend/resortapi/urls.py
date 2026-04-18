@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from resortapi.core.views import (
     UserViewSet, UserProfileViewSet,
     FacilityViewSet, BlackoutDateViewSet,
-    ReservationViewSet, PaymentViewSet, ReportViewSet, TransactionLogViewSet
+    ReservationViewSet, PaymentViewSet, FeedbackViewSet, ReportViewSet, TransactionLogViewSet
 )
 
 router = DefaultRouter()
@@ -20,6 +20,7 @@ router.register(r'blackout-dates', BlackoutDateViewSet, basename='blackout-date'
 # Reservations & Payments
 router.register(r'reservations', ReservationViewSet, basename='reservation')
 router.register(r'payments', PaymentViewSet, basename='payment')
+router.register(r'feedbacks', FeedbackViewSet, basename='feedback')
 
 # Reports
 router.register(r'reports', ReportViewSet, basename='report')

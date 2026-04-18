@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     UserProfile, Facility, BlackoutDate,
-    Reservation, Payment, Notification, Schedule, TransactionLog
+    Reservation, Payment, Notification, Schedule, TransactionLog, Feedback
 )
 
 
@@ -64,3 +64,11 @@ class TransactionLogAdmin(admin.ModelAdmin):
     list_filter = ['action', 'created_at']
     search_fields = ['user__email', 'reservation__reservation_id']
     readonly_fields = ['created_at']
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ['feedback_id', 'reservation', 'first_name', 'last_name', 'rating', 'status', 'submitted_at']
+    list_filter = ['status', 'rating', 'submitted_at']
+    search_fields = ['feedback_id', 'first_name', 'last_name', 'email', 'comment', 'reservation__reservation_id']
+    readonly_fields = ['feedback_id', 'submitted_at', 'updated_at']
