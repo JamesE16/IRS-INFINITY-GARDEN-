@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import StaffSidebar from "../../components/staff/StaffSidebar";
 
 import {
@@ -16,42 +16,110 @@ import {
 
 import styles from "../../styles/AdminScheduleManagement.module.css";
 
-// ───────── MOCK SCHEDULE DATA ─────────
-const reservations = [
-  { date: "2026-04-07", label: "Pavilion A", customer: "Cristalyn Llarenas", status: "confirmed" },
-  { date: "2026-04-11", label: "Cottage 3", customer: "James Higoy", status: "confirmed" },
-  { date: "2026-04-20", label: "Pavilion B", customer: "Joanna Cooper", status: "confirmed" },
-  { date: "2026-04-24", label: "Room 201", customer: "Sheena Emperador", status: "confirmed" },
-  { date: "2026-04-29", label: "Pavilion A", customer: "Zean Marquez", status: "confirmed" },
+// ───────── FULL YEAR RESERVATIONS (WITH NAMES + STATUS) ─────────
+const allReservations = [
+  // JANUARY
+  { date: "2026-01-03", label: "Pavilion A", customer: "Juan Dela Cruz", status: "pending" },
+  { date: "2026-01-07", label: "Garde Cottage", customer: "Maria Santos", status: "approved" },
+  { date: "2026-01-12", label: "Room 101", customer: "John Reyes", status: "pending" },
+  { date: "2026-01-15", label: "New Year Event - Pavilion B", customer: "ABC Corp", status: "approved" },
+
+  // FEBRUARY
+  { date: "2026-02-02", label: "Cottage 2", customer: "Ana Lopez", status: "pending" },
+  { date: "2026-02-05", label: "Room 102", customer: "Carlos Mendoza", status: "approved" },
+
+  // MARCH
+  { date: "2026-03-03", label: "Cottage 3", customer: "Elena Cruz", status: "pending" },
+  { date: "2026-03-06", label: "Room 101", customer: "Miguel Torres", status: "approved" },
+
+  // APRIL
+  { date: "2026-04-03", label: "Cottage 1", customer: "Sofia Reyes", status: "pending" },
+  { date: "2026-04-07", label: "Pavilion A", customer: "David Lim", status: "approved" },
+  { date: "2026-04-11", label: "Cottage 3", customer: "Isabella Garcia", status: "pending" },
+  { date: "2026-04-15", label: "Room 101", customer: "Andres Cruz", status: "approved" },
+  { date: "2026-04-20", label: "Wedding Event - Pavilion B", customer: "Grace Tan", status: "pending" },
+  { date: "2026-04-24", label: "Room 201", customer: "Mark Villanueva", status: "approved" },
+
+  // MAY
+  { date: "2026-05-02", label: "Pavilion A", customer: "Liam Santos", status: "pending" },
+  { date: "2026-05-06", label: "Room 102", customer: "Noah Reyes", status: "approved" },
+
+  // JUNE
+  { date: "2026-06-01", label: "Room 101", customer: "Emma Garcia", status: "pending" },
+  { date: "2026-06-05", label: "Cottage 3", customer: "Lucas Mendoza", status: "approved" },
+
+  // JULY
+  { date: "2026-07-02", label: "Cottage 1", customer: "Sophia Cruz", status: "pending" },
+  { date: "2026-07-06", label: "Room 101", customer: "Ethan Lim", status: "approved" },
+
+  // AUGUST
+  { date: "2026-08-03", label: "Room 102", customer: "Olivia Santos", status: "pending" },
+  { date: "2026-08-07", label: "Cottage 2", customer: "James Reyes", status: "approved" },
+
+  // SEPTEMBER
+  { date: "2026-09-02", label: "Room 101", customer: "Ava Cruz", status: "pending" },
+  { date: "2026-09-06", label: "Cottage 3", customer: "Benjamin Garcia", status: "approved" },
+
+  // OCTOBER
+  { date: "2026-10-03", label: "Cottage 1", customer: "Charlotte Lim", status: "pending" },
+  { date: "2026-10-07", label: "Room 102", customer: "Daniel Mendoza", status: "approved" },
+
+  // NOVEMBER
+  { date: "2026-11-02", label: "Room 101", customer: "Amelia Reyes", status: "pending" },
+  { date: "2026-11-06", label: "Cottage 2", customer: "Henry Santos", status: "approved" },
+
+  // DECEMBER
+  { date: "2026-12-01", label: "Room 101", customer: "Mia Cruz", status: "pending" },
+  { date: "2026-12-05", label: "Cottage 3", customer: "Alexander Garcia", status: "approved" },
+  { date: "2026-12-20", label: "Wedding Event - Pavilion B", customer: "Sophia & Mark", status: "approved" },
+  { date: "2026-12-31", label: "New Year Countdown - Pavilion A", customer: "Event Group", status: "pending" }
 ];
 
 export default function StaffScheduleMonitoring() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedReservation, setSelectedReservation] = useState(null);
 
-  // ── Calendar helpers ────────────────────────────────────────────────────────
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
+  // FILTER
+  const filteredReservations = useMemo(() => {
+    return allReservations.filter(r => {
+      const resDate = new Date(r.date);
+      const sameMonth = isSameMonth(resDate, currentDate);
+      const statusMatch = activeTab === "all" ? true : r.status === activeTab;
+      return sameMonth && statusMatch;
+    });
+  }, [currentDate, activeTab]);
+
+  const getCount = (type) => {
+    return allReservations.filter(r => {
+      const resDate = new Date(r.date);
+      const sameMonth = isSameMonth(resDate, currentDate);
+      return type === "all" ? sameMonth : sameMonth && r.status === type;
+    }).length;
+  };
+
   const renderHeader = () => (
-    <div className={styles.calendarHeader}>
-      <button className={styles.calNavBtn} onClick={prevMonth}>◀</button>
-      <h3 className={styles.calMonthLabel}>{format(currentDate, "MMMM yyyy")}</h3>
-      <button className={styles.calNavBtn} onClick={nextMonth}>▶</button>
+    <div className={styles.calHeader}>
+      <button onClick={prevMonth} className={styles.navBtn}>◀</button>
+      <h2>{format(currentDate, "MMMM yyyy")}</h2>
+      <button onClick={nextMonth} className={styles.navBtn}>▶</button>
     </div>
   );
 
   const renderDays = () => {
-    const days = [];
     const startDate = startOfWeek(currentDate);
-    for (let i = 0; i < 7; i++) {
-      days.push(
-        <div key={i} className={styles.dayName}>
-          {format(addDays(startDate, i), "EEE")}
-        </div>
-      );
-    }
-    return <div className={styles.daysRow}>{days}</div>;
+    return (
+      <div className={styles.daysRow}>
+        {[...Array(7)].map((_, i) => (
+          <div key={i} className={styles.dayName}>
+            {format(addDays(startDate, i), "EEE").toUpperCase()}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const renderCells = () => {
@@ -66,37 +134,40 @@ export default function StaffScheduleMonitoring() {
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const reservation = reservations.find(r => isSameDay(new Date(r.date), day));
-        const isToday = isSameDay(day, new Date());
-        const notThisMonth = !isSameMonth(day, monthStart);
+        const event = filteredReservations.find(r =>
+          isSameDay(new Date(r.date), day)
+        );
+
+        const isDisabled = !isSameMonth(day, monthStart);
 
         days.push(
           <div
             key={day.toString()}
-            className={[
-              styles.cell,
-              notThisMonth  ? styles.disabled  : "",
-              reservation   ? styles.reserved  : "",
-              isToday && !reservation ? styles.today : "",
-            ].join(" ")}
-            onClick={() => reservation && setSelectedReservation(reservation)}
+            className={`${styles.cell} ${isDisabled ? styles.disabled : ""} ${event ? styles.hasEvent : ""}`}
+            onClick={() => event && setSelectedReservation(event)}
           >
-            <span className={styles.cellDay}>{format(day, "d")}</span>
-            {reservation && (
-              <span className={styles.cellEvent}>
-                <span className={styles.cellEventDot} />
-                {reservation.label}
-              </span>
+            <span className={styles.date}>{format(day, "d")}</span>
+
+            {event && (
+              <div className={styles.event}>
+                <span className={styles.dot}></span>
+                {event.label} - {event.customer} ({event.status})
+              </div>
             )}
           </div>
         );
+
         day = addDays(day, 1);
       }
+
       rows.push(
-        <div className={styles.row} key={day.toString()}>{days}</div>
+        <div className={styles.row} key={day.toString()}>
+          {days}
+        </div>
       );
       days = [];
     }
+
     return <div>{rows}</div>;
   };
 
@@ -105,42 +176,68 @@ export default function StaffScheduleMonitoring() {
       <StaffSidebar />
 
       <div className={styles.mainContent}>
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.title}>
-              <h1>Schedule Monitoring</h1>
-              <p>View reservation schedules and availability</p>
-            </div>
+        <div className={styles.topHeader}>
+          <div>
+            <h1>Schedule Monitoring</h1>
+            <p>Infinity Garden Resort - Reservation Schedule Overview</p>
           </div>
         </div>
 
-        <div className={styles.container}>
-          <div className={styles.calendarWrap}>
-            <h2 className={styles.sectionTitle}>Reservation Schedule</h2>
-            <div className={styles.calendar}>
-              {renderHeader()}
-              {renderDays()}
-              {renderCells()}
-            </div>
+        <div className={styles.tabs}>
+          {["pending", "approved", "all"].map(tab => (
+            <button
+              key={tab}
+              className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.calendarBox}>
+          <h3>Reservation Calendar and Availability</h3>
+          <div className={styles.calendar}>
+            {renderHeader()}
+            {renderDays()}
+            {renderCells()}
           </div>
         </div>
       </div>
 
-      {/* ── Reservation Detail Modal ─────────────────────────────────── */}
+      {/* Reservation Detail Modal */}
       {selectedReservation && (
         <div className={styles.modalOverlay} onClick={() => setSelectedReservation(null)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3>Schedule Details</h3>
+              <h3>Reservation Details</h3>
               <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.modalRow}><span>Facility</span><strong>{selectedReservation.label}</strong></div>
-              <div className={styles.modalRow}><span>Customer</span><strong>{selectedReservation.customer}</strong></div>
-              <div className={styles.modalRow}><span>Date</span><strong>{selectedReservation.date}</strong></div>
-              <div className={styles.modalRow}><span>Status</span><strong>{selectedReservation.status}</strong></div>
+              <div className={styles.modalRow}>
+                <span>Facility:</span>
+                <strong>{selectedReservation.label}</strong>
+              </div>
+              <div className={styles.modalRow}>
+                <span>Customer:</span>
+                <strong>{selectedReservation.customer}</strong>
+              </div>
+              <div className={styles.modalRow}>
+                <span>Date:</span>
+                <strong>{selectedReservation.date}</strong>
+              </div>
+              <div className={styles.modalRow}>
+                <span>Status:</span>
+                <span className={selectedReservation.status === 'approved' ? styles.statusApproved : styles.statusPending}>
+                  {selectedReservation.status.charAt(0).toUpperCase() + selectedReservation.status.slice(1)}
+                </span>
+              </div>
             </div>
-            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
+            <div className={styles.modalActions}>
+              <button className={styles.cancelBtn} onClick={() => setSelectedReservation(null)}>
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
