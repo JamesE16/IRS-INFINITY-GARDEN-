@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import styles from '../../styles/AdminPayments.module.css';
-import { paymentAPI } from '../../utils/api';
 
 const AdminPaymentManagement = () => {
   const [transactions, setTransactions] = useState([]);
