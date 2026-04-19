@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import StaffSidebar from "../../components/staff/StaffSidebar";
 
 import {
@@ -18,7 +17,7 @@ import {
 import styles from "../../styles/AdminScheduleManagement.module.css";
 
 // ───────── FULL YEAR RESERVATIONS (WITH NAMES + STATUS) ─────────
-const reservations = [
+const rawReservations = [
   // JANUARY
   { date: "2026-01-03", label: "Pavilion A", customer: "Juan Dela Cruz", status: "pending" },
   { date: "2026-01-07", label: "Garde Cottage", customer: "Maria Santos", status: "approved" },
@@ -76,9 +75,12 @@ const reservations = [
   { date: "2026-12-31", label: "New Year Countdown - Pavilion A", customer: "Event Group", status: "pending" }
 ];
 
-export default function StaffScheduleManagement() {
-  const navigate = useNavigate();
+const reservations = rawReservations.map((reservation, index) => ({
+  ...reservation,
+  guests: 4 + (index % 4)
+}));
 
+export default function StaffScheduleManagement() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
   const [activeTab, setActiveTab] = useState("all");
   const [selectedReservation, setSelectedReservation] = useState(null);
@@ -215,30 +217,12 @@ export default function StaffScheduleManagement() {
               <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.modalRow}>
-                <span>Facility:</span>
-                <strong>{selectedReservation.label}</strong>
-              </div>
-              <div className={styles.modalRow}>
-                <span>Customer:</span>
-                <strong>{selectedReservation.customer}</strong>
-              </div>
-              <div className={styles.modalRow}>
-                <span>Date:</span>
-                <strong>{selectedReservation.date}</strong>
-              </div>
-              <div className={styles.modalRow}>
-                <span>Status:</span>
-                <span className={selectedReservation.status === 'approved' ? styles.statusApproved : styles.statusPending}>
-                  {selectedReservation.status.charAt(0).toUpperCase() + selectedReservation.status.slice(1)}
-                </span>
-              </div>
+              <div className={styles.modalRow}><span>Name</span><strong>{selectedReservation.customer}</strong></div>
+              <div className={styles.modalRow}><span>Room / Facility</span><strong>{selectedReservation.label}</strong></div>
+              <div className={styles.modalRow}><span>Guests</span><strong>{selectedReservation.guests}</strong></div>
+              <div className={styles.modalRow}><span>Date</span><strong>{selectedReservation.date}</strong></div>
             </div>
-            <div className={styles.modalActions}>
-              <button className={styles.cancelBtn} onClick={() => setSelectedReservation(null)}>
-                Close
-              </button>
-            </div>
+            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
           </div>
         </div>
       )}
