@@ -8,13 +8,12 @@ import logo from '../../assets/logo.png';
 export default function NavBar() {
   const navigate = useNavigate();
 
-  // Listen for Ctrl+L keyboard shortcut (hidden admin access)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Ctrl+L (Windows/Linux) or Cmd+L (Mac) triggers admin login
-      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-        e.preventDefault();
-        navigate('/admin/login');
+// Listen for Ctrl+L keyboard shortcut (hidden login access)
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+            e.preventDefault();
+            navigate('/login');
       }
     };
 

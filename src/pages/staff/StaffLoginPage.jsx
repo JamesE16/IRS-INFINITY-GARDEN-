@@ -4,7 +4,7 @@ import { useBooking } from '../../context/BookingContext';
 import styles from '../../styles/AdminLoginPage.module.css';
 import logo from '../../assets/logo.png'; // ✅ added
 
-export default function AdminLoginPage() {
+export default function StaffLoginPage() {
   const navigate = useNavigate();
   const { showToast } = useBooking();
 
@@ -48,39 +48,43 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     try {
       let isAuthenticated = false;
-      let isStaff = false;
 
-      // Mock authentication only
-      if (
-        formData.email === 'admin@infinitygarden.com' &&
-        formData.password === 'infinity123'
-      ) {
-        isAuthenticated = true;
-        localStorage.setItem('adminEmail', formData.email);
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        localStorage.setItem('adminRole', 'admin');
-      }
+      try {
+        // For now, no backend, so skip fetch
+        // const response = await fetch('http://localhost:8000/api/users/login/', {
+        //   method: 'POST',
+        //   mode: 'cors',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify(formData),
+        // });
 
-      if (
-        formData.email === 'staffdemo@infinityresort.com' &&
-        formData.password === 'Staff123!'
-      ) {
-        isAuthenticated = true;
-        isStaff = true;
-        localStorage.setItem('staffEmail', formData.email);
-        localStorage.setItem('isStaffLoggedIn', 'true');
-        localStorage.setItem('staffRole', 'staff');
+        // if (response.ok) {
+        //   const userData = await response.json();
+        //   isAuthenticated = true;
+
+        //   localStorage.setItem('staffEmail', formData.email);
+        //   localStorage.setItem('isStaffLoggedIn', 'true');
+        //   localStorage.setItem('staffRole', userData.profile?.role || 'staff');
+        // }
+      } catch {
+        // Demo login
+        if (
+          formData.email === 'staffdemo@infinityresort.com' &&
+          formData.password === 'Staff123!'
+        ) {
+          isAuthenticated = true;
+          localStorage.setItem('staffEmail', formData.email);
+          localStorage.setItem('isStaffLoggedIn', 'true');
+          localStorage.setItem('staffRole', 'staff');
+          showToast('Demo staff login', 'success');
+        }
       }
 
       if (isAuthenticated) {
         showToast('Login successful', 'success');
-        setTimeout(() => {
-          if (isStaff) {
-            navigate('/staff/dashboard');
-          } else {
-            navigate('/admin/dashboard');
-          }
-        }, 500);
+        setTimeout(() => navigate('/staff/dashboard'), 500);
       } else {
         showToast('Invalid credentials', 'error');
       }
@@ -116,8 +120,8 @@ export default function AdminLoginPage() {
           </div>
 
 
-          <h2>Admin & Staff Login</h2>
-          <p>Secure access for administrators and staff members</p>
+          <h2>Staff Login</h2>
+          <p>Secure access for staff members</p>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -127,7 +131,7 @@ export default function AdminLoginPage() {
               id="email"
               type="email"
               name="email"
-              placeholder="admin@infinitygarden.com"
+              placeholder="staffdemo@infinityresort.com"
               value={formData.email}
               onChange={handleChange}
               className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
@@ -157,7 +161,7 @@ export default function AdminLoginPage() {
               <line x1="12" y1="16" x2="12" y2="12"/>
               <line x1="12" y1="8" x2="12.01" y2="8"/>
             </svg>
-            <p>This login is protected. Only authorized staff and admin can access.</p>
+            <p>This login is protected. Only authorized staff can access.</p>
           </div>
 
           <div className={styles.actions}>
@@ -172,8 +176,7 @@ export default function AdminLoginPage() {
 
         <div className={styles.demoNote}>
           <strong>Demo Credentials:</strong>
-          <p>Admin: admin@infinitygarden.com | infinity123</p>
-          <p>Staff: staffdemo@infinityresort.com | Staff123!</p>
+          <p>Email: staffdemo@infinityresort.com | Password: Staff123!</p>
         </div>
       </div>
     </div>
