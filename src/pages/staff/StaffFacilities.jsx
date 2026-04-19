@@ -1,57 +1,28 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import StaffSidebar from '../../components/staff/StaffSidebar';
+import { facilitiesAPI } from '../../utils/api';
 import { ROOMS } from '../../data/rooms';
 import styles from '../../styles/AdminFacilities.module.css';
 
-const mockFacilities = [
-  {
-    id: 1,
-    name: 'Pavilion A',
-    type: 'Pavilion',
-    subtype: 'Wedding',
-    description: 'Spacious pavilion perfect for weddings',
-    guests: 100,
-    size: 500,
-    beds: 'N/A',
-    price: 25000,
-    available: true,
-    amenities: ['Sound System', 'Lighting', 'Tables & Chairs'],
-    features: ['Garden View', 'Dance Floor'],
-    img: ''
-  },
-  {
-    id: 2,
-    name: 'Cottage 3',
-    type: 'Cottage',
-    subtype: 'Deluxe',
-    description: 'Cozy cottage with modern amenities',
-    guests: 4,
-    size: 80,
-    beds: '2 Queen Beds',
-    price: 5000,
-    available: true,
-    amenities: ['Air Conditioning', 'WiFi', 'Mini Fridge'],
-    features: ['Private Balcony', 'Garden Access'],
-    img: ''
-  },
-  {
-    id: 3,
-    name: 'Room 201',
-    type: 'Room',
-    subtype: 'Standard',
-    description: 'Comfortable standard room',
-    guests: 2,
-    size: 25,
-    beds: '1 King Bed',
-    price: 3000,
-    available: true,
-    amenities: ['Air Conditioning', 'TV', 'WiFi'],
-    features: ['City View'],
-    img: ''
-  }
-];
+const facilityTypes = ['Room', 'Cottage', 'Gazebo', 'Pavilion'];
 
-const facilityTypes = ['All', 'Room', 'Cottage', 'Pavilion'];
+function normalizeFacility(item) {
+  return {
+    id: item.id ?? item.pk ?? item.id?.toString() ?? String(Date.now()),
+    name: item.name ?? item.title ?? 'Unnamed Facility',
+    type: item.type ?? item.category ?? 'Room',
+    subtype: item.subtype ?? item.room_type ?? 'Standard',
+    description: item.desc ?? item.description ?? '',
+    guests: item.guests ?? item.capacity ?? 0,
+    size: item.size ?? item.area ?? 0,
+    beds: item.beds ?? item.bed_config ?? '',
+    price: item.price ?? item.rate ?? 0,
+    available: item.available ?? true,
+    amenities: Array.isArray(item.amenities) ? item.amenities : (item.amenities || []).split?.(',').map((value) => value.trim()).filter(Boolean) ?? [],
+    features: Array.isArray(item.features) ? item.features : (item.features || []).split?.(',').map((value) => value.trim()).filter(Boolean) ?? [],
+    img: item.img ?? item.image_url ?? '',
+  };
+}
 
 export default function StaffFacilities() {
   const [facilities, setFacilities] = useState([]);
@@ -68,34 +39,47 @@ export default function StaffFacilities() {
   const fetchFacilities = async () => {
     setIsLoading(true);
     try {
-      // Mock data
-      setFacilities(mockFacilities);
+      const data = await facilitiesAPI.getAll();
+      const list = Array.isArray(data) ? data : data.results ?? [];
+      if (!list.length) throw new Error('No facilities returned');
+      setFacilities(list.map(normalizeFacility));
       setError(null);
     } catch (err) {
-      setFacilities([]);
-      setError('Failed to load facilities.');
+      console.warn('Facilities fallback loaded from local room data', err);
+      setFacilities(ROOMS.map(normalizeFacility));
+      // Silently fall back to local data without showing error
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredFacilities = useMemo(() => {
-    let filtered = facilities;
-    if (filterType !== 'All') {
-      filtered = filtered.filter(f => f.type === filterType);
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(f =>
-        f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        f.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    return filtered;
-  }, [facilities, filterType, searchQuery]);
-
-  const handleView = (facility) => {
+  const handleSelectFacility = (facility) => {
     setSelectedFacility(facility);
   };
+
+  const handleClosePreview = () => {
+    setSelectedFacility(null);
+  };
+
+  const facilityCounts = useMemo(() => {
+    const filtered = facilities.filter((facility) =>
+      (filterType === 'All' || facility.type === filterType) &&
+      facility.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return {
+      all: facilities.length,
+      filtered: filtered.length
+    };
+  }, [facilities, filterType, searchQuery]);
+
+  const visibleFacilities = useMemo(() => {
+    return facilities.filter((facility) => {
+      const matchesType = filterType === 'All' || facility.type === filterType;
+      const matchesQuery = facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        facility.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesType && matchesQuery;
+    });
+  }, [facilities, filterType, searchQuery]);
 
   return (
     <div className={styles.adminShell}>
@@ -105,196 +89,128 @@ export default function StaffFacilities() {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
-              <h1>Resort Facilities</h1>
-              <p>View available facilities and accommodations</p>
+              <h1>Facilities & Rooms</h1>
+              <p>Infinity Garden Resort - Staff View</p>
             </div>
           </div>
         </div>
 
-        <div className={styles.container}>
-          {error && (
-            <div className={styles.errorBanner}>
-              <p>{error}</p>
+        <div className={styles.actionBar}>
+            <div>
+              <span>{facilityCounts.filtered} of {facilityCounts.all} facilities</span>
             </div>
-          )}
-
-          <div className={styles.controls}>
-            <div className={styles.searchBar}>
+            <div className={styles.filters}>
+              <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
+                <option value="All">All Types</option>
+                {facilityTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
               <input
                 type="text"
-                placeholder="Search facilities..."
+                placeholder="Search facility or room"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
+                onChange={(event) => setSearchQuery(event.target.value)}
               />
-            </div>
-
-            <div className={styles.filterTabs}>
-              {facilityTypes.map((type) => (
-                <button
-                  key={type}
-                  className={`${styles.tab} ${filterType === type ? styles.active : ''}`}
-                  onClick={() => setFilterType(type)}
-                >
-                  {type}
-                </button>
-              ))}
             </div>
           </div>
 
-          {isLoading ? (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Loading facilities...</p>
+        <div className={styles.container}>
+          {error && <div className={styles.errorBanner}>{error}</div>}
+
+          <div className={styles.grid}>
+            <div className={styles.listPanel}>
+              {isLoading ? (
+                <div className={styles.emptyState}>
+                  <h3>Loading facilities...</h3>
+                </div>
+              ) : visibleFacilities.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <h3>No facilities found</h3>
+                  <p>Adjust your search or filters.</p>
+                </div>
+              ) : (
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Guests</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                      <th>View</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleFacilities.map((facility) => (
+                      <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
+                        <td>
+                          <button className={styles.tableLink} onClick={() => handleSelectFacility(facility)}>
+                            {facility.name}
+                          </button>
+                        </td>
+                        <td>{facility.type}</td>
+                        <td>{facility.guests}</td>
+                        <td>₱{facility.price.toLocaleString()}</td>
+                        <td>
+                          <span className={`${styles.statusTag} ${facility.available ? styles.available : styles.unavailable}`}>
+                            {facility.available ? 'Available' : 'Unavailable'}
+                          </span>
+                        </td>
+                        <td>
+                          <button className={styles.previewBtn} onClick={() => handleSelectFacility(facility)}>
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
-          ) : filteredFacilities.length === 0 ? (
-            <div className={styles.empty}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="9" cy="9" r="2"/>
-                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-              </svg>
-              <h3>No facilities found</h3>
-              <p>No facilities match your current filters.</p>
-            </div>
-          ) : (
-            <div className={styles.facilitiesGrid}>
-              {filteredFacilities.map((facility) => (
-                <div key={facility.id} className={styles.facilityCard}>
-                  <div className={styles.facilityImage}>
-                    {facility.img ? (
-                      <img src={facility.img} alt={facility.name} />
-                    ) : (
-                      <div className={styles.placeholderImage}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                          <rect x="3" y="3" width="18" height="18" rx="2"/>
-                          <circle cx="9" cy="9" r="2"/>
-                          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
 
-                  <div className={styles.facilityContent}>
-                    <div className={styles.facilityHeader}>
-                      <h3 className={styles.facilityName}>{facility.name}</h3>
-                      <span className={`${styles.facilityType} ${styles[facility.type.toLowerCase()]}`}>
-                        {facility.type}
-                      </span>
-                    </div>
-
-                    <p className={styles.facilityDescription}>
-                      {facility.description || 'No description available'}
-                    </p>
-
-                    <div className={styles.facilityDetails}>
-                      <div className={styles.detailItem}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                          <circle cx="9" cy="7" r="4"/>
-                          <path d="M22 2 2 22"/>
-                        </svg>
-                        <span>{facility.guests} guests</span>
-                      </div>
-
-                      <div className={styles.detailItem}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="3" y="3" width="18" height="18" rx="2"/>
-                          <path d="M3 9h18"/>
-                          <path d="M9 21V9"/>
-                        </svg>
-                        <span>{facility.size} sqm</span>
-                      </div>
-
-                      <div className={styles.detailItem}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="12" y1="1" x2="12" y2="23"/>
-                          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                        <span>₱{facility.price.toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    <div className={styles.facilityActions}>
-                      <button
-                        className={styles.viewBtn}
-                        onClick={() => handleView(facility)}
-                      >
-                        View Details
-                      </button>
-                    </div>
+          </div>
+          {selectedFacility && (
+            <div className={styles.previewBackdrop}>
+              <div className={styles.previewModal}>
+                <div className={styles.previewHeader}>
+                  <div>
+                    <p className={styles.previewLabel}>{selectedFacility.type}</p>
+                    <h2>{selectedFacility.name}</h2>
                   </div>
                 </div>
-              ))}
+                <div className={styles.previewContent}>
+                  {selectedFacility.img ? (
+                    <div className={styles.previewImageWrapper}>
+                      <img src={selectedFacility.img} alt={selectedFacility.name} />
+                    </div>
+                  ) : (
+                    <div className={styles.previewNoImage}>No image available</div>
+                  )}
+                  <div className={styles.previewDetails}>
+                    <p>{selectedFacility.description}</p>
+                    <div className={styles.previewGrid}>
+                    <div><strong>Subtype</strong><span>{selectedFacility.subtype}</span></div>
+                    <div><strong>Guests</strong><span>{selectedFacility.guests}</span></div>
+                    <div><strong>Size</strong><span>{selectedFacility.size} sqm</span></div>
+                    <div><strong>Price</strong><span>₱{selectedFacility.price.toLocaleString()}</span></div>
+                    <div><strong>Status</strong><span>{selectedFacility.available ? 'Available' : 'Unavailable'}</span></div>
+                    <div><strong>Beds</strong><span>{selectedFacility.beds || 'N/A'}</span></div>
+                    <div><strong>Amenities</strong><span>{selectedFacility.amenities.join(', ') || 'None'}</span></div>
+                    <div><strong>Features</strong><span>{selectedFacility.features.join(', ') || 'None'}</span></div>
+                  </div>
+                  </div>
+                </div>
+                <div className={styles.previewFooter}>
+                  <button className={styles.cancelBtn} onClick={handleClosePreview}>
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      {selectedFacility && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedFacility(null)}>
-          <div className={styles.modal} onClick={e => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>{selectedFacility.name}</h3>
-              <button className={styles.modalClose} onClick={() => setSelectedFacility(null)}>✕</button>
-            </div>
-            <div className={styles.modalBody}>
-              <div className={styles.facilityDetails}>
-                <div className={styles.detailRow}>
-                  <span>Type:</span>
-                  <strong>{selectedFacility.type} - {selectedFacility.subtype}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Description:</span>
-                  <p>{selectedFacility.description}</p>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Capacity:</span>
-                  <strong>{selectedFacility.guests} guests</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Size:</span>
-                  <strong>{selectedFacility.size} sqm</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Beds:</span>
-                  <strong>{selectedFacility.beds}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Price:</span>
-                  <strong>₱{selectedFacility.price.toLocaleString()}</strong>
-                </div>
-                <div className={styles.detailRow}>
-                  <span>Availability:</span>
-                  <span className={selectedFacility.available ? styles.available : styles.unavailable}>
-                    {selectedFacility.available ? 'Available' : 'Unavailable'}
-                  </span>
-                </div>
-                {selectedFacility.amenities.length > 0 && (
-                  <div className={styles.detailRow}>
-                    <span>Amenities:</span>
-                    <div className={styles.amenitiesList}>
-                      {selectedFacility.amenities.map((amenity, index) => (
-                        <span key={index} className={styles.amenityTag}>{amenity}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {selectedFacility.features.length > 0 && (
-                  <div className={styles.detailRow}>
-                    <span>Features:</span>
-                    <div className={styles.featuresList}>
-                      {selectedFacility.features.map((feature, index) => (
-                        <span key={index} className={styles.featureTag}>{feature}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

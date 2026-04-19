@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StaffSidebar from '../../components/staff/StaffSidebar';
+import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminUserManagement.module.css';
 
 const demoGuests = [
@@ -52,21 +53,24 @@ const statusTabs = [
   { key: 'inactive', label: 'Inactive' }
 ];
 
+function normalizeGuest(guest) {
+  return {
+    id: guest.id ?? guest.pk ?? Math.floor(Math.random() * 100000),
+    firstName: guest.first_name || guest.firstName || '',
+    lastName: guest.last_name || guest.lastName || '',
+    email: guest.email || '',
+    phone: guest.phone || guest.phone_number || '',
+    isActive: guest.is_active ?? true
+  };
+}
+
 export default function StaffGuestManagement() {
   const navigate = useNavigate();
   const [guests, setGuests] = useState([]);
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [editingGuest, setEditingGuest] = useState(null);
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: ''
-  });
+  const [selectedGuest, setSelectedGuest] = useState(null);
 
   useEffect(() => {
     fetchGuests();
@@ -75,11 +79,15 @@ export default function StaffGuestManagement() {
   const fetchGuests = async () => {
     setIsLoading(true);
     try {
-      // Mock data
-      setGuests(demoGuests);
+      const data = await adminAPI.getAllGuests();
+      if (Array.isArray(data) && data.length > 0) {
+        setGuests(data.map(normalizeGuest));
+      } else {
+        throw new Error('No guest data returned');
+      }
       setError(null);
     } catch (err) {
-      console.log('Using demo data');
+      console.log('Guest data fallback: backend offline or no guests', err);
       setGuests(demoGuests);
       setError(null);
     } finally {
@@ -101,175 +109,92 @@ export default function StaffGuestManagement() {
     return guests.filter((guest) => (filter === 'active' ? guest.isActive : !guest.isActive));
   }, [filter, guests]);
 
-  const handleInput = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCreateGuest = async (event) => {
-    event.preventDefault();
-    setIsSaving(true);
-
-    const guestPayload = {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      phone: form.phone,
-      isActive: true
-    };
-
-    try {
-      // Mock add
-      const newGuest = { ...guestPayload, id: Date.now() };
-      setGuests(prev => [...prev, newGuest]);
-      setShowModal(false);
-      setForm({ firstName: '', lastName: '', email: '', phone: '' });
-    } catch (err) {
-      console.error('Error adding guest:', err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleEditGuest = (guest) => {
-    setEditingGuest(guest);
-    setForm({
-      firstName: guest.firstName,
-      lastName: guest.lastName,
-      email: guest.email,
-      phone: guest.phone
-    });
-    setShowModal(true);
-  };
-
-  const handleUpdateGuest = async (event) => {
-    event.preventDefault();
-    setIsSaving(true);
-
-    const updatedGuest = {
-      ...editingGuest,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      phone: form.phone
-    };
-
-    try {
-      // Mock update
-      setGuests(prev => prev.map(g => g.id === editingGuest.id ? updatedGuest : g));
-      setShowModal(false);
-      setEditingGuest(null);
-      setForm({ firstName: '', lastName: '', email: '', phone: '' });
-    } catch (err) {
-      console.error('Error updating guest:', err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const handleViewGuest = (guest) => {
-    // Mock view - could open a modal or navigate
-    alert(`Viewing guest: ${guest.firstName} ${guest.lastName}`);
-  };
-
-  const resetForm = () => {
-    setForm({ firstName: '', lastName: '', email: '', phone: '' });
-    setEditingGuest(null);
-    setShowModal(false);
+    setSelectedGuest(guest);
   };
 
   return (
     <div className={styles.adminShell}>
       <StaffSidebar />
-
       <div className={styles.mainContent}>
         <div className={styles.header}>
-          <div className={styles.headerContent}>
+          <div className={styles.pageHeader}>
             <div className={styles.title}>
               <h1>Guest Management</h1>
-              <p>Manage guest information and profiles</p>
-            </div>
-            <div className={styles.headerActions}>
-              <button
-                className={styles.primaryBtn}
-                onClick={() => setShowModal(true)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add Guest
-              </button>
+              <p>Infinity Garden Resort - Staff View</p>
             </div>
           </div>
         </div>
 
-        <div className={styles.container}>
-          {error && (
-            <div className={styles.errorBanner}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-              </svg>
-              <p>{error}</p>
-            </div>
-          )}
+        <div className={styles.actionBar}>
+          <p className={styles.summaryText}>
+            Showing {filteredGuests.length} of {counts.all} guests — {counts.active} active, {counts.inactive} inactive.
+          </p>
+        </div>
 
-          <div className={styles.filterTabs}>
-            {statusTabs.map((tab) => (
-              <button
-                key={tab.key}
-                className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
-                onClick={() => setFilter(tab.key)}
-              >
-                {tab.label} ({counts[tab.key]})
-              </button>
-            ))}
-          </div>
+        <div className={styles.filterTabs}>
+          {statusTabs.map((tab) => (
+            <button
+              key={tab.key}
+              className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
+              onClick={() => setFilter(tab.key)}
+            >
+              {tab.label} ({counts[tab.key]})
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.container}>
+          {error && <div className={styles.errorBanner}>{error}</div>}
 
           {isLoading ? (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Loading guests...</p>
+            <div className={styles.emptyState}>
+              <h3>Loading guests…</h3>
+              <p>Please wait while the list is loaded.</p>
+            </div>
+          ) : filteredGuests.length === 0 ? (
+            <div className={styles.emptyState}>
+              <h3>No guests found</h3>
+              <p>Try another filter.</p>
             </div>
           ) : (
-            <div className={styles.tableContainer}>
+            <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
+                    <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredGuests.map((guest) => (
                     <tr key={guest.id}>
-                      <td>{guest.firstName} {guest.lastName}</td>
-                      <td>{guest.email}</td>
-                      <td>{guest.phone}</td>
+                      <td>{String(guest.id).padStart(2, '0')}</td>
                       <td>
-                        <span className={`${styles.status} ${guest.isActive ? styles.active : styles.inactive}`}>
+                        <div className={styles.userName}>{guest.firstName} {guest.lastName}</div>
+                      </td>
+                      <td>
+                        <div className={styles.userEmail}>{guest.email}</div>
+                      </td>
+                      <td>
+                        <div className={styles.userPhone}>{guest.phone}</div>
+                      </td>
+                      <td>
+                        <span className={`${styles.status} ${guest.isActive ? styles.statusActive : styles.statusInactive}`}>
                           {guest.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
                       <td>
-                        <div className={styles.actions}>
-                          <button
-                            className={styles.viewBtn}
-                            onClick={() => handleViewGuest(guest)}
-                          >
-                            View
-                          </button>
-                          <button
-                            className={styles.editBtn}
-                            onClick={() => handleEditGuest(guest)}
-                          >
-                            Edit
-                          </button>
-                        </div>
+                        <button
+                          className={styles.actionBtn}
+                          onClick={() => handleViewGuest(guest)}
+                        >
+                          View Details
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -278,74 +203,52 @@ export default function StaffGuestManagement() {
             </div>
           )}
         </div>
-      </div>
 
-      {showModal && (
-        <div className={styles.modalOverlay} onClick={resetForm}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>{editingGuest ? 'Edit Guest' : 'Add New Guest'}</h3>
-              <button className={styles.modalClose} onClick={resetForm}>✕</button>
-            </div>
-            <form className={styles.modalForm} onSubmit={editingGuest ? handleUpdateGuest : handleCreateGuest}>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="firstName" className={styles.label}>First Name</label>
-                  <input
-                    id="firstName"
-                    type="text"
-                    className={styles.input}
-                    value={form.firstName}
-                    onChange={(e) => handleInput('firstName', e.target.value)}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="lastName" className={styles.label}>Last Name</label>
-                  <input
-                    id="lastName"
-                    type="text"
-                    className={styles.input}
-                    value={form.lastName}
-                    onChange={(e) => handleInput('lastName', e.target.value)}
-                    required
-                  />
-                </div>
+        {/* View Guest Modal */}
+        {selectedGuest && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalPanel}>
+              <div className={styles.modalHeader}>
+                <h2 className={styles.modalTitle}>Guest Details</h2>
+                <button className={styles.modalClose} onClick={() => setSelectedGuest(null)}>
+                  ✕
+                </button>
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="email" className={styles.label}>Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  className={styles.input}
-                  value={form.email}
-                  onChange={(e) => handleInput('email', e.target.value)}
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="phone" className={styles.label}>Phone</label>
-                <input
-                  id="phone"
-                  type="tel"
-                  className={styles.input}
-                  value={form.phone}
-                  onChange={(e) => handleInput('phone', e.target.value)}
-                  required
-                />
+              <div className={styles.modalBody}>
+                <div className={styles.guestDetails}>
+                  <div className={styles.detailRow}>
+                    <span>ID:</span>
+                    <strong>{String(selectedGuest.id).padStart(2, '0')}</strong>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span>Name:</span>
+                    <strong>{selectedGuest.firstName} {selectedGuest.lastName}</strong>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span>Email:</span>
+                    <strong>{selectedGuest.email}</strong>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span>Phone:</span>
+                    <strong>{selectedGuest.phone}</strong>
+                  </div>
+                  <div className={styles.detailRow}>
+                    <span>Status:</span>
+                    <span className={selectedGuest.isActive ? styles.statusActive : styles.statusInactive}>
+                      {selectedGuest.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div className={styles.modalActions}>
-                <button type="button" className={styles.cancelBtn} onClick={resetForm} disabled={isSaving}>
-                  Cancel
-                </button>
-                <button type="submit" className={styles.saveBtn} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : editingGuest ? 'Update Guest' : 'Add Guest'}
+                <button className={styles.cancelBtn} onClick={() => setSelectedGuest(null)}>
+                  Close
                 </button>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
