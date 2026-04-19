@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styles from '../../styles/AdminSidebar.module.css';
 import logo from '../../assets/logo.png';
 
@@ -9,7 +9,9 @@ import {
   FaBuilding,
   FaMoneyBillWave,
   FaClock,
-  FaComments
+  FaComments,
+  FaSignOutAlt
+
 } from 'react-icons/fa';
 
 const links = [
@@ -23,6 +25,16 @@ const links = [
 ];
 
 export default function StaffSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminEmail');
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('adminSession');
+    localStorage.removeItem('adminRole');
+    navigate('/');
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
@@ -48,6 +60,17 @@ export default function StaffSidebar() {
             <span>{link.label}</span>
           </NavLink>
         ))}
+
+        <NavLink
+          to="/"
+          onClick={handleLogout}
+          className={({ isActive }) =>
+            `${styles.navItem} ${isActive ? styles.active : ''}`
+          }
+        >
+          <span className={styles.icon}><FaSignOutAlt /></span>
+          <span>Logout</span>
+        </NavLink>
       </nav>
     </aside>
   );

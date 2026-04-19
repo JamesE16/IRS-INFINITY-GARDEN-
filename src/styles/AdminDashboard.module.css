@@ -284,7 +284,7 @@
 }
 
 .cell {
-  min-height: 58px;
+  min-height: 50px;
   border-radius: 6px;
   border: 1px solid #f1f5f9;
   padding: 5px 6px;
@@ -358,7 +358,7 @@
 .sidebarSummary {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 40px;
 }
 
 .summarySection {
