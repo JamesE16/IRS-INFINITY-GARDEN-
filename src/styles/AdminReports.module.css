@@ -175,7 +175,7 @@
 }
 
 .downloadBtn {
-  background: #3b82f6;
+  background: #1e293b;
   color: #fff;
   border: none;
   padding: 6px 12px;
@@ -189,7 +189,7 @@
 }
 
 .downloadBtn:hover {
-  background: #2563eb;
+  background: #13357c;
 }
 
 .printReportBtn {
@@ -452,7 +452,7 @@
 
 .cancelBtn {
   background: #f8fafc;
-  border: 1px solid var(--border, #e2e8f4);
+  border: 3px solid var(--border, #e2e8f4);
   padding: 10px 16px;
   border-radius: var(--radius, 8px);
   font-size: 0.85rem;
