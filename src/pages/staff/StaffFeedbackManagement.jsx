@@ -55,7 +55,7 @@ export default function StaffFeedbackManagement() {
       // Mock data
       setFeedbacks(mockFeedbacks);
       setError(null);
-    } catch (err) {
+    } catch {
       setFeedbacks([]);
       setError('Failed to load feedback.');
     } finally {
@@ -211,7 +211,7 @@ export default function StaffFeedbackManagement() {
             <div className={styles.modalBody}>
               <div className={styles.feedbackDetails}>
                 <div className={styles.detailRow}>
-                  <span>Guest:</span>
+                  <span>Guest Name:</span>
                   <strong>{selectedFeedback.guest_name}</strong>
                 </div>
                 <div className={styles.detailRow}>
