@@ -1,305 +1,305 @@
-
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
-import { reservationsAPI } from '../../utils/api';
-import Modal from '../../components/ui/Modal';
 import styles from '../../styles/AdminReservations.module.css';
 
 export default function AdminReservations() {
-  const navigate = useNavigate();
   const [reservations, setReservations] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [filteredReservations, setFilteredReservations] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
-  const [approvalNotes, setApprovalNotes] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
   const [filter, setFilter] = useState('pending');
 
+  const [form, setForm] = useState({
+    guest_name: '',
+    facility_name: '',
+    payment: 'GCash',
+    date: ''
+  });
+
   useEffect(() => {
-    fetchReservations();
-  }, [filter]);
+    const demo = [
+      { id: 1, booking_id: "1001", guest_name: "Maria Santos", facility_name: "Deluxe Room", payment: "GCash", check_in: "2026-03-15", status: "pending" },
+      { id: 2, booking_id: "1002", guest_name: "John Reyes", facility_name: "Standard Room", payment: "Cash", check_in: "2026-03-22", status: "approved" },
+      { id: 3, booking_id: "1003", guest_name: "Anna Dela Cruz", facility_name: "Family Room", payment: "Card", check_in: "2026-03-12", status: "approved" },
+      { id: 4, booking_id: "1004", guest_name: "Sophia Fernandez", facility_name: "Executive Room", payment: "GCash", check_in: "2026-03-19", status: "approved" },
+      { id: 5, booking_id: "1005", guest_name: "Gerald Ochavido", facility_name: "Couple Room", payment: "Cash", check_in: "2026-03-04", status: "approved" },
+      { id: 6, booking_id: "1006", guest_name: "Nicole Aquino", facility_name: "Pavilion", payment: "GCash", check_in: "2026-03-24", status: "pending" },
+      { id: 7, booking_id: "1007", guest_name: "Alvin Bernardo", facility_name: "Pool View Room", payment: "Card", check_in: "2026-03-06", status: "approved" },
+      { id: 8, booking_id: "1008", guest_name: "Atasha Cardinez", facility_name: "Deluxe Room", payment: "GCash", check_in: "2026-03-18", status: "pending" },
+      { id: 9, booking_id: "1009", guest_name: "Joshua Gonzales", facility_name: "Garden View Room", payment: "Cash", check_in: "2026-03-27", status: "cancelled" },
+      { id: 10, booking_id: "1010", guest_name: "Joyce Cabral", facility_name: "Single Room", payment: "Card", check_in: "2026-03-02", status: "approved" }
+    ];
+    setReservations(demo);
+  }, []);
 
-  const fetchReservations = async () => {
-    setIsLoading(true);
-    try {
-      let data = [];
-      if (filter === 'pending') {
-        data = await reservationsAPI.getPending();
-      }
-      setReservations(Array.isArray(data) ? data : []);
-      setError(null);
-    } catch (err) {
-      // Backend offline - show empty list
-      console.log('Using demo mode (backend offline)');
-      setReservations([]);
-      setError(null);
-    } finally {
-      setIsLoading(false);
-    }
+  useEffect(() => {
+    if (filter === 'all') setFilteredReservations(reservations);
+    else setFilteredReservations(reservations.filter(r => r.status === filter));
+  }, [reservations, filter]);
+
+  const getCount = (type) => {
+    if (type === 'all') return reservations.length;
+    return reservations.filter(r => r.status === type).length;
   };
 
-  const handleApprove = async () => {
-    if (!selectedReservation) return;
+  const handleAdd = () => {
+    const newRes = {
+      id: Date.now(),
+      booking_id: String(Math.floor(1000 + Math.random() * 9000)),
+      guest_name: form.guest_name,
+      facility_name: form.facility_name,
+      payment: form.payment,
+      check_in: form.date,
+      status: 'pending'
+    };
 
-    try {
-      const updatedRes = await reservationsAPI.approve(
-        selectedReservation.id,
-        approvalNotes,
-        'approved'
-      );
+    setReservations(prev => [newRes, ...prev]);
+    setIsAdding(false);
 
-      setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
-      setSelectedReservation(null);
-      setApprovalNotes('');
-    } catch (err) {
-      setError('Failed to approve reservation');
-      console.error(err);
-    }
+    setForm({
+      guest_name: '',
+      facility_name: '',
+      payment: 'GCash',
+      date: ''
+    });
   };
 
-  const handleReject = async () => {
-    if (!selectedReservation) return;
+  const handleApprove = (id) => {
+    setReservations(prev =>
+      prev.map(r => r.id === id ? { ...r, status: 'approved' } : r)
+    );
+  };
 
-    try {
-      await reservationsAPI.approve(
-        selectedReservation.id,
-        approvalNotes,
-        'cancelled'
-      );
+  const handleCancel = (id) => {
+    setReservations(prev =>
+      prev.map(r => r.id === id ? { ...r, status: 'cancelled' } : r)
+    );
+  };
 
-      setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
-      setSelectedReservation(null);
-      setApprovalNotes('');
-    } catch (err) {
-      setError('Failed to reject reservation');
-      console.error(err);
-    }
+  // ✅ ARCHIVE FUNCTION
+  const handleArchive = (id) => {
+    setReservations(prev =>
+      prev.map(r => r.id === id ? { ...r, status: 'archived' } : r)
+    );
   };
 
   return (
     <div className={styles.adminShell}>
       <AdminSidebar />
+
       <div className={styles.mainContent}>
-        {/* Header */}
         <div className={styles.header}>
-         <div className={styles.pageHeader}>
-          <div className={styles.title}>
-            <h1>Reservation Management</h1>
-            <p>Infinity Garden Resort Reservation Management System</p>
-          </div>
-         </div>
-        </div>
-
-       {/* Filter tabs */}
-       <div className={styles.filterTabs}>
-         {['pending', 'approved', 'all'].map(tab => (
-           <button
-             key={tab}
-             className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
-             onClick={() => setFilter(tab)}
-           >
-             {tab.charAt(0).toUpperCase() + tab.slice(1)} ({
-               reservations.length
-             })
-           </button>
-         ))}
-       </div>
-
-       {/* Content */}
-       <div className={styles.container}>
-         {error && (
-           <div className={styles.errorBanner}>
-             <p>{error}</p>
-           </div>
-         )}
-
-         {isLoading ? (
-           <div className={styles.loading}>Loading reservations...</div>
-         ) : reservations.length === 0 ? (
-           <div className={styles.empty}>
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-               <rect x="3" y="4" width="18" height="18" rx="2"/>
-               <line x1="16" y1="2" x2="16" y2="6"/>
-               <line x1="8" y1="2" x2="8" y2="6"/>
-               <line x1="3" y1="10" x2="21" y2="10"/>
-             </svg>
-             <h3>No reservations found</h3>
-             <p>There are no {filter} reservations at the moment.</p>
-           </div>
-         ) : (
-           <div className={styles.tableWrapper}>
-             <table className={styles.table}>
-               <thead>
-                 <tr>
-                   <th>Booking ID</th>
-                   <th>Guest</th>
-                   <th>Facility</th>
-                   <th>Check-in</th>
-                   <th>Check-out</th>
-                   <th>Amount</th>
-                   <th>Status</th>
-                   <th>Actions</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 {reservations.map(res => (
-                   <tr key={res.id}>
-                     <td className={styles.bookingId}>{res.booking_id}</td>
-                     <td>
-                       <div className={styles.guestInfo}>
-                         <strong>{res.guest_name}</strong>
-                         <small>{res.guest_email}</small>
-                       </div>
-                     </td>
-                     <td>{res.facility_name}</td>
-                     <td>{new Date(res.check_in).toLocaleDateString()}</td>
-                     <td>{new Date(res.check_out).toLocaleDateString()}</td>
-                     <td className={styles.amount}>₱{parseFloat(res.total_amount).toLocaleString()}</td>
-                     <td>
-                       <span className={`${styles.status} ${styles[`status_${res.status}`]}`}>
-                         {res.status.charAt(0).toUpperCase() + res.status.slice(1)}
-                       </span>
-                     </td>
-                     <td>
-                       <button
-                         className={styles.actionBtn}
-                         onClick={() => setSelectedReservation(res)}
-                       >
-                         Review
-                       </button>
-                     </td>
-                   </tr>
-                 ))}
-               </tbody>
-             </table>
-           </div>
-         )}
-       </div>
-
-       {/* Review Modal */}
-       {selectedReservation && (
-         <ReservationReviewModal
-           reservation={selectedReservation}
-           notes={approvalNotes}
-           onNotesChange={setApprovalNotes}
-           onApprove={handleApprove}
-           onReject={handleReject}
-           onClose={() => {
-             setSelectedReservation(null);
-             setApprovalNotes('');
-           }}
-         />
-       )}
-       </div>
-    </div>
-  );
-}
-
-function ReservationReviewModal({ reservation, notes, onNotesChange, onApprove, onReject, onClose }) {
-  return (
-    <div className="modal-overlay">
-      <div className="modal-box" style={{ maxWidth: '600px' }}>
-        <h2>Review Reservation</h2>
-
-        {/* Reservation details */}
-        <div style={{ background: 'var(--bg)', padding: '16px', borderRadius: 'var(--radius)', marginBottom: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '0.9rem' }}>
+          <div className={styles.pageHeader}>
             <div>
-              <strong>Booking ID:</strong>
-              <p>{reservation.booking_id}</p>
+              <h1>Reservation Management</h1>
+              <p>Infinity Garden Resort Reservation Management System</p>
             </div>
-            <div>
-              <strong>Guest:</strong>
-              <p>{reservation.guest_name}</p>
-            </div>
-            <div>
-              <strong>Facility:</strong>
-              <p>{reservation.facility_name}</p>
-            </div>
-            <div>
-              <strong>Total Amount:</strong>
-              <p>₱{parseFloat(reservation.total_amount).toLocaleString()}</p>
-            </div>
-            <div>
-              <strong>Check-in:</strong>
-              <p>{new Date(reservation.check_in).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <strong>Check-out:</strong>
-              <p>{new Date(reservation.check_out).toLocaleDateString()}</p>
-            </div>
+
+            <button className={styles.addBtn} onClick={() => setIsAdding(true)}>
+              <span className={styles.plus}>+</span>
+              Add Reservation
+            </button>
           </div>
         </div>
 
-        {/* Notes */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '8px' }}>
-            Review Notes
-          </label>
-          <textarea
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Add any notes regarding this reservation..."
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius)',
-              fontFamily: 'DM Sans',
-              minHeight: '100px',
-              fontSize: '0.9rem'
-            }}
-          />
+        <div className={styles.filterTabs}>
+          {['pending', 'approved', 'cancelled', 'all'].map(tab => (
+            <button
+              key={tab}
+              className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
+              onClick={() => setFilter(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+            </button>
+          ))}
         </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={onClose}
-            style={{
-              flex: 1,
-              background: 'var(--bg)',
-              border: '1px solid var(--border)',
-              padding: '12px',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onReject}
-            style={{
-              flex: 1,
-              background: 'var(--red)',
-              color: '#fff',
-              border: 'none',
-              padding: '12px',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            Reject
-          </button>
-          <button
-            onClick={onApprove}
-            style={{
-              flex: 1,
-              background: '#16a34a',
-              color: '#fff',
-              border: 'none',
-              padding: '12px',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            Approve
-          </button>
+        <div className={styles.container}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Res. ID</th>
+                  <th>Guest Name</th>
+                  <th>Facility</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  {filter !== 'all' && <th>Actions</th>}
+                </tr>
+              </thead>
+
+              <tbody>
+                {filteredReservations.map(res => (
+                  <tr key={res.id}>
+                    <td>{res.booking_id}</td>
+                    <td>{res.guest_name}</td>
+                    <td>{res.facility_name}</td>
+                    <td>{new Date(res.check_in).toLocaleDateString()}</td>
+
+                    <td>
+                      <span className={`${styles.status} ${styles[`status_${res.status}`]}`}>
+                        {res.status}
+                      </span>
+                    </td>
+
+                    {filter !== 'all' && (
+                      <td className={styles.actions}>
+                        <button
+                          className={styles.viewBtn}
+                          onClick={() => setSelectedReservation(res)}
+                        >
+                          View
+                        </button>
+
+                        {/* ✅ SHOW ARCHIVE ONLY IN APPROVED */}
+                        {res.status === 'approved' && (
+                          <button
+                            className={styles.cancelBtnSmall}
+                            onClick={() => handleArchive(res.id)}
+                          >
+                            Archive
+                          </button>
+                        )}
+
+                        {res.status === 'pending' && (
+                          <>
+                            <button
+                              className={styles.approveBtn}
+                              onClick={() => handleApprove(res.id)}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className={styles.cancelBtnSmall}
+                              onClick={() => handleCancel(res.id)}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* VIEW MODAL */}
+        {selectedReservation && (
+          <div className={styles.modalOverlay}>
+            <div className={`${styles.modalBox} ${styles.largeModal}`}>
+              <div className={styles.modalHeader}>
+                <h3>Reservation Details</h3>
+                <span
+                  className={styles.closeBtn}
+                  onClick={() => setSelectedReservation(null)}
+                >
+                  ×
+                </span>
+              </div>
+
+              <div className={styles.modalBody}>
+                <label>Guest Name</label>
+                <input value={selectedReservation.guest_name} readOnly />
+
+                <label>Facility</label>
+                <input value={selectedReservation.facility_name} readOnly />
+
+                <label>Payment Method</label>
+                <input value={selectedReservation.payment} readOnly />
+
+                <label>Date</label>
+                <input
+                  value={new Date(selectedReservation.check_in).toLocaleDateString()}
+                  readOnly
+                />
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button
+                  onClick={() => setSelectedReservation(null)}
+                  className={styles.cancelBtn}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ADD RESERVATION */}
+        {isAdding && (
+          <div className={styles.modalOverlay}>
+            <div className={`${styles.modalBox} ${styles.largeModal}`}>
+              <div className={styles.modalHeader}>
+                <h3>Add Reservation</h3>
+                <span
+                  className={styles.closeBtn}
+                  onClick={() => setIsAdding(false)}
+                >
+                  ×
+                </span>
+              </div>
+
+              <div className={styles.modalBody}>
+                <label>Guest Name</label>
+                <input
+                  value={form.guest_name}
+                  onChange={e =>
+                    setForm({ ...form, guest_name: e.target.value })
+                  }
+                />
+
+                <label>Facility</label>
+                <input
+                  value={form.facility_name}
+                  onChange={e =>
+                    setForm({ ...form, facility_name: e.target.value })
+                  }
+                />
+
+                <label>Payment Method</label>
+                <select
+                  value={form.payment}
+                  onChange={e =>
+                    setForm({ ...form, payment: e.target.value })
+                  }
+                  className={styles.paymentSelect}
+                >
+                  <option>GCash</option>
+                  <option>Cash</option>
+                  <option>Card</option>
+                </select>
+
+                <label>Date</label>
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={e =>
+                    setForm({ ...form, date: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className={styles.modalFooter}>
+                <button
+                  onClick={() => setIsAdding(false)}
+                  className={styles.cancelBtn}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAdd}
+                  className={styles.submitBtn}
+                >
+                  Add Reservation
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
