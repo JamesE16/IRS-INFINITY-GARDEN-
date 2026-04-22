@@ -91,15 +91,10 @@
 
 .addBtn,
 .saveBtn {
-  background: #2563eb;
+  background: #152d4a;
   color: #fff;
   padding: 0.9rem 1.2rem;
   border-radius: 0.75rem;
-}
-
-.addBtn:hover,
-.saveBtn:hover {
-  background: #1d4ed8;
 }
 
 .cancelBtn,
@@ -207,12 +202,12 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: #fff;
+  background: #64748b;
   box-shadow: inset 0 -1px 0 #e2e8f0;
 }
 
 .table th {
-  background: #fff;
+  background: #64748b;
 }
 
 .previewBtn {
@@ -359,14 +354,11 @@
 }
 
 .editPreviewBtn {
-  background: #2563eb;
+  background: #152d4a;
   color: #fff;
   border: none;
 }
 
-.editPreviewBtn:hover {
-  background: #1d4ed8;
-}
 
 .previewFooter .cancelBtn {
   background: #ffffff;

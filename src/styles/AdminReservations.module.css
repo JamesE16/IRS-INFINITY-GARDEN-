@@ -80,18 +80,19 @@
   border-radius: 12px;
 }
 
-/* SCROLLABLE TABLE */
+/* ✅ SCROLLABLE TABLE WITH FIXED HEADER */
 .tableWrapper {
   max-height: 420px;
   overflow-y: auto;
-
+  overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: #94a3b8 transparent;
 }
 
-/* SCROLLBAR */
+/* ✅ SCROLLBAR STYLING */
 .tableWrapper::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 .tableWrapper::-webkit-scrollbar-track {
@@ -107,31 +108,37 @@
 
 .tableWrapper::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+  border-radius: 20px;
 }
 
-/* TABLE */
 .table {
   width: 100%;
   border-collapse: collapse;
 }
 
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f3f4f6;
+}
+
 .table th {
   background: #f3f4f6;
   padding: 12px;
+  font-weight: 600;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .table td {
   padding: 12px;
-}
-
-/* CENTER CONTENT */
-.table th,
-.table td {
   text-align: center;
   vertical-align: middle;
+  border-bottom: 1px solid #f3f4f6;
 }
 
-/* STATUS */
 .status {
   padding: 4px 10px;
   border-radius: 12px;
@@ -150,7 +157,6 @@
   background: #fee2e2;
 }
 
-/* ACTIONS */
 .actions {
   display: flex;
   gap: 6px;
@@ -158,7 +164,6 @@
   align-items: center;
 }
 
-/* BUTTON STYLE */
 .viewBtn,
 .approveBtn,
 .cancelBtnSmall,
@@ -167,25 +172,44 @@
   border-radius: 20px;
   font-size: 0.85rem;
   cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
 }
 
-/* COLORS */
 .viewBtn {
   background: #2563eb;
   color: white;
   border: 1px solid #1d4ed8;
 }
 
+.viewBtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
 .approveBtn {
-  background: #16a34a;
+  background:  #2a4f7c;
   color: white;
-  border: 1px solid #15803d;
+  border: 1px solid #152d4a;
+}
+
+.approveBtn:hover {
+  background: #1e3a5f;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
 }
 
 .cancelBtnSmall {
   background: #dc2626;
   color: white;
   border: 1px solid #b91c1c;
+}
+
+.cancelBtnSmall:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
 /* ✅ NEW ARCHIVE BUTTON STYLE */
@@ -195,7 +219,12 @@
   border: 1px solid #4b5563;
 }
 
-/* MODAL OVERLAY */
+.archiveBtn:hover {
+  background: #4b5563;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -206,17 +235,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
-/* BASE MODAL */
 .modalBox {
   background: white;
   padding: 20px;
   border-radius: 10px;
   width: 350px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-/* LARGE MODAL */
 .largeModal {
   width: 560px;
   max-width: 95%;
@@ -224,18 +254,32 @@
   border-radius: 16px;
 }
 
-/* HEADER */
 .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
 }
 
 .closeBtn {
   cursor: pointer;
   font-size: 20px;
   color: #6b7280;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover {
+  color: #1f2937;
 }
 
 /* BODY */
@@ -248,6 +292,7 @@
   font-weight: 600;
   margin-bottom: 6px;
   margin-top: 14px;
+  color: #1f2937;
 }
 
 /* INPUTS */
@@ -259,30 +304,44 @@
   border: 1px solid #d1d5db;
   background: #f9fafb;
   font-size: 0.95rem;
+  transition: all 0.2s;
 }
 
-/* VIEW DETAILS FIX */
+.modalBody input:focus,
+.paymentSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: white;
+}
+
 .modalBody input[readonly] {
   background: #f9fafb;
   border: 1px solid #d1d5db;
   color: #111827;
+  cursor: not-allowed;
 }
 
-/* FOOTER */
 .modalFooter {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
 }
 
-/* BUTTONS */
 .cancelBtn {
   background: #e5e7eb;
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.cancelBtn:hover {
+  background: #d1d5db;
 }
 
 .submitBtn {
@@ -292,4 +351,11 @@
   padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.submitBtn:hover {
+  background: #111827;
+  box-shadow: 0 2px 8px rgba(31, 41, 55, 0.3);
 }
