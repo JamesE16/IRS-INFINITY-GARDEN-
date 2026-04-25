@@ -44,7 +44,7 @@ export default function MyBookingsPage() {
             </svg>
             <h3>No bookings yet</h3>
             <p>You haven't made any reservations yet.<br />Explore our rooms and book your perfect stay.</p>
-            <button className="btn-red" onClick={() => navigate('/rooms')}>
+            <button className="btn-navy" onClick={() => navigate('/rooms')}>
               Browse Rooms
             </button>
           </div>

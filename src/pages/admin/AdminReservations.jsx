@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminReservations.module.css';
 
 export default function AdminReservations() {
@@ -85,7 +85,8 @@ export default function AdminReservations() {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar />
+      <Sidebar role="admin" />
+      
 
       <div className={styles.mainContent}>
         <div className={styles.header}>

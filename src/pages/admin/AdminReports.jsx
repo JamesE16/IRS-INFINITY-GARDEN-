@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminReports.module.css';
 import { reservationsAPI } from '../../utils/api';
 import { 
@@ -42,7 +42,7 @@ const AdminReports = () => {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar activePage="/admin/reports" />
+      <Sidebar role="admin" />
 
       <div className={styles.mainContent}>
         {/* ===== HEADER (UNCHANGED) ===== */}

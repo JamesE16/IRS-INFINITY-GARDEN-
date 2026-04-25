@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import StaffSidebar from '../../components/staff/StaffSidebar';
+import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminPayments.module.css';
 
 const mockTransactions = [
@@ -111,7 +111,7 @@ const PaymentManagement = () => {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+      <Sidebar role="staff" />
 
       <div className={styles.mainContent}>
         <div className={styles.header}>

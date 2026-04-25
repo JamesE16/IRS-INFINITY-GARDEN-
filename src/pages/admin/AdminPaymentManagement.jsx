@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminPayments.module.css';
 
 const AdminPaymentManagement = () => {
@@ -151,7 +151,7 @@ const AdminPaymentManagement = () => {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar activePage="/admin/payment-management" />
+      <Sidebar role="admin" />
 
       <div className={styles.mainContent}>
         {/* HEADER (UNCHANGED) */}

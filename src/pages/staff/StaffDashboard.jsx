@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StaffSidebar from '../../components/staff/StaffSidebar';
+import Sidebar from '../../components/Sidebar';
 import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminDashboard.module.css';
 
@@ -148,7 +148,7 @@ export default function StaffDashboard() {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+     <Sidebar role="staff" />
 
       <div className={styles.mainContent}>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import StaffSidebar from '../../components/staff/StaffSidebar';
+import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
 const mockFeedbacks = [
@@ -91,7 +91,7 @@ export default function StaffFeedbackManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+      <Sidebar role="staff" />
 
       <div className={styles.mainContent}>
         <div className={styles.header}>

@@ -154,7 +154,7 @@
 
 .confirmBtn {
   width: 100%;
-  background: var(--red);
+  background: var(--navy-light);
   color: #fff;
   border: none;
   padding: 15px;
@@ -167,5 +167,5 @@
 }
 
 .confirmBtn:hover {
-  background: var(--red-hover);
+  background: var(--navy);
 }

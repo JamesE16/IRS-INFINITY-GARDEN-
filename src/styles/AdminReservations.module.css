@@ -26,17 +26,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-
   padding: 8px 16px;
   border-radius: 10px;
-
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.4);
-
   color: #fff;
   font-size: 0.85rem;
   font-weight: 600;
-
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -75,21 +71,23 @@
 /* CONTAINER */
 .container {
   background: white;
-  margin: 20px;
-  padding: 20px;
+  margin: 35px;
+  padding: 25px;
   border-radius: 12px;
 }
 
-/* ✅ SCROLLABLE TABLE WITH FIXED HEADER */
+/* SCROLLABLE TABLE WITH FIXED HEADER */
 .tableWrapper {
   max-height: 420px;
   overflow-y: auto;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: #94a3b8 transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
 }
 
-/* ✅ SCROLLBAR STYLING */
+/* SCROLLBAR STYLING */
 .tableWrapper::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -136,7 +134,12 @@
   padding: 12px;
   text-align: center;
   vertical-align: middle;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Remove bottom border on last row */
+.table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .status {
@@ -159,7 +162,7 @@
 
 .actions {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   justify-content: center;
   align-items: center;
 }
@@ -189,7 +192,7 @@
 }
 
 .approveBtn {
-  background:  #2a4f7c;
+  background: #2a4f7c;
   color: white;
   border: 1px solid #152d4a;
 }
@@ -212,7 +215,6 @@
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
 }
 
-/* ✅ NEW ARCHIVE BUTTON STYLE */
 .archiveBtn {
   background: #6b7280;
   color: white;
@@ -282,7 +284,6 @@
   color: #1f2937;
 }
 
-/* BODY */
 .modalBody {
   padding: 20px 24px;
 }
@@ -295,7 +296,6 @@
   color: #1f2937;
 }
 
-/* INPUTS */
 .modalBody input,
 .paymentSelect {
   width: 100%;

@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
-import StaffSidebar from '../../components/staff/StaffSidebar';
+import Sidebar from '../../components/Sidebar';
 import { facilitiesAPI } from '../../utils/api';
 import { ROOMS } from '../../data/rooms';
 import styles from '../../styles/AdminFacilities.module.css';
@@ -83,7 +83,7 @@ export default function StaffFacilities() {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+      <Sidebar role="staff" />
 
       <div className={styles.mainContent}>
         <div className={styles.header}>

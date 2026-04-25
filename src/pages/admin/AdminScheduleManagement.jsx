@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AdminSidebar from "../../components/admin/AdminSidebar";
+import Sidebar from "../../components/Sidebar";
 
 import {
   format,
@@ -176,7 +176,7 @@ export default function AdminScheduleManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar />
+      <Sidebar role="admin" />
 
       <div className={styles.mainContent}>
         <div className={styles.topHeader}>

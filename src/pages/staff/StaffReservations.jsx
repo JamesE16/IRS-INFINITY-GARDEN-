@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import StaffSidebar from '../../components/staff/StaffSidebar';
+import Sidebar from '../../components/Sidebar';
 import { reservationsAPI } from '../../utils/api';
 import Modal from '../../components/ui/Modal';
 import styles from '../../styles/AdminReservations.module.css';
@@ -46,7 +46,7 @@ export default function StaffReservations() {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+      <Sidebar role="staff" />
       <div className={styles.mainContent}>
         {/* Header */}
         <div className={styles.header}>

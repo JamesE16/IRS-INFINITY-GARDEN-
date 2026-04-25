@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
 import { adminAPI } from '../../utils/api';
 import { FaBell } from 'react-icons/fa';
 import styles from '../../styles/AdminDashboard.module.css';
@@ -163,7 +163,7 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar />
+      <Sidebar role="admin" />
 
       <div className={styles.mainContent}>
 

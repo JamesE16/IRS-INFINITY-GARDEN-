@@ -1,5 +1,5 @@
 import { useState } from "react";
-import StaffSidebar from "../../components/staff/StaffSidebar";
+import Sidebar from "../../components/Sidebar";
 
 import {
   format,
@@ -176,7 +176,7 @@ export default function StaffScheduleManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <StaffSidebar />
+      <Sidebar role="staff" />
 
       <div className={styles.mainContent}>
         <div className={styles.topHeader}>

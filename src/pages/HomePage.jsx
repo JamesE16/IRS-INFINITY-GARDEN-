@@ -100,7 +100,7 @@ export default function HomePage() {
           <p className={styles.heroDesc}>
             Experience luxury accommodation surrounded by lush gardens and world-class amenities.
           </p>
-          <button className="btn-red" onClick={() => navigate('/rooms')}>
+          <button className="btn-navy" onClick={() => navigate('/rooms')}>
             <span>Book Your Stay</span>
             <FaArrowRight className="arrow" />
           </button>
@@ -151,7 +151,7 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <button className="btn-red" onClick={() => navigate('/rooms')}>
+              <button className="btn-navy" onClick={() => navigate('/rooms')}>
                 <span>Explore Rooms</span>
                 <FaArrowRight className="arrow" />
               </button>
@@ -165,10 +165,6 @@ export default function HomePage() {
         <div className="container" style={{ textAlign: 'center' }}>
           <h2>Ready to Experience Paradise?</h2>
           <p>Experience the perfect natural retreat. Book your stay today!</p>
-          <button className={styles.viewBtn}  onClick={() => navigate('/rooms')}>
-            <span>View Available Rooms</span>
-            <FaArrowRight className="arrow" />
-          </button>
         </div>
       </section>
 

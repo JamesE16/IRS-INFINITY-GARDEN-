@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
+
 import { facilitiesAPI } from '../../utils/api';
 import { ROOMS } from '../../data/rooms';
 import styles from '../../styles/AdminFacilities.module.css';
@@ -185,7 +186,8 @@ export default function AdminFacilities() {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar />
+     <Sidebar role="admin" />
+      
 
       <div className={styles.mainContent}>
         <div className={styles.header}>

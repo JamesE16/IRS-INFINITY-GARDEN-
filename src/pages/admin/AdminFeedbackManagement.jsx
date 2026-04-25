@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import AdminSidebar from '../../components/admin/AdminSidebar';
+import Sidebar from '../../components/Sidebar';
+
+
 import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
@@ -104,7 +106,7 @@ export default function AdminFeedbackManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <AdminSidebar />
+      <Sidebar role="admin" />
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
