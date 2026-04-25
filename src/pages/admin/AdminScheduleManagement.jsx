@@ -80,10 +80,11 @@ const reservations = rawReservations.map((reservation, index) => ({
   guests: 4 + (index % 4)
 }));
 
-export default function AdminScheduleManagement() {
+export default function AdminScheduleManagement({ role = 'admin' }) {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const isAdmin = role === 'admin';
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -176,13 +177,17 @@ export default function AdminScheduleManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
 
       <div className={styles.mainContent}>
         <div className={styles.topHeader}>
           <div>
             <h1>Schedule Management</h1>
-            <p>Infinity Garden Resort Reservation Management System</p>
+            <p>
+              {isAdmin
+                ? 'Infinity Garden Resort Reservation Management System'
+                : 'Infinity Garden Resort - Staff View'}
+            </p>
           </div>
 
         </div>

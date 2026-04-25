@@ -7,9 +7,10 @@ import {
   FaDownload, FaPlus 
 } from 'react-icons/fa';
 
-const AdminReports = () => {
+const AdminReports = ({ role = 'admin' }) => {
   const [data, setData] = useState([]);
   const [showModal, setShowModal] = useState(null); // "generate" | "print" | null
+  const isAdmin = role === 'admin';
 
   const [dateRange, setDateRange] = useState({
     start: '2026-03-07',
@@ -42,7 +43,7 @@ const AdminReports = () => {
 
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
 
       <div className={styles.mainContent}>
         {/* ===== HEADER (UNCHANGED) ===== */}
@@ -50,7 +51,11 @@ const AdminReports = () => {
           <div className={styles.headerContent}>
             <div className={styles.title}>
               <h1>Reports</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
+              <p>
+                {isAdmin
+                  ? 'Infinity Garden Resort Reservation Management System'
+                  : 'Infinity Garden Resort - Staff View'}
+              </p>
             </div>
           </div>
         </div>
@@ -101,24 +106,28 @@ const AdminReports = () => {
                     <div className={styles.miniGraph}>
                       <FaChartLine />
                     </div>
-                    <button 
-                      className={styles.downloadBtn}
-                      onClick={() => setShowModal("generate")}
-                    >
-                      <FaDownload /> Download
-                    </button>
+                    {isAdmin && (
+                      <button
+                        className={styles.downloadBtn}
+                        onClick={() => setShowModal("generate")}
+                      >
+                        <FaDownload /> Download
+                      </button>
+                    )}
                   </div>
 
                   <div className={styles.graphCard}>
                     <p>Revenue Over Time</p>
                     <h3>₱145,200.00</h3>
                     <div className={styles.barGraphPlaceholder}></div>
-                    <button 
-                      className={styles.downloadBtn}
-                      onClick={() => setShowModal("generate")}
-                    >
-                      <FaDownload /> Download
-                    </button>
+                    {isAdmin && (
+                      <button
+                        className={styles.downloadBtn}
+                        onClick={() => setShowModal("generate")}
+                      >
+                        <FaDownload /> Download
+                      </button>
+                    )}
                   </div>
                 </div>
               </section>
@@ -140,12 +149,14 @@ const AdminReports = () => {
                     Generated Reports
                   </h3>
 
-                  <button 
-                    className={styles.printReportBtn}
-                    onClick={() => setShowModal("print")}
-                  >
-                    <FaPlus /> Print Report
-                  </button>
+                  {isAdmin && (
+                    <button
+                      className={styles.printReportBtn}
+                      onClick={() => setShowModal("print")}
+                    >
+                      <FaPlus /> Print Report
+                    </button>
+                  )}
                 </div>
 
                 <table className={styles.reportTable}>
@@ -172,12 +183,14 @@ const AdminReports = () => {
                               View
                             </button>
 
-                            <button 
-                              className={styles.downloadLink}
-                              onClick={() => setShowModal("generate")}
-                            >
-                              Download
-                            </button>
+                            {isAdmin && (
+                              <button
+                                className={styles.downloadLink}
+                                onClick={() => setShowModal("generate")}
+                              >
+                                Download
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -216,12 +229,14 @@ const AdminReports = () => {
                 })}
               />
 
-              <button 
-                className={styles.generateMainBtn}
-                onClick={() => setShowModal("generate")}
-              >
-                Generate Report
-              </button>
+              {isAdmin && (
+                <button
+                  className={styles.generateMainBtn}
+                  onClick={() => setShowModal("generate")}
+                >
+                  Generate Report
+                </button>
+              )}
             </aside>
 
           </div>

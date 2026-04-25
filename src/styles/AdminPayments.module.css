@@ -29,6 +29,29 @@
   gap: 24px;  
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primaryBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.primaryBtn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: #fff;
+}
+
 .title {
   display: flex;
   flex-direction: column;
@@ -103,6 +126,11 @@
 }
 
 .statIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.statIcon > svg {
   width: 22px;
   height: 22px;
 }
@@ -305,7 +333,19 @@
   color: #991b1b;
 }
 
-.actionBtn {
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actionBtn,
+.viewBtn,
+.verifyBtn,
+.printBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: 1px solid var(--navy, #1a3c8f);
   color: var(--navy, #1a3c8f);
@@ -317,7 +357,10 @@
   transition: all 0.2s;
 }
 
-.actionBtn:hover {
+.actionBtn:hover,
+.viewBtn:hover,
+.verifyBtn:hover,
+.printBtn:hover {
   background: var(--navy, #1a3c8f);
   color: #fff;
   box-shadow: 0 2px 8px rgba(26, 60, 143, 0.12);
@@ -388,6 +431,60 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  color: var(--navy, #1a3c8f);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.formGroup input,
+.formGroup select {
+  border: 1px solid var(--border, #e2e8f4);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: var(--navy, #1a3c8f);
+  box-shadow: 0 0 0 3px rgba(26, 60, 143, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.modalActions button {
+  border: 1px solid var(--border, #e2e8f4);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modalActions button[type="submit"] {
+  background: var(--navy, #1a3c8f);
+  border-color: var(--navy, #1a3c8f);
+  color: #fff;
 }
 
 .modalRow {

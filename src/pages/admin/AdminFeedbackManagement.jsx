@@ -27,7 +27,7 @@ const badgeStyle = {
   archived: styles.statusArchived
 };
 
-export default function AdminFeedbackManagement() {
+export default function AdminFeedbackManagement({ role = 'admin' }) {
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -36,6 +36,7 @@ export default function AdminFeedbackManagement() {
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [statusUpdate, setStatusUpdate] = useState('new');
   const [isSaving, setIsSaving] = useState(false);
+  const isAdmin = role === 'admin';
 
   useEffect(() => {
     fetchFeedbacks();
@@ -106,14 +107,18 @@ export default function AdminFeedbackManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
               <h1>Feedback Management</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
+              <p>
+                {isAdmin
+                  ? 'Infinity Garden Resort Reservation Management System'
+                  : 'Infinity Garden Resort - Staff View'}
+              </p>
             </div>
           </div>
         </div>
@@ -291,19 +296,26 @@ export default function AdminFeedbackManagement() {
                   <span>Submitted</span>
                   <strong>{new Date(selectedFeedback.submitted_at).toLocaleString()}</strong>
                 </div>
-                <div className={styles.formGroup}>
-                  <label>Status</label>
-                  <select
-                    className={styles.select}
-                    value={statusUpdate}
-                    onChange={(e) => setStatusUpdate(e.target.value)}
-                  >
-                    <option value="new">New</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
+                {isAdmin ? (
+                  <div className={styles.formGroup}>
+                    <label>Status</label>
+                    <select
+                      className={styles.select}
+                      value={statusUpdate}
+                      onChange={(e) => setStatusUpdate(e.target.value)}
+                    >
+                      <option value="new">New</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+                ) : (
+                  <div className={styles.modalRow}>
+                    <span>Status</span>
+                    <strong>{statusLabel[selectedFeedback.status] || selectedFeedback.status}</strong>
+                  </div>
+                )}
                 <div className={styles.formGroup}>
                   <label>Comment</label>
                   <textarea
@@ -319,13 +331,15 @@ export default function AdminFeedbackManagement() {
                 <button className={styles.cancelBtn} onClick={() => setSelectedFeedback(null)}>
                   Close
                 </button>
-                <button
-                  className={styles.submitBtn}
-                  disabled={isSaving || selectedFeedback.status === statusUpdate}
-                  onClick={handleStatusSave}
-                >
-                  {isSaving ? 'Saving…' : 'Save Status'}
-                </button>
+                {isAdmin && (
+                  <button
+                    className={styles.submitBtn}
+                    disabled={isSaving || selectedFeedback.status === statusUpdate}
+                    onClick={handleStatusSave}
+                  >
+                    {isSaving ? 'Saving...' : 'Save Status'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
