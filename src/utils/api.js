@@ -277,6 +277,19 @@ export const adminAPI = {
     return response.json();
   },
 
+  createFeedback: async (feedbackData) => {
+    const response = await fetch(`${API_BASE_URL}/feedbacks/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(feedbackData)
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to submit feedback');
+    }
+    return response.json();
+  },
+
   updateFeedbackStatus: async (id, status) => {
     const response = await fetch(`${API_BASE_URL}/feedbacks/${id}/update_status/`, {
       method: 'PATCH',
