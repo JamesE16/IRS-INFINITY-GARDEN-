@@ -499,3 +499,144 @@
     min-width: unset;
   }
 }
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  /* Hide everything except print container */
+  body > *:not(.printContainer) {
+    display: none !important;
+  }
+
+  /* Show only the print container */
+  .printContainer {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Print page setup */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  body {
+    font-size: 12px !important;
+    background: #fff !important;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid !important;
+  }
+
+  table {
+    page-break-inside: avoid !important;
+  }
+
+  .printSection {
+    page-break-inside: avoid !important;
+  }
+}
+
+/* ===== PRINT CONTAINER STYLES ===== */
+.printContainer {
+  font-family: 'DM Sans', sans-serif;
+  color: #000;
+  background: #fff;
+  padding: 20px;
+  max-width: none;
+  margin: 0;
+}
+
+.printHeader {
+  text-align: center;
+  border-bottom: 2px solid #1a3c8f;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.printHeader h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a3c8f;
+  margin: 0 0 10px 0;
+}
+
+.printHeader p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.printContent {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.printSection {
+  page-break-inside: avoid;
+}
+
+.printSection h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a3c8f;
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.printStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.printStat {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.printStat h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 8px 0;
+}
+
+.printStat p {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a3c8f;
+  margin: 0;
+}
+
+.printTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.printTable th,
+.printTable td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.printTable th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+}
+
+.printTable tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
