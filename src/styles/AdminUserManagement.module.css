@@ -1,7 +1,7 @@
 .adminShell {
   display: flex;
   min-height: 100vh;
-  background: var(--bg);
+  background: var(--bg, #f0f4fb);
 }
 
 .mainContent {

@@ -192,25 +192,27 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
 
         </div>
 
-        <div className={styles.tabs}>
-          {["pending", "approved", "all"].map(tab => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
-            </button>
-          ))}
-        </div>
+        <div className={styles.container}>
+          <div className={styles.tabs}>
+            {["pending", "approved", "all"].map(tab => (
+              <button
+                key={tab}
+                className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+              </button>
+            ))}
+          </div>
 
-        <div className={styles.calendarBox}>
-          <h3>Reservation Calendar and Availability</h3>
+          <div className={styles.calendarBox}>
+            <h3>Reservation Calendar and Availability</h3>
 
-          <div className={styles.calendar}>
-            {renderHeader()}
-            {renderDays()}
-            {renderCells()}
+            <div className={styles.calendar}>
+              {renderHeader()}
+              {renderDays()}
+              {renderCells()}
+            </div>
           </div>
         </div>
       </div>

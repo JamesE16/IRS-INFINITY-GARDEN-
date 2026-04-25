@@ -1,11 +1,11 @@
 .adminShell {
   display: flex;
   min-height: 100vh;
+  background: var(--bg, #f0f4fb);
 }
 
 .mainContent {
   flex: 1;
-  background: #f8fafc;
   padding: 0 2rem 2rem;
   
 }
