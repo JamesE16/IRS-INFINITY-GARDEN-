@@ -191,10 +191,12 @@
 /* ===== FILTER TABS ===== */
 .filterTabs {
   max-width: 1400px;  
+  width: 100%;
   margin: 0 auto;
   padding: 0 2rem 24px;
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -226,6 +228,7 @@
   max-width: 1400px;  
   margin: 0 auto;
   padding: 0 2rem 32px;
+  width: 100%;
 }
 
 .tableWrapper {
@@ -256,11 +259,13 @@
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--navy);
-  text-align: left; 
+  text-align: center;
 }
 
 .table td {
-  text-align: left;
+  text-align: center;
+  color: var(--navy);
+  vertical-align: middle;
 }
 
 .table tbody tr:nth-child(even) {
@@ -269,6 +274,40 @@
 
 .table tbody tr:hover {
   background: rgba(59, 130, 246, 0.05);
+}
+
+.table button:hover,
+.table button:active {
+  transform: none;
+}
+
+.table th,
+.table td,
+.table td div,
+.table td span,
+.table td small,
+.table td strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.table button {
+  background: transparent;
+  border: 1px solid var(--navy);
+  color: var(--navy);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.table button:hover,
+.table button:active {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+  transform: none;
 }
 
 .userName {
@@ -436,10 +475,13 @@
 /* ===== RESPONSIVE ===== */
 @media (max-width: 960px) {
   .pageHeader,
-  .actionBar,
-  .filterTabs {
+  .actionBar {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filterTabs {
+    justify-content: flex-end;
   }
 
   .pageHeader {
@@ -479,4 +521,39 @@
   .actionBtn {
     padding: 6px 12px;
   }
+}
+
+/* Shared management table styling */
+.table {
+  background: #fff;
+}
+
+.table thead,
+.table th {
+  background: #f8fafc;
+}
+
+.table th,
+.table td {
+  text-align: center;
+  vertical-align: middle;
+  color: var(--navy);
+}
+
+.table th {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.table button:hover,
+.table button:active {
+  transform: none;
 }

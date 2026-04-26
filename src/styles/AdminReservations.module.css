@@ -6,19 +6,26 @@
 
 .mainContent {
   flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 /* HEADER */
 .header {
   background: linear-gradient(135deg, var(--navy), var(--navy-light));
   color: white;
-  padding: 20px;
+  padding: 20px 2rem;
 }
 
 .pageHeader {
+  max-width: 1400px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 
 /* ADD BUTTON */
@@ -49,35 +56,51 @@
 
 /* FILTER */
 .filterTabs {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
   display: flex;
-  gap: 20px;
-  padding: 16px 20px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 28px 2rem 0;
 }
 
 .tab {
-  background: none;
-  border: none;
-  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-mid);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
 }
 
 /* ACTIVE TAB */
 .active {
-  color: var(--red);
-  border-bottom: 2px solid var(--red);
+  background: rgba(59, 130, 246, 0.12);
+  border-color: #3b82f6;
+  color: var(--navy);
 }
 
 /* CONTAINER */
 .container {
-  background: white;
-  margin: 35px;
-  padding: 25px;
-  border-radius: 12px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 25px 2rem 32px;
 }
 
 /* SCROLLABLE TABLE WITH FIXED HEADER */
 .tableWrapper {
+  background: #fff;
   max-height: 420px;
   overflow-y: auto;
   overflow-x: auto;
@@ -118,16 +141,17 @@
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #f3f4f6;
+  background: #f8fafc;
 }
 
 .table th {
-  background: #f3f4f6;
+  background: #f8fafc;
   padding: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
   vertical-align: middle;
   border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
 }
 
 .table td {
@@ -140,6 +164,53 @@
 /* Remove bottom border on last row */
 .table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.table th,
+.table td {
+  color: var(--navy);
+}
+
+.table button:hover,
+.table button:active {
+  transform: none;
+}
+
+.table th,
+.table td,
+.table td div,
+.table td span,
+.table td small,
+.table td strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.table button {
+  background: transparent;
+  border: 1px solid var(--navy);
+  color: var(--navy);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.table button:hover,
+.table button:active {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+  transform: none;
 }
 
 .guestInfo {
@@ -387,4 +458,39 @@
 .submitBtn:hover {
   background: #111827;
   box-shadow: 0 2px 8px rgba(31, 41, 55, 0.3);
+}
+
+/* Shared management table styling */
+.table {
+  background: #fff;
+}
+
+.table thead,
+.table th {
+  background: #f8fafc;
+}
+
+.table th,
+.table td {
+  text-align: center;
+  vertical-align: middle;
+  color: var(--navy);
+}
+
+.table th {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.table button:hover,
+.table button:active {
+  transform: none;
 }

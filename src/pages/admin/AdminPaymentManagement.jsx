@@ -221,34 +221,45 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
-                      <td>{transaction.transaction_id || `TXN-${transaction.id}`}</td>
-                      <td>{transaction.guest_name}</td>
-                      <td>PHP {Number(transaction.amount || 0).toLocaleString()}</td>
-                      <td>
-                        <span className={`${styles.status} ${styles[`status${normalizeStatus(transaction.status).charAt(0).toUpperCase() + normalizeStatus(transaction.status).slice(1)}`]}`}>
-                          {normalizeStatus(transaction.status)}
-                        </span>
-                      </td>
-                      <td>{transaction.date}</td>
-                      <td>
-                        <div className={styles.actions}>
-                          <button className={styles.viewBtn} onClick={() => handleView(transaction)}>
-                            <FaEye /> View
-                          </button>
-                          {normalizeStatus(transaction.status) === 'pending' && (
-                            <button className={styles.verifyBtn} onClick={() => handleVerify(transaction)}>
-                              <FaCheckCircle /> Verify
+                  {filteredTransactions.map((transaction) => {
+                    const status = normalizeStatus(transaction.status);
+                    const isVerified = status === 'paid';
+
+                    return (
+                      <tr key={transaction.id}>
+                        <td>{transaction.transaction_id || `TXN-${transaction.id}`}</td>
+                        <td>{transaction.guest_name}</td>
+                        <td>PHP {Number(transaction.amount || 0).toLocaleString()}</td>
+                        <td>
+                          <span className={`${styles.status} ${styles[`status${status.charAt(0).toUpperCase() + status.slice(1)}`]}`}>
+                            {status}
+                          </span>
+                        </td>
+                        <td>{transaction.date}</td>
+                        <td>
+                          <div className={styles.actions}>
+                            <button className={styles.viewBtn} onClick={() => handleView(transaction)}>
+                              <FaEye /> View
                             </button>
-                          )}
-                          <button className={styles.printBtn} onClick={() => handlePrintReceipt(transaction)}>
-                            <FaPrint /> Print Receipt
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <button
+                              className={`${styles.verifyBtn} ${isVerified ? styles.verifiedBtn : ''}`}
+                              onClick={() => !isVerified && handleVerify(transaction)}
+                              disabled={isVerified}
+                            >
+                              <FaCheckCircle /> {isVerified ? 'Verified' : 'Verify'}
+                            </button>
+                            <button
+                              className={`${styles.printBtn} ${!isVerified ? styles.disabledBtn : ''}`}
+                              onClick={() => isVerified && handlePrintReceipt(transaction)}
+                              disabled={!isVerified}
+                            >
+                              <FaPrint /> Print Receipt
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

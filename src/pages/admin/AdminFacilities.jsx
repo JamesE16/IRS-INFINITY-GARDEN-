@@ -220,12 +220,18 @@ export default function AdminFacilities({ role = 'admin' }) {
               <span>{facilityCounts.filtered} of {facilityCounts.all} facilities</span>
             </div>
             <div className={styles.filters}>
-              <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
-                <option value="All">All Types</option>
-                {facilityTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+              <div className={styles.filterTabs}>
+                {['All', ...facilityTypes].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={`${styles.tab} ${filterType === type ? styles.active : ''}`}
+                    onClick={() => setFilterType(type)}
+                  >
+                    {type === 'All' ? 'All Types' : type}
+                  </button>
                 ))}
-              </select>
+              </div>
               <input
                 type="text"
                 placeholder="Search facility or room"
@@ -264,11 +270,7 @@ export default function AdminFacilities({ role = 'admin' }) {
                   <tbody>
                     {visibleFacilities.map((facility) => (
                       <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
-                        <td>
-                          <button className={styles.tableLink} onClick={() => handleSelectFacility(facility)}>
-                            {facility.name}
-                          </button>
-                        </td>
+                        <td>{facility.name}</td>
                         <td>{facility.type}</td>
                         <td>{facility.guests}</td>
                         <td>₱{facility.price.toLocaleString()}</td>
