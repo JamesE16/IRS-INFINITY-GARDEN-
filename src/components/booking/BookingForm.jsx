@@ -69,6 +69,29 @@ export default function BookingForm({ room, onPriceChange }) {
       special_requests: form.special,
       status: 'pending'
     };
+     
+    try {
+      const response = await fetch('http://localhost:8000/api/reservations/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify(reservationPayload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit booking');
+      }
+
+      const data = await response.json();
+      await submitBooking(reservationPayload, clientBooking);
+      showToast('Booking request submitted. Awaiting admin approval.', 'success');
+      navigate('/booking/confirmed');
+    } catch (error) {
+      console.error('Booking error:', error);
+      showToast(error.message || 'Error submitting booking', 'error');
+    }
 
     const clientBooking = {
       roomId:    room.id,

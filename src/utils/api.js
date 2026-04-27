@@ -79,9 +79,30 @@ export const facilitiesAPI = {
       check_out: checkOut,
       type: type
     });
-    const response = await fetch(`${API_BASE_URL}/facilities/available/?${params}`, {
-      credentials: 'include'
-    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/facilities/available/?${params}`,
+      { credentials: 'include' }
+    );
+
+    return response.json();
+  },
+
+  // NEW: Check availability for a single facility (real-time)
+  checkAvailability: async (id, checkIn, checkOut) => {
+    const response = await fetch(
+      `${API_BASE_URL}/facilities/${id}/?check_in=${checkIn}&check_out=${checkOut}`,
+      { credentials: 'include' }
+    );
+    return response.json();
+  },
+
+  // NEW: Batch check multiple facilities
+  checkMultipleAvailability: async (facilityIds) => {
+    const response = await fetch(
+      `${API_BASE_URL}/facilities/check_availability/?ids=${facilityIds.join(',')}`,
+      { credentials: 'include' }
+    );
     return response.json();
   },
 
@@ -113,6 +134,7 @@ export const facilitiesAPI = {
     return response.ok;
   }
 };
+
 
 // ============================================================
 // RESERVATIONS

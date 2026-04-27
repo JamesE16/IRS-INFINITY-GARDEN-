@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from datetime import timedelta
+from datetime import datetime
 
 from .models import (
     UserProfile, Facility, BlackoutDate,
@@ -121,7 +122,7 @@ class UserProfileViewSet(viewsets.ModelViewSet):
 
 class FacilityViewSet(viewsets.ModelViewSet):
     """Manage facilities (rooms, cottages, pavilions, gazebos)"""
-    queryset = Facility.objects.filter(availability_status=True)
+    queryset = Facility.objects.filter(is_active=True)
     serializer_class = FacilitySerializer
     
     def get_permissions(self):
@@ -147,11 +148,11 @@ class FacilityViewSet(viewsets.ModelViewSet):
         facilities = Facility.objects.filter(is_active=True)
         
         if facility_type != 'All':
-            facilities = facilities.filter(room_type__name=facility_type)
+            facilities = facilities.filter(type=facility_type)
         
-        # Exclude facilities with overlapping approved reservations
+        # Exclude facilities with overlapping confirmed reservations
         booked = Reservation.objects.filter(
-            status__in=['approved', 'confirmed', 'checked_in'],
+            status__in=['confirmed', 'checked_in'],
             check_in__lt=check_out,
             check_out__gt=check_in
         ).values_list('facility_id', flat=True)
@@ -186,7 +187,14 @@ class BlackoutDateViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     """Manage reservations"""
     queryset = Reservation.objects.all()
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """Allow unauthenticated users to create reservations"""
+        if self.action == 'create':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -204,8 +212,12 @@ class ReservationViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return Reservation.objects.all()
         
-        # Clients see their own reservations
-        return Reservation.objects.filter(guest=user)
+        # Authenticated clients see their own reservations
+        if user.is_authenticated:
+            return Reservation.objects.filter(guest=user)
+        
+        # Unauthenticated users see nothing
+        return Reservation.objects.none()
     
     def create(self, request, *args, **kwargs):
         """Client creating a reservation"""
@@ -229,7 +241,21 @@ class ReservationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_409_CONFLICT
                 )
             
+            # Calculate nights from check_in and check_out
+            check_in_date = check_in if isinstance(check_in, type(check_in)) else datetime.strptime(str(check_in), '%Y-%m-%d').date()
+            check_out_date = check_out if isinstance(check_out, type(check_out)) else datetime.strptime(str(check_out), '%Y-%m-%d').date()
+            nights = (check_out_date - check_in_date).days
+            
+            if nights <= 0:
+                return Response(
+                    {'error': 'check_out date must be after check_in date'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Create reservation
             reservation = Reservation.objects.create(
+                guest=request.user if request.user.is_authenticated else None,
+                nights=nights,
                 **serializer.validated_data
             )
             
@@ -262,7 +288,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation.save()
             
             # Log transaction
-            action_name = 'reservation_approved' if new_status == 'approved' else 'reservation_cancelled'
+            action_name = 'reservation_confirmed' if new_status == 'confirmed' else 'reservation_cancelled'
             TransactionLog.objects.create(
                 user=request.user,
                 action=action_name,
@@ -287,7 +313,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        if reservation.status not in ['pending', 'approved', 'confirmed']:
+        if reservation.status not in ['pending', 'confirmed']:
             return Response(
                 {'error': 'Cannot cancel reservation in this state'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -309,6 +335,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_bookings(self, request):
         """Get current user's bookings"""
+        if not request.user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         reservations = Reservation.objects.filter(guest=request.user).order_by('-created_at')
         serializer = ReservationListSerializer(reservations, many=True)
         return Response(serializer.data)
@@ -335,7 +366,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservations = Reservation.objects.filter(
             check_in__gte=start_date,
             check_out__lte=end_date,
-            status__in=['approved', 'confirmed', 'checked_in']
+            status__in=['confirmed', 'checked_in']
         ).order_by('check_in')
         
         serializer = ReservationListSerializer(reservations, many=True)
@@ -357,7 +388,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         """Get payments by status"""
         status_filter = request.query_params.get('status')
         if status_filter:
-            payments = Payment.objects.filter(status=status_filter)
+            payments = Payment.objects.filter(verification_status=status_filter)
         else:
             payments = Payment.objects.all()
         
@@ -428,19 +459,19 @@ class ReportViewSet(viewsets.ViewSet):
             query = query.filter(created_at__lte=end_date)
         
         total_reservations = query.count()
-        approved_count = query.filter(status='approved').count()
+        confirmed_count = query.filter(status='confirmed').count()
         pending_count = query.filter(status='pending').count()
         cancelled_count = query.filter(status='cancelled').count()
         
         total_revenue = query.filter(
-            status__in=['approved', 'confirmed', 'checked_out']
+            status__in=['confirmed', 'checked_in', 'checked_out']
         ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         
         avg_value = total_revenue / total_reservations if total_reservations > 0 else 0
         
         data = {
             'total_reservations': total_reservations,
-            'approved_count': approved_count,
+            'confirmed_count': confirmed_count,
             'pending_count': pending_count,
             'cancelled_count': cancelled_count,
             'total_revenue': total_revenue,
@@ -457,11 +488,11 @@ class ReportViewSet(viewsets.ViewSet):
         data = []
         for facility in facilities:
             total_reservations = facility.reservations.filter(
-                status__in=['approved', 'confirmed', 'checked_out']
+                status__in=['confirmed', 'checked_in', 'checked_out']
             ).count()
             
             total_revenue = facility.reservations.filter(
-                status__in=['approved', 'confirmed', 'checked_out']
+                status__in=['confirmed', 'checked_in', 'checked_out']
             ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
             
             data.append({
@@ -476,11 +507,10 @@ class ReportViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def guest_report(self, request):
         """Get guest statistics"""
-        total_guests = User.objects.filter(profile__role='client').count()
-        repeat_guests = User.objects.filter(
-            profile__role='client',
-            reservations__status__in=['approved', 'confirmed']
-        ).annotate(reservation_count=Count('reservations')).filter(reservation_count__gt=1).count()
+        total_guests = Reservation.objects.values('email').distinct().count()
+        repeat_guests = Reservation.objects.values('email').annotate(
+            count=Count('id')
+        ).filter(count__gt=1).count()
         
         return Response({
             'total_guests': total_guests,

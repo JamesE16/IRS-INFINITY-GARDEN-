@@ -132,7 +132,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         fields = [
             'facility', 'first_name', 'last_name', 'contact', 'email', 'address', 'valid_id',
             'check_in', 'check_out', 'num_guests', 'special_requests',
-            'nights', 'total_amount'
+            'total_amount'
         ]
 
 

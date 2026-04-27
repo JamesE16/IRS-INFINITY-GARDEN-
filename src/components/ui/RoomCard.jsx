@@ -1,44 +1,67 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useBooking } from '../../context/BookingContext';
+import { facilitiesAPI } from '../../utils/api';
 import styles from '../../styles/RoomCard.module.css';
-
 
 export default function RoomCard({ room }) {
   const navigate = useNavigate();
-  const { setSelectedRoom, isRoomReserved } = useBooking();
+  const { setSelectedRoom } = useBooking();
+  const [availabilityStatus, setAvailabilityStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const isReserved = isRoomReserved(room.id) || !room.available;
+  // DYNAMIC: Fetch availability from API
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const facility = await facilitiesAPI.getById(room.id);
+        setAvailabilityStatus(facility.availability_status);
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+        setAvailabilityStatus({ is_available: true, current_reservation: null });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvailability();
+
+    // POLL for updates every 30 seconds (REAL-TIME effect)
+    const interval = setInterval(fetchAvailability, 30000);
+    
+    return () => clearInterval(interval);
+  }, [room.id]);
+
+  // DYNAMIC: Determine if reserved
+  const isReserved = availabilityStatus && !availabilityStatus.is_available;
 
   const handleView = () => {
     if (isReserved) return;
-    
     setSelectedRoom(room);
     navigate(`/rooms/${room.id}`);
   };
 
-  // Helper for capacity text
   const getCapacityText = (room) => {
-    if (room.type === 'Gazebo' || room.type === 'Pavilion') {
-      return `Up to ${room.guests} guests`;
-    }
     return `Up to ${room.guests} guests`;
   };
 
-  // Badge color per type
   const badgeClass = {
-    Room:    styles.badgeRoom,
+    Room: styles.badgeRoom,
     Cottage: styles.badgeCottage,
-    Gazebo:  styles.badgeGazebo,
-    Pavilion:styles.badgePavilion,
+    Gazebo: styles.badgeGazebo,
+    Pavilion: styles.badgePavilion,
   }[room.type] || styles.badgeRoom;
 
-  // Show first 4 amenities + overflow count
   const visibleTags = room.amenities.slice(0, 4);
-  const extraCount  = room.amenities.length - 4;
+  const extraCount = room.amenities.length - 4;
+
+  if (loading) {
+    return <div className={styles.card + ' ' + styles.loading}>Loading...</div>;
+  }
 
   return (
     <div className={`${styles.card} ${isReserved ? styles.unavailable : ''}`}>
-      {/* ── IMAGE ── */}
+      {/* IMAGE */}
       <div className={styles.imgWrapper}>
         <img
           src={room.img}
@@ -47,45 +70,37 @@ export default function RoomCard({ room }) {
           loading="lazy"
         />
 
-        {/* Type badge */}
-        <span className={`${styles.typeBadge} ${badgeClass}`}>{room.subtype}</span>
+        {/* Badge */}
+        <span className={`${styles.typeBadge} ${badgeClass}`}>
+          {room.subtype}
+        </span>
 
-        {/* Reserved overlay — shown when API indicates unavailability */}
-        {isReserved && (
+        {/* DYNAMIC: Reserved Overlay */}
+        {isReserved && availabilityStatus?.current_reservation && (
           <div className={styles.reservedOverlay}>
-            <span className={styles.reservedLabel}>Reserved / Unavailable</span>
+            <span className={styles.reservedLabel}>
+              Reserved until {new Date(availabilityStatus.current_reservation.check_out).toLocaleDateString()}
+            </span>
           </div>
         )}
       </div>
 
-      {/* ── BODY ── */}
+      {/* BODY */}
       <div className={styles.body}>
         <h3 className={styles.name}>{room.name}</h3>
         <p className={styles.desc}>{room.desc}</p>
 
-        {/* Meta: guests + size */}
+        {/* Meta */}
         <div className={styles.meta}>
           <span className={styles.metaItem}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            {getCapacityText(room)}
+            👥 {getCapacityText(room)}
           </span>
           <span className={styles.metaItem}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15 3 21 3 21 9"/>
-              <polyline points="9 21 3 21 3 15"/>
-              <line x1="21" y1="3" x2="14" y2="10"/>
-              <line x1="3"  y1="21" x2="10" y2="14"/>
-            </svg>
-            {room.size} m²
+            📐 {room.size} m²
           </span>
         </div>
 
-        {/* Amenity tags */}
+        {/* Tags */}
         <div className={styles.tags}>
           {visibleTags.map((a) => (
             <span key={a} className={styles.tag}>{a}</span>
@@ -95,28 +110,19 @@ export default function RoomCard({ room }) {
           )}
         </div>
 
-        {/* Price + CTA */}
+        {/* Footer */}
         <div className={styles.footer}>
           <div className={styles.price}>
             ₱{room.price}<span> / night</span>
           </div>
+
           <button
             className={`${styles.viewBtn} ${isReserved ? styles.viewBtnDisabled : ''}`}
             onClick={handleView}
             disabled={isReserved}
-            aria-label={!isReserved ? `View details for ${room.name}` : 'Room unavailable'}
+            title={isReserved ? `Reserved until ${availabilityStatus?.blocked_until}` : 'View details'}
           >
-            {!isReserved ? (
-              <>
-                View Details
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </>
-            ) : (
-              'Unavailable'
-            )}
+            {isReserved ? 'Reserved' : 'View Details'}
           </button>
         </div>
       </div>

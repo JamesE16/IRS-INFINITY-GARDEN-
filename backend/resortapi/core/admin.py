@@ -15,8 +15,8 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Facility)
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'type', 'capacity', 'price', 'availability_status']
-    list_filter = ['type', 'availability_status', 'created_at']
+    list_display = ['name', 'room_type', 'capacity', 'price', 'is_active']
+    list_filter = ['room_type', 'is_active']
     search_fields = ['name', 'type']
     readonly_fields = ['created_at', 'updated_at']
 
