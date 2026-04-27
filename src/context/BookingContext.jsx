@@ -40,7 +40,7 @@ export function BookingProvider({ children }) {
     setTimeout(() => setToast(null), 3200);
   }, []);
 
-  // ── Actions ────────────────────────────────────────────────
+  // ── Actions ────────────────────────────────────────���───────
   const addBooking = useCallback((booking) => {
     setBookings((prev) => [...prev, booking]);
     setConfirmedBooking(booking);
@@ -62,12 +62,22 @@ export function BookingProvider({ children }) {
   // ── Load bookings from backend when available ───────────────
   const loadBookings = useCallback(async () => {
     try {
+      const token = localStorage.getItem('access_token');
+      console.log('🔍 BookingContext: Loading bookings, token exists:', !!token);
+      
+      if (!token) {
+        console.log('⚠️ No token found, skipping backend bookings load');
+        return;
+      }
+
       const backendBookings = await reservationsAPI.getMyBookings();
       if (Array.isArray(backendBookings)) {
+        console.log('✅ Loaded', backendBookings.length, 'bookings from backend');
         setBookings(backendBookings);
       }
-    } catch {
-      // Backend unavailable or user not authenticated, keep local bookings
+    } catch (error) {
+      console.error('❌ Error loading bookings from backend:', error.message);
+      // Keep local bookings if backend fails
     }
   }, []);
 
@@ -77,22 +87,27 @@ export function BookingProvider({ children }) {
 
   const submitBooking = useCallback(async (reservationData, clientBooking) => {
     try {
+      console.log('📤 Submitting booking...');
       const response = await reservationsAPI.create(reservationData);
+      
       const mergedBooking = {
         ...clientBooking,
         ...response,
         status: response.status || clientBooking.status || 'Pending',
       };
 
+      console.log('✅ Booking submitted successfully:', mergedBooking);
       setBookings((prev) => [...prev, mergedBooking]);
       setConfirmedBooking(mergedBooking);
       return mergedBooking;
     } catch (error) {
+      console.error('❌ Error submitting booking:', error);
       throw error;
     }
   }, []);
 
   const refreshBookings = useCallback(async () => {
+    console.log('🔄 Refreshing bookings...');
     await loadBookings();
   }, [loadBookings]);
 
@@ -105,7 +120,7 @@ export function BookingProvider({ children }) {
 
         return (
           parseInt(bookingRoomId, 10) === parseInt(roomId, 10) &&
-          status === 'approved'
+          (status === 'approved' || status === 'confirmed' || status === 'checked_in')
         );
       });
     },
@@ -143,124 +158,3 @@ export function useBooking() {
   if (!ctx) throw new Error('useBooking must be used inside <BookingProvider>');
   return ctx;
 }
-
-
-
-//WITH BACKEND (Dynamic Reserved State) — replace bookings state with API calls
-/*import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-
-const BookingContext = createContext(null);
-
-export function BookingProvider({ children }) {
-
-  const [bookings, setBookings] = useState(() => {
-    try {
-      const stored = localStorage.getItem('ig_bookings');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ig_bookings', JSON.stringify(bookings));
-  }, [bookings]);
-
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [confirmedBooking, setConfirmedBooking] = useState(null);
-  const [filter, setFilter] = useState('All');
-  const [toast, setToast] = useState(null);
-
-  const showToast = useCallback((msg, type = 'success') => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  }, []);
-
-  const isRoomAvailable = (roomId, checkIn, checkOut) => {
-    return !bookings.some(b => {
-      if (b.room !== roomId || b.status !== "Approved") return false;
-
-      const existingStart = new Date(b.checkIn);
-      const existingEnd = new Date(b.checkOut);
-      const newStart = new Date(checkIn);
-      const newEnd = new Date(checkOut);
-
-      return newStart <= existingEnd && newEnd >= existingStart;
-    });
-  };
-
-  const calculateTotal = (price, checkIn, checkOut) => {
-    const days =
-      (new Date(checkOut) - new Date(checkIn)) /
-      (1000 * 60 * 60 * 24);
-
-    return days * price;
-  };
-
-  const addBooking = (booking) => {
-    const newBooking = {
-      ...booking,
-      id: Date.now(),
-      status: "Pending"
-    };
-
-    setBookings(prev => [...prev, newBooking]);
-    setConfirmedBooking(newBooking);
-  };
-
-  const cancelBooking = (id) => {
-    setBookings(prev =>
-      prev.map(b =>
-        b.id === id ? { ...b, status: "Cancelled" } : b
-      )
-    );
-  };
-
-  const isRoomReserved = (roomId) => {
-    return bookings.some(
-      b => b.room === roomId && b.status === "Approved"
-    );
-  };
-
-  const submitBooking = async (bookingData) => {
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/reservations/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(bookingData)
-      });
-
-      const data = await res.json();
-
-      addBooking(data);
-      showToast("Booking submitted!");
-    } catch {
-      showToast("Booking failed", "error");
-    }
-  };
-
-  return (
-    <BookingContext.Provider value={{
-      bookings,
-      selectedRoom,
-      setSelectedRoom,
-      confirmedBooking,
-      filter,
-      setFilter,
-      toast,
-      showToast,
-      addBooking,
-      cancelBooking,
-      isRoomAvailable,
-      calculateTotal,
-      isRoomReserved,
-      submitBooking
-    }}>
-      {children}
-    </BookingContext.Provider>
-  );
-}
-
-export const useBooking = () => useContext(BookingContext);*/ 

@@ -332,7 +332,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         serializer = ReservationDetailSerializer(reservation)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])  # ✅ ADD permission_classes
     def my_bookings(self, request):
         """Get current user's bookings"""
         if not request.user.is_authenticated:
