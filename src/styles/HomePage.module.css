@@ -216,6 +216,55 @@
   font-size: 0.95rem;
 }
 
+/* ── FEEDBACK SECTION ── */
+.feedbackSection {
+  background: var(--navy-dark);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.feedbackButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--navy-light);
+  color: #fff;
+  border: 2px solid var(--navy);
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.feedbackButton svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.feedbackButton:hover {
+  background: var(--navy);
+  border-color: var(--navy-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.feedbackButton:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .feedbackButton {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+  }
+}
+
 
 .fadeImage {
   width: 100%;

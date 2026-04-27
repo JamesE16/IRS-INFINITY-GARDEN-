@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminUserManagement.module.css';
@@ -55,6 +54,14 @@ const demoUsers = [
   }
 ];
 
+const demoGuests = [
+  { id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', phone: '+63 912 345 6789', isActive: true },
+  { id: 2, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', phone: '+63 923 456 7890', isActive: true },
+  { id: 3, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', phone: '+63 934 567 8901', isActive: true },
+  { id: 4, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', phone: '+63 945 678 9012', isActive: true },
+  { id: 5, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', phone: '+63 956 789 0123', isActive: true }
+];
+
 const statusTabs = [
   { key: 'all', label: 'All Users' },
   { key: 'active', label: 'Active' },
@@ -78,13 +85,24 @@ function normalizeUser(user) {
   };
 }
 
-export default function AdminUserManagement() {
-  const navigate = useNavigate();
+function normalizeGuest(guest) {
+  return {
+    id: guest.id ?? guest.pk ?? Math.floor(Math.random() * 100000),
+    firstName: guest.first_name || guest.firstName || '',
+    lastName: guest.last_name || guest.lastName || '',
+    email: guest.email || '',
+    phone: guest.phone || guest.phone_number || '',
+    isActive: guest.is_active ?? true
+  };
+}
+
+export default function AdminUserManagement({ role = 'admin', mode = 'users' }) {
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
@@ -93,6 +111,8 @@ export default function AdminUserManagement() {
     password: '',
     role: 'Staff'
   });
+  const isAdmin = role === 'admin';
+  const isGuestMode = mode === 'guests';
 
   useEffect(() => {
     fetchUsers();
@@ -101,16 +121,16 @@ export default function AdminUserManagement() {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const data = await adminAPI.getAllUsers();
+      const data = isGuestMode ? await adminAPI.getAllGuests() : await adminAPI.getAllUsers();
       if (Array.isArray(data) && data.length > 0) {
-        setUsers(data.map(normalizeUser));
+        setUsers(data.map(isGuestMode ? normalizeGuest : normalizeUser));
       } else {
-        throw new Error('No user data returned');
+        throw new Error('No data returned');
       }
       setError(null);
     } catch (err) {
-      console.log('Admin users fallback: backend offline or no users', err);
-      setUsers(demoUsers);
+      console.log('User management fallback: backend offline or no data', err);
+      setUsers(isGuestMode ? demoGuests : demoUsers);
       setError(null);
     } finally {
       setIsLoading(false);
@@ -169,30 +189,44 @@ export default function AdminUserManagement() {
     );
   };
 
+  const handleRowAction = (user) => {
+    if (isAdmin && !isGuestMode) {
+      handleToggleStatus(user.id);
+      return;
+    }
+
+    setSelectedUser(user);
+  };
+
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
       <div className={styles.mainContent}>
         <div className={styles.header}>
           <div className={styles.pageHeader}>
             <div className={styles.title}>
-              <h1>User Management</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
+              <h1>{isGuestMode ? 'Guest Management' : 'User Management'}</h1>
+              <p>
+                {isAdmin
+                  ? 'Infinity Garden Resort Reservation Management System'
+                  : 'Infinity Garden Resort - Staff View'}
+              </p>
             </div>
-            {/* EXACT LOGOUT BUTTON STYLE */}
-            <button className={styles.headerBtn} onClick={() => setShowModal(true)}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-              </svg>
-              Add User
-            </button>
+            {isAdmin && !isGuestMode && (
+              <button className={styles.headerBtn} onClick={() => setShowModal(true)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add User
+              </button>
+            )}
           </div>
         </div>
 
         <div className={styles.actionBar}>
           <p className={styles.summaryText}>
-            Showing {filteredUsers.length} of {counts.all} users — {counts.active} active, {counts.inactive} inactive.
+            Showing {filteredUsers.length} of {counts.all} {isGuestMode ? 'guests' : 'users'} - {counts.active} active, {counts.inactive} inactive.
           </p>
         </div>
 
@@ -229,7 +263,7 @@ export default function AdminUserManagement() {
                     <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Role</th>
+                    {isGuestMode ? <th>Phone</th> : <th>Role</th>}
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
@@ -245,7 +279,11 @@ export default function AdminUserManagement() {
                         <div className={styles.userEmail}>{user.email}</div>
                       </td>
                       <td>
-                        <span className={styles.roleBadge}>{user.role}</span>
+                        {isGuestMode ? (
+                          <div className={styles.userPhone}>{user.phone}</div>
+                        ) : (
+                          <span className={styles.roleBadge}>{user.role}</span>
+                        )}
                       </td>
                       <td>
                         <span className={`${styles.status} ${user.isActive ? styles.statusActive : styles.statusInactive}`}>
@@ -255,9 +293,9 @@ export default function AdminUserManagement() {
                       <td>
                         <button
                           className={styles.actionBtn}
-                          onClick={() => handleToggleStatus(user.id)}
+                          onClick={() => handleRowAction(user)}
                         >
-                          {user.isActive ? 'Deactivate' : 'Activate'}
+                          {isAdmin && !isGuestMode ? (user.isActive ? 'Deactivate' : 'Activate') : 'View Details'}
                         </button>
                       </td>
                     </tr>
@@ -343,6 +381,49 @@ export default function AdminUserManagement() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {selectedUser && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalPanel}>
+              <div className={styles.modalHeader}>
+                <h2 className={styles.modalTitle}>{isGuestMode ? 'Guest Details' : 'User Details'}</h2>
+                <button className={styles.modalClose} onClick={() => setSelectedUser(null)}>
+                  x
+                </button>
+              </div>
+              <div className={styles.modalBody}>
+                <div className={styles.formGroup}>
+                  <label>Name</label>
+                  <input className={styles.input} value={`${selectedUser.firstName} ${selectedUser.lastName}`} readOnly />
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Email</label>
+                  <input className={styles.input} value={selectedUser.email} readOnly />
+                </div>
+                {isGuestMode ? (
+                  <div className={styles.formGroup}>
+                    <label>Phone</label>
+                    <input className={styles.input} value={selectedUser.phone || 'N/A'} readOnly />
+                  </div>
+                ) : (
+                  <div className={styles.formGroup}>
+                    <label>Role</label>
+                    <input className={styles.input} value={selectedUser.role} readOnly />
+                  </div>
+                )}
+                <div className={styles.formGroup}>
+                  <label>Status</label>
+                  <input className={styles.input} value={selectedUser.isActive ? 'Active' : 'Inactive'} readOnly />
+                </div>
+              </div>
+              <div className={styles.modalActions}>
+                <button className={styles.cancelBtn} onClick={() => setSelectedUser(null)}>
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

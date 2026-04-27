@@ -25,7 +25,7 @@ function normalizeFacility(item) {
   };
 }
 
-export default function AdminFacilities() {
+export default function AdminFacilities({ role = 'admin' }) {
   const [facilities, setFacilities] = useState([]);
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [editedFacility, setEditedFacility] = useState(null);
@@ -35,6 +35,7 @@ export default function AdminFacilities() {
   const [showForm, setShowForm] = useState(false);
   const [filterType, setFilterType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const isAdmin = role === 'admin';
 
   const [form, setForm] = useState({
     name: '',
@@ -186,25 +187,31 @@ export default function AdminFacilities() {
 
   return (
     <div className={styles.adminShell}>
-     <Sidebar role="admin" />
+     <Sidebar role={role} />
       
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
-              <h1>Facilities & Rooms</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
+              <h1>{isAdmin ? 'Facilities & Rooms' : 'Resort Facilities'}</h1>
+              <p>
+                {isAdmin
+                  ? 'Infinity Garden Resort Reservation Management System'
+                  : 'Infinity Garden Resort - Staff View'}
+              </p>
             </div>
-            <div className={styles.headerActions}>
-              <button className={styles.headerBtn} onClick={() => { resetForm(); setShowForm(true); }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add Facility
-              </button>
-            </div>
+            {isAdmin && (
+              <div className={styles.headerActions}>
+                <button className={styles.headerBtn} onClick={() => { resetForm(); setShowForm(true); }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                  Add Facility
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -213,12 +220,18 @@ export default function AdminFacilities() {
               <span>{facilityCounts.filtered} of {facilityCounts.all} facilities</span>
             </div>
             <div className={styles.filters}>
-              <select value={filterType} onChange={(event) => setFilterType(event.target.value)}>
-                <option value="All">All Types</option>
-                {facilityTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+              <div className={styles.filterTabs}>
+                {['All', ...facilityTypes].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={`${styles.tab} ${filterType === type ? styles.active : ''}`}
+                    onClick={() => setFilterType(type)}
+                  >
+                    {type === 'All' ? 'All Types' : type}
+                  </button>
                 ))}
-              </select>
+              </div>
               <input
                 type="text"
                 placeholder="Search facility or room"
@@ -257,11 +270,7 @@ export default function AdminFacilities() {
                   <tbody>
                     {visibleFacilities.map((facility) => (
                       <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
-                        <td>
-                          <button className={styles.tableLink} onClick={() => handleSelectFacility(facility)}>
-                            {facility.name}
-                          </button>
-                        </td>
+                        <td>{facility.name}</td>
                         <td>{facility.type}</td>
                         <td>{facility.guests}</td>
                         <td>₱{facility.price.toLocaleString()}</td>
@@ -315,9 +324,11 @@ export default function AdminFacilities() {
                   </div>
                 </div>
                 <div className={styles.previewFooter}>
-                  <button className={styles.editPreviewBtn} onClick={() => handleEditFacility(selectedFacility)}>
-                    Edit
-                  </button>
+                  {isAdmin && (
+                    <button className={styles.editPreviewBtn} onClick={() => handleEditFacility(selectedFacility)}>
+                      Edit
+                    </button>
+                  )}
                   <button className={styles.cancelBtn} onClick={handleClosePreview}>
                     Close
                   </button>
@@ -325,7 +336,7 @@ export default function AdminFacilities() {
               </div>
             </div>
           )}
-          {showForm && (
+          {isAdmin && showForm && (
             <div className={styles.modalBackdrop}>
               <div className={styles.modal}>
                 <div className={styles.modalHeader}>

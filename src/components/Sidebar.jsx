@@ -77,6 +77,7 @@ const ALL_MODULES = [
   },
   {
     to: '/admin/reports',
+    staffTo: '/staff/reports',
     label: 'Reports',
     icon: <FaChartBar />,
     roles: ['admin', 'staff'],  

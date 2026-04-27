@@ -27,6 +27,7 @@ import StaffPaymentManagement from './pages/staff/StaffPaymentManagement';
 import StaffFeedbackManagement from './pages/staff/StaffFeedbackManagement';
 import StaffFacilities from './pages/staff/StaffFacilities';
 import StaffScheduleMonitoring from './pages/staff/StaffScheduleMonitoring';
+import StaffReports from './pages/staff/StaffReports';
 
 export default function App() {
   return (
@@ -80,6 +81,7 @@ function AppRoutes() {
         <Route path="/staff/feedbacks" element={<StaffProtectedRoute><StaffFeedbackManagement /></StaffProtectedRoute>} />
         <Route path="/staff/facilities" element={<StaffProtectedRoute><StaffFacilities /></StaffProtectedRoute>} />
         <Route path="/staff/schedule" element={<StaffProtectedRoute><StaffScheduleMonitoring /></StaffProtectedRoute>} />
+        <Route path="/staff/reports" element={<StaffProtectedRoute><StaffReports /></StaffProtectedRoute>} />
       </Routes>
     </>
   );

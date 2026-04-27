@@ -56,7 +56,7 @@ function StatCard({ label, value, iconBg, iconStroke, children }) {
 }
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-export default function AdminDashboard() {
+export default function AdminDashboard({ role = 'admin' }) {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
@@ -82,6 +82,8 @@ export default function AdminDashboard() {
     };
     fetchStats();
   }, []);
+
+  const isAdmin = role === 'admin';
 
   const handleNotifications = () => navigate('/admin/notifications');
 
@@ -163,7 +165,7 @@ export default function AdminDashboard() {
 
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
 
       <div className={styles.mainContent}>
 
@@ -171,14 +173,20 @@ export default function AdminDashboard() {
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
-              <h1>Admin Dashboard</h1>
-              <p>Infinity Garden Resort Reservation Management System</p>
+              <h1>{isAdmin ? 'Admin Dashboard' : 'Staff Dashboard'}</h1>
+              <p>
+                {isAdmin
+                  ? 'Infinity Garden Resort Reservation Management System'
+                  : 'Infinity Garden Resort - Staff View'}
+              </p>
             </div>
-            <div className={styles.headerActions}>
-              <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">
-                <FaBell />
-              </button>
-            </div>
+            {isAdmin && (
+              <div className={styles.headerActions}>
+                <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">
+                  <FaBell />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

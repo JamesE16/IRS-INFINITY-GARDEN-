@@ -80,10 +80,11 @@ const reservations = rawReservations.map((reservation, index) => ({
   guests: 4 + (index % 4)
 }));
 
-export default function AdminScheduleManagement() {
+export default function AdminScheduleManagement({ role = 'admin' }) {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const isAdmin = role === 'admin';
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -176,36 +177,42 @@ export default function AdminScheduleManagement() {
 
   return (
     <div className={styles.adminShell}>
-      <Sidebar role="admin" />
+      <Sidebar role={role} />
 
       <div className={styles.mainContent}>
         <div className={styles.topHeader}>
           <div>
             <h1>Schedule Management</h1>
-            <p>Infinity Garden Resort Reservation Management System</p>
+            <p>
+              {isAdmin
+                ? 'Infinity Garden Resort Reservation Management System'
+                : 'Infinity Garden Resort - Staff View'}
+            </p>
           </div>
 
         </div>
 
-        <div className={styles.tabs}>
-          {["pending", "approved", "all"].map(tab => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
-            </button>
-          ))}
-        </div>
+        <div className={styles.container}>
+          <div className={styles.tabs}>
+            {["pending", "approved", "all"].map(tab => (
+              <button
+                key={tab}
+                className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+              </button>
+            ))}
+          </div>
 
-        <div className={styles.calendarBox}>
-          <h3>Reservation Calendar and Availability</h3>
+          <div className={styles.calendarBox}>
+            <h3>Reservation Calendar and Availability</h3>
 
-          <div className={styles.calendar}>
-            {renderHeader()}
-            {renderDays()}
-            {renderCells()}
+            <div className={styles.calendar}>
+              {renderHeader()}
+              {renderDays()}
+              {renderCells()}
+            </div>
           </div>
         </div>
       </div>

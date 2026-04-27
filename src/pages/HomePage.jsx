@@ -1,12 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react'; 
 import Footer from '../components/layout/Footer';
+import FeedbackModal from '../components/ui/FeedbackModal';
 import styles from '../styles/HomePage.module.css';
 import { FaArrowRight } from "react-icons/fa";
 
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+  const handleFeedbackSuccess = () => {
+    // Could add a toast notification here
+    console.log('Feedback submitted successfully');
+  };
 
   // DYNAMIC IMAGES FOR WHY CHOOSE SECTION
   const images = [
@@ -168,7 +175,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── FEEDBACK SECTION ── */}
+      <section className={styles.feedbackSection}>
+        <div className="container">
+          <button 
+            className={styles.feedbackButton}
+            onClick={() => setShowFeedbackModal(true)}
+            aria-label="Share feedback"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Share Your Feedback</span>
+          </button>
+        </div>
+      </section>
+
       <Footer />
+
+      {showFeedbackModal && (
+        <FeedbackModal 
+          onClose={() => setShowFeedbackModal(false)}
+          onSubmit={handleFeedbackSuccess}
+        />
+      )}
     </div>
   );
 }
