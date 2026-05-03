@@ -10,14 +10,21 @@ import styles from "../styles/BookingPage.module.css";
 
 export default function BookingPage() {
   const navigate = useNavigate();
-  const { selectedRoom } = useBooking();
+  const { selectedRoom, facilitiesLoading } = useBooking();
 
   // Pricing state — updated live by BookingForm
   const [pricing, setPricing] = useState({
     nights: 0, subtotal: 0, tax: 0, total: 0, guests: 1,
   });
 
-  // Guard: if no room selected, redirect to /rooms
+  if (facilitiesLoading && !selectedRoom) {
+    return (
+      <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+        <h2>Loading booking details...</h2>
+      </div>
+    );
+  }
+
   if (!selectedRoom) {
     return (
       <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>

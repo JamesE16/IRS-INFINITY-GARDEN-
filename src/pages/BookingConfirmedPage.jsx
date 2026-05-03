@@ -44,7 +44,7 @@ export default function BookingConfirmedPage() {
           <p>Your reservation has been successfully confirmed</p>
           <div className={styles.refBox}>
             <span className={styles.refLabel}>Booking Reference</span>
-            <span className={styles.refId}>{b.id}</span>
+            <span className={styles.refId}>{b.reservationId || b.id}</span>
           </div>
         </div>
 

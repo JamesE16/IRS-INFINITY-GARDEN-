@@ -1,5 +1,4 @@
 import { useBooking } from '../../context/BookingContext';
-import { ROOMS } from '../../data/rooms';
 import styles from "../../styles/FilterTabs.module.css";
 
 const TABS = [
@@ -61,10 +60,10 @@ const TABS = [
 ];
 
 export default function FilterTabs() {
-  const { filter, setFilter } = useBooking();
+  const { filter, setFilter, facilities } = useBooking();
 
   const countFor = (key) =>
-    key === 'All' ? ROOMS.length : ROOMS.filter((r) => r.type === key).length;
+    key === 'All' ? facilities.length : facilities.filter((r) => r.type === key).length;
 
   return (
     <div className={styles.bar}>

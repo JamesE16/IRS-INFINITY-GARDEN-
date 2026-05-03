@@ -1,33 +1,45 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
+import { reservationsAPI } from '../../utils/api';
 import styles from '../../styles/AdminReservations.module.css';
 
-const demoReservations = [
-  { id: 1, booking_id: '1001', guest_name: 'Maria Santos', facility_name: 'Deluxe Room', payment: 'GCash', check_in: '2026-03-15', status: 'pending' },
-  { id: 2, booking_id: '1002', guest_name: 'John Reyes', facility_name: 'Standard Room', payment: 'Cash', check_in: '2026-03-22', status: 'approved' },
-  { id: 3, booking_id: '1003', guest_name: 'Anna Dela Cruz', facility_name: 'Family Room', payment: 'Card', check_in: '2026-03-12', status: 'approved' },
-  { id: 4, booking_id: '1004', guest_name: 'Sophia Fernandez', facility_name: 'Executive Room', payment: 'GCash', check_in: '2026-03-19', status: 'approved' },
-  { id: 5, booking_id: '1005', guest_name: 'Gerald Ochavido', facility_name: 'Couple Room', payment: 'Cash', check_in: '2026-03-04', status: 'approved' },
-  { id: 6, booking_id: '1006', guest_name: 'Nicole Aquino', facility_name: 'Pavilion', payment: 'GCash', check_in: '2026-03-24', status: 'pending' },
-  { id: 7, booking_id: '1007', guest_name: 'Alvin Bernardo', facility_name: 'Pool View Room', payment: 'Card', check_in: '2026-03-06', status: 'approved' },
-  { id: 8, booking_id: '1008', guest_name: 'Atasha Cardinez', facility_name: 'Deluxe Room', payment: 'GCash', check_in: '2026-03-18', status: 'pending' },
-  { id: 9, booking_id: '1009', guest_name: 'Joshua Gonzales', facility_name: 'Garden View Room', payment: 'Cash', check_in: '2026-03-27', status: 'cancelled' },
-  { id: 10, booking_id: '1010', guest_name: 'Joyce Cabral', facility_name: 'Single Room', payment: 'Card', check_in: '2026-03-02', status: 'approved' }
-];
+const normalizeReservation = (reservation) => ({
+  id: reservation.id,
+  booking_id: reservation.reservation_id || reservation.id,
+  guest_name: reservation.guest_full_name || `${reservation.first_name || ''} ${reservation.last_name || ''}`.trim() || 'Guest',
+  facility_name: reservation.facility_name || reservation.facility?.name || 'Facility',
+  payment: reservation.payment_method || 'N/A',
+  check_in: reservation.check_in,
+  check_out: reservation.check_out,
+  status: (reservation.status || 'pending').toLowerCase(),
+});
 
 export default function AdminReservations({ role = 'admin' }) {
-  const [reservations, setReservations] = useState(demoReservations);
+  const [reservations, setReservations] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filter, setFilter] = useState('pending');
   const isAdmin = role === 'admin';
 
-  const [form, setForm] = useState({
-    guest_name: '',
-    facility_name: '',
-    payment: 'GCash',
-    date: ''
-  });
+  useEffect(() => {
+    const loadReservations = async () => {
+      setIsLoading(true);
+      try {
+        const data = await reservationsAPI.getAll();
+        const list = Array.isArray(data) ? data : data.results ?? [];
+        setReservations(list.map(normalizeReservation));
+        setError('');
+      } catch (err) {
+        console.error(err);
+        setError('Unable to load reservations from backend.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadReservations();
+  }, []);
 
   const filteredReservations = useMemo(() => {
     if (filter === 'all') return reservations;
@@ -39,49 +51,27 @@ export default function AdminReservations({ role = 'admin' }) {
     return reservations.filter((reservation) => reservation.status === type).length;
   };
 
-  const handleAdd = () => {
-    const newReservation = {
-      id: Date.now(),
-      booking_id: String(Math.floor(1000 + Math.random() * 9000)),
-      guest_name: form.guest_name,
-      facility_name: form.facility_name,
-      payment: form.payment,
-      check_in: form.date,
-      status: 'pending'
-    };
+  const updateReservationStatus = async (id, status) => {
+    try {
+      if (status === 'confirmed') {
+        await reservationsAPI.approve(id, '', 'confirmed');
+      } else if (status === 'cancelled') {
+        await reservationsAPI.approve(id, '', 'cancelled');
+      }
 
-    setReservations((prev) => [newReservation, ...prev]);
-    setIsAdding(false);
-    setForm({
-      guest_name: '',
-      facility_name: '',
-      payment: 'GCash',
-      date: ''
-    });
-  };
-
-  const handleApprove = (id) => {
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.id === id ? { ...reservation, status: 'approved' } : reservation
-      )
-    );
-  };
-
-  const handleCancel = (id) => {
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.id === id ? { ...reservation, status: 'cancelled' } : reservation
-      )
-    );
+      setReservations((prev) =>
+        prev.map((reservation) =>
+          reservation.id === id ? { ...reservation, status } : reservation
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      setError('Unable to update reservation status.');
+    }
   };
 
   const handleArchive = (id) => {
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.id === id ? { ...reservation, status: 'archived' } : reservation
-      )
-    );
+    setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
   };
 
   return (
@@ -99,16 +89,11 @@ export default function AdminReservations({ role = 'admin' }) {
                   : 'Infinity Garden Resort - Staff View'}
               </p>
             </div>
-
-            <button className={styles.addBtn} onClick={() => setIsAdding(true)}>
-              <span className={styles.plus}>+</span>
-              Add Reservation
-            </button>
           </div>
         </div>
 
         <div className={styles.filterTabs}>
-          {['pending', 'approved', 'cancelled', 'all'].map((tab) => (
+          {['pending', 'confirmed', 'cancelled', 'all'].map((tab) => (
             <button
               key={tab}
               className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
@@ -120,6 +105,8 @@ export default function AdminReservations({ role = 'admin' }) {
         </div>
 
         <div className={styles.container}>
+          {error && <div className={styles.errorBanner}>{error}</div>}
+
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
@@ -134,53 +121,63 @@ export default function AdminReservations({ role = 'admin' }) {
               </thead>
 
               <tbody>
-                {filteredReservations.map((reservation) => (
-                  <tr key={reservation.id}>
-                    <td>{reservation.booking_id}</td>
-                    <td>{reservation.guest_name}</td>
-                    <td>{reservation.facility_name}</td>
-                    <td>{new Date(reservation.check_in).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`${styles.status} ${styles[`status_${reservation.status}`]}`}>
-                        {reservation.status}
-                      </span>
-                    </td>
-                    <td className={styles.actions}>
-                      <button
-                        className={styles.viewBtn}
-                        onClick={() => setSelectedReservation(reservation)}
-                      >
-                        View
-                      </button>
-
-                      {reservation.status === 'approved' && (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="6">Loading reservations...</td>
+                  </tr>
+                ) : filteredReservations.length === 0 ? (
+                  <tr>
+                    <td colSpan="6">No reservations found.</td>
+                  </tr>
+                ) : (
+                  filteredReservations.map((reservation) => (
+                    <tr key={reservation.id}>
+                      <td>{reservation.booking_id}</td>
+                      <td>{reservation.guest_name}</td>
+                      <td>{reservation.facility_name}</td>
+                      <td>{new Date(reservation.check_in).toLocaleDateString()}</td>
+                      <td>
+                        <span className={`${styles.status} ${styles[`status_${reservation.status}`]}`}>
+                          {reservation.status}
+                        </span>
+                      </td>
+                      <td className={styles.actions}>
                         <button
-                          className={styles.cancelBtnSmall}
-                          onClick={() => handleArchive(reservation.id)}
+                          className={styles.viewBtn}
+                          onClick={() => setSelectedReservation(reservation)}
                         >
-                          Archive
+                          View
                         </button>
-                      )}
 
-                      {reservation.status === 'pending' && (
-                        <>
-                          <button
-                            className={styles.approveBtn}
-                            onClick={() => handleApprove(reservation.id)}
-                          >
-                            Approve
-                          </button>
+                        {reservation.status === 'confirmed' && (
                           <button
                             className={styles.cancelBtnSmall}
-                            onClick={() => handleCancel(reservation.id)}
+                            onClick={() => handleArchive(reservation.id)}
                           >
-                            Cancel
+                            Archive
                           </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        )}
+
+                        {reservation.status === 'pending' && (
+                          <>
+                            <button
+                              className={styles.approveBtn}
+                              onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              className={styles.cancelBtnSmall}
+                              onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -209,8 +206,11 @@ export default function AdminReservations({ role = 'admin' }) {
                 <label>Payment Method</label>
                 <input value={selectedReservation.payment} readOnly />
 
-                <label>Date</label>
+                <label>Check-in</label>
                 <input value={new Date(selectedReservation.check_in).toLocaleDateString()} readOnly />
+
+                <label>Check-out</label>
+                <input value={new Date(selectedReservation.check_out).toLocaleDateString()} readOnly />
               </div>
 
               <div className={styles.modalFooter}>
@@ -219,69 +219,6 @@ export default function AdminReservations({ role = 'admin' }) {
                   className={styles.cancelBtn}
                 >
                   Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isAdding && (
-          <div className={styles.modalOverlay}>
-            <div className={`${styles.modalBox} ${styles.largeModal}`}>
-              <div className={styles.modalHeader}>
-                <h3>Add Reservation</h3>
-                <button
-                  className={styles.closeBtn}
-                  onClick={() => setIsAdding(false)}
-                >
-                  x
-                </button>
-              </div>
-
-              <div className={styles.modalBody}>
-                <label>Guest Name</label>
-                <input
-                  value={form.guest_name}
-                  onChange={(event) => setForm({ ...form, guest_name: event.target.value })}
-                />
-
-                <label>Facility</label>
-                <input
-                  value={form.facility_name}
-                  onChange={(event) => setForm({ ...form, facility_name: event.target.value })}
-                />
-
-                <label>Payment Method</label>
-                <select
-                  value={form.payment}
-                  onChange={(event) => setForm({ ...form, payment: event.target.value })}
-                  className={styles.paymentSelect}
-                >
-                  <option>GCash</option>
-                  <option>Cash</option>
-                  <option>Card</option>
-                </select>
-
-                <label>Date</label>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={(event) => setForm({ ...form, date: event.target.value })}
-                />
-              </div>
-
-              <div className={styles.modalFooter}>
-                <button
-                  onClick={() => setIsAdding(false)}
-                  className={styles.cancelBtn}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAdd}
-                  className={styles.submitBtn}
-                >
-                  Add Reservation
                 </button>
               </div>
             </div>

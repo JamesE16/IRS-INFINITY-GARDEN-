@@ -38,17 +38,18 @@ export const authAPI = {
   },
 
   login: async (email, password) => {
-    const response = await fetch(`${API_BASE_URL}/users/me/`, {
-      method: 'GET',
+    const response = await fetch(`${API_BASE_URL}/users/login/`, {
+      method: 'POST',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${btoa(`${email}:${password}`)}`
-      }
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
     });
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error('Login failed');
+      throw new Error(error.detail || 'Login failed');
     }
     
     const data = await response.json();
@@ -192,6 +193,17 @@ export const reservationsAPI = {
     const data = await response.json();
     console.log('✅ Reservation created:', data);
     return data;
+  },
+
+  getAll: async () => {
+    const response = await fetch(`${API_BASE_URL}/reservations/`, {
+      credentials: 'include',
+      headers: getAuthHeaders()
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reservations: ${response.status}`);
+    }
+    return response.json();
   },
 
   getMyBookings: async () => {

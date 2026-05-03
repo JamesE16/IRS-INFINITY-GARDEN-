@@ -7,19 +7,32 @@ import styles from "../../styles/BookingForm.module.css";
 
 export default function BookingForm({ room, onPriceChange }) {
   const navigate = useNavigate();
-  const { submitBooking, showToast } = useBooking();
+  const { submitBooking, addBooking, showToast } = useBooking();
 
   const [form, setForm] = useState({
     name:     '',
     email:    '',
     phone:    '',
+    address:  '',
+    validId:  '',
     checkin:  '',
     checkout: '',
-    guests:   '',
+    guests:   '1',
     special:  '',
   });
 
   const [errors, setErrors] = useState({});
+
+  const fieldLabels = {
+    name: 'Full Name',
+    email: 'Email Address',
+    phone: 'Phone Number',
+    address: 'Address',
+    validId: 'Valid ID',
+    checkin: 'Check-in Date',
+    checkout: 'Check-out Date',
+    guests: 'Number of Guests',
+  };
 
   // Update field + notify parent of price change
   const handleChange = (e) => {
@@ -39,8 +52,11 @@ export default function BookingForm({ room, onPriceChange }) {
     if (!form.email.trim()) errs.email = 'Email address is required.';
     if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email.';
     if (!form.phone.trim()) errs.phone = 'Phone number is required.';
+    if (!form.address.trim()) errs.address = 'Address is required.';
+    if (!form.validId.trim()) errs.validId = 'Valid ID is required.';
     if (!form.checkin)      errs.checkin  = 'Check-in date is required.';
     if (!form.checkout)     errs.checkout = 'Check-out date is required.';
+    if (!form.guests)       errs.guests = 'Number of guests is required.';
     if (form.checkin && form.checkout && new Date(form.checkout) <= new Date(form.checkin)) {
       errs.checkout = 'Check-out must be after check-in.';
     }
@@ -51,50 +67,28 @@ export default function BookingForm({ room, onPriceChange }) {
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
-      showToast('Please fill in all required fields.', 'error');
+      const missingFields = Object.keys(errs).map((key) => fieldLabels[key] || key);
+      showToast(`Please complete: ${missingFields.join(', ')}`, 'error');
       return;
     }
 
     const nights = calcNights(form.checkin, form.checkout);
     const { subtotal, tax, total } = calcTotal(room.price, nights);
-
-    const reservationPayload = {
-      facility: room.id,
-      guest_name: form.name,
-      guest_email: form.email,
-      guest_phone: form.phone,
-      check_in: form.checkin,
-      check_out: form.checkout,
-      guests: parseInt(form.guests, 10),
-      special_requests: form.special,
-      status: 'pending'
-    };
-     
-    try {
-      const response = await fetch('http://localhost:8000/api/reservations/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify(reservationPayload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit booking');
-      }
-
-      const data = await response.json();
-      await submitBooking(reservationPayload, clientBooking);
-      showToast('Booking request submitted. Awaiting admin approval.', 'success');
-      navigate('/booking/confirmed');
-    } catch (error) {
-      console.error('Booking error:', error);
-      showToast(error.message || 'Error submitting booking', 'error');
-    }
+    const trimmedName = form.name.trim();
+    const nameParts = trimmedName.split(/\s+/);
+    const firstName = nameParts[0] || trimmedName;
+    const lastName = nameParts.slice(1).join(' ') || '-';
+    const backendFacilityId =
+      typeof room.backendId === 'number'
+        ? room.backendId
+        : typeof room.backendId === 'string' && /^\d+$/.test(room.backendId)
+          ? parseInt(room.backendId, 10)
+          : null;
 
     const clientBooking = {
-      roomId:    room.id,
+      roomId:    backendFacilityId ?? room.publicId ?? room.externalId ?? room.id,
+      publicId: room.publicId,
+      externalId: room.externalId,
       roomName:  room.name,
       roomType:  room.type,
       roomImg:   room.img,
@@ -102,6 +96,8 @@ export default function BookingForm({ room, onPriceChange }) {
       name:      form.name,
       email:     form.email,
       phone:     form.phone,
+      address:   form.address,
+      validId:   form.validId,
       checkin:   form.checkin,
       checkout:  form.checkout,
       guests:    parseInt(form.guests, 10),
@@ -112,6 +108,28 @@ export default function BookingForm({ room, onPriceChange }) {
       special:   form.special,
       status:    'Pending',
       createdAt: new Date().toISOString(),
+    };
+
+    if (!backendFacilityId) {
+      addBooking(clientBooking);
+      showToast('Booking saved locally for this room.', 'success');
+      navigate('/booking/confirmed');
+      return;
+    }
+
+    const reservationPayload = {
+      facility: backendFacilityId,
+      first_name: firstName,
+      last_name: lastName,
+      contact: form.phone,
+      email: form.email,
+      address: form.address,
+      valid_id: form.validId,
+      check_in: form.checkin,
+      check_out: form.checkout,
+      num_guests: parseInt(form.guests, 10),
+      special_requests: form.special,
+      total_amount: total.toFixed(2),
     };
 
     try {
@@ -166,6 +184,32 @@ export default function BookingForm({ room, onPriceChange }) {
             onChange={handleChange}
           />
           {errors.phone && <p className={styles.errorMsg}>{errors.phone}</p>}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Address <span>*</span></label>
+          <textarea
+            className={`${styles.textarea} ${errors.address ? styles.inputError : ''}`}
+            name="address"
+            placeholder="Street, barangay, city, province"
+            rows={3}
+            value={form.address}
+            onChange={handleChange}
+          />
+          {errors.address && <p className={styles.errorMsg}>{errors.address}</p>}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Valid ID <span>*</span></label>
+          <input
+            className={`${styles.input} ${errors.validId ? styles.inputError : ''}`}
+            type="text"
+            name="validId"
+            placeholder="Passport, Driver's License, National ID"
+            value={form.validId}
+            onChange={handleChange}
+          />
+          {errors.validId && <p className={styles.errorMsg}>{errors.validId}</p>}
         </div>
       </section>
 
@@ -225,7 +269,7 @@ export default function BookingForm({ room, onPriceChange }) {
           <label className={styles.label}>Number of Guests <span>*</span></label>
           <div className={styles.inputWrapper}>
             <select
-              className={styles.select}
+              className={`${styles.select} ${errors.guests ? styles.inputError : ''}`}
               name="guests"
               value={form.guests}
               onChange={handleChange}
@@ -243,6 +287,7 @@ export default function BookingForm({ room, onPriceChange }) {
               </svg>
             </span>
           </div>
+          {errors.guests && <p className={styles.errorMsg}>{errors.guests}</p>}
         </div>
 
         <div className={styles.formGroup}>

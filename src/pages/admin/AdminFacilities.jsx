@@ -2,28 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 
 import { facilitiesAPI } from '../../utils/api';
-import { ROOMS } from '../../data/rooms';
+import { normalizeFacility } from '../../utils/facilityHelpers';
 import styles from '../../styles/AdminFacilities.module.css';
 
 const facilityTypes = ['Room', 'Cottage', 'Gazebo', 'Pavilion'];
-
-function normalizeFacility(item) {
-  return {
-    id: item.id ?? item.pk ?? item.id?.toString() ?? String(Date.now()),
-    name: item.name ?? item.title ?? 'Unnamed Facility',
-    type: item.type ?? item.category ?? 'Room',
-    subtype: item.subtype ?? item.room_type ?? 'Standard',
-    description: item.desc ?? item.description ?? '',
-    guests: item.guests ?? item.capacity ?? 0,
-    size: item.size ?? item.area ?? 0,
-    beds: item.beds ?? item.bed_config ?? '',
-    price: item.price ?? item.rate ?? 0,
-    available: item.available ?? true,
-    amenities: Array.isArray(item.amenities) ? item.amenities : (item.amenities || []).split?.(',').map((value) => value.trim()).filter(Boolean) ?? [],
-    features: Array.isArray(item.features) ? item.features : (item.features || []).split?.(',').map((value) => value.trim()).filter(Boolean) ?? [],
-    img: item.img ?? item.image_url ?? '',
-  };
-}
 
 export default function AdminFacilities({ role = 'admin' }) {
   const [facilities, setFacilities] = useState([]);
@@ -65,9 +47,9 @@ export default function AdminFacilities({ role = 'admin' }) {
       setFacilities(list.map(normalizeFacility));
       setError(null);
     } catch (err) {
-      console.warn('Facilities fallback loaded from local room data', err);
-      setFacilities(ROOMS.map(normalizeFacility));
-      setError('Backend offline or API unavailable. Using local room dataset.');
+      console.warn('Facilities API unavailable', err);
+      setFacilities([]);
+      setError('Backend offline or API unavailable.');
     } finally {
       setIsLoading(false);
     }

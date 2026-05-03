@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
@@ -49,7 +49,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
-        """Authenticate a user and return their profile"""
+        """Authenticate a user, create a session, and return their profile"""
         email = request.data.get('email')
         password = request.data.get('password')
         if not email or not password:
@@ -59,8 +59,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if user is None:
             return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        login(request, user)
         serializer = self.get_serializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def logout(self, request):
+        logout(request)
+        return Response({'detail': 'Logged out successfully.'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def create_staff(self, request):

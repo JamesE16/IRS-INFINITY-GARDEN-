@@ -73,10 +73,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
 # ============================================================
 
 class FacilitySerializer(serializers.ModelSerializer):
+    type = serializers.CharField(source='room_type.name', read_only=True)
+
     class Meta:
         model = Facility
         fields = [
-            'id', 'name', 'type', 'capacity', 'price', 'availability_status',
+            'id', 'external_id', 'name', 'type', 'capacity', 'price', 'availability_status',
             'description', 'amenities', 'image_url', 'created_at', 'updated_at'
         ]
 

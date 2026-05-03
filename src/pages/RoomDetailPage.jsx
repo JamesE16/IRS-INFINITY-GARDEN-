@@ -1,22 +1,30 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
-import { ROOMS } from '../data/rooms';
 import Footer from '../components/layout/Footer';
 import styles from "../styles/RoomDetailPage.module.css";
-
 
 export default function RoomDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { setSelectedRoom } = useBooking();
+  const { facilities, facilitiesLoading, setSelectedRoom } = useBooking();
 
-  // Find room by ID
-  const room = ROOMS.find((r) => r.id === id.toString());
+  const room = facilities.find(
+    (facility) =>
+      String(facility.publicId || facility.externalId || facility.id) === String(id)
+  );
 
   useEffect(() => {
     if (room) setSelectedRoom(room);
   }, [room, setSelectedRoom]);
+
+  if (facilitiesLoading) {
+    return (
+      <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
+        <h2>Loading room details...</h2>
+      </div>
+    );
+  }
 
   if (!room) {
     return (
@@ -34,7 +42,6 @@ export default function RoomDetailPage() {
     navigate('/booking');
   };
 
-  // Split amenities and features into 2 columns
   const half = (arr) => ({
     col1: arr.filter((_, i) => i % 2 === 0),
     col2: arr.filter((_, i) => i % 2 === 1),
@@ -51,7 +58,6 @@ export default function RoomDetailPage() {
 
   return (
     <div className="page">
-      {/* ── BACK BAR ── */}
       <div className="back-bar">
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <span className={styles.arrow}>←</span>
@@ -59,20 +65,16 @@ export default function RoomDetailPage() {
         </button>
       </div>
 
-      {/* ── DETAIL BODY ── */}
       <div className={styles.body}>
-        {/* Left — image */}
         <div className={styles.imageWrap}>
           <img src={room.img} alt={room.name} />
         </div>
 
-        {/* Right — info */}
         <div className={styles.info}>
           <span className={styles.typeBadge}>{room.type}</span>
           <h1 className={styles.name}>{room.name}</h1>
           <p className={styles.desc}>{room.desc}</p>
 
-          {/* Specs bar */}
           <div className={styles.specs}>
             <div className={styles.specItem}>
               <span className={styles.specLabel}>Guests</span>
@@ -80,15 +82,14 @@ export default function RoomDetailPage() {
             </div>
             <div className={styles.specItem}>
               <span className={styles.specLabel}>Size</span>
-              <span className={styles.specVal}>{room.size} m²</span>
+              <span className={styles.specVal}>{room.size || 'N/A'} m²</span>
             </div>
             <div className={styles.specItem}>
               <span className={styles.specLabel}>Beds</span>
-              <span className={styles.specVal}>{room.beds}</span>
+              <span className={styles.specVal}>{room.beds || 'N/A'}</span>
             </div>
           </div>
 
-          {/* Amenities */}
           <div className={styles.featureSection}>
             <h4>Amenities</h4>
             <div className={styles.featureGrid}>
@@ -109,7 +110,6 @@ export default function RoomDetailPage() {
             </div>
           </div>
 
-          {/* Features */}
           <div className={styles.featureSection}>
             <h4>Features</h4>
             <div className={styles.featureGrid}>
@@ -132,7 +132,6 @@ export default function RoomDetailPage() {
 
           <hr className="divider" />
 
-          {/* Price + Book */}
           <div className={styles.price}>
             ₱{room.price}<span> / night</span>
           </div>
