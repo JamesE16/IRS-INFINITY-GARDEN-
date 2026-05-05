@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../context/BookingContext';
+import { authAPI } from '../../utils/api';
 import styles from '../../styles/AdminLoginPage.module.css';
-import logo from '../../assets/logo.png'; // ✅ added
+import logo from '../../assets/logo.png';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -17,9 +18,9 @@ export default function AdminLoginPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -39,7 +40,7 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       showToast('Please fix errors and try again', 'error');
       return;
@@ -47,45 +48,35 @@ export default function AdminLoginPage() {
 
     setIsLoading(true);
     try {
-      let isAuthenticated = false;
-      let isStaff = false;
+      const userData = await authAPI.login(formData.email, formData.password);
+      const role = userData?.profile?.role;
 
-      // Mock authentication only
-      if (
-        formData.email === 'admin@infinitygarden.com' &&
-        formData.password === 'infinity123'
-      ) {
-        isAuthenticated = true;
-        localStorage.setItem('adminEmail', formData.email);
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('isStaffLoggedIn');
+      localStorage.removeItem('adminRole');
+      localStorage.removeItem('staffRole');
+
+      if (role === 'admin') {
+        localStorage.setItem('adminEmail', userData.email || formData.email);
         localStorage.setItem('isAdminLoggedIn', 'true');
         localStorage.setItem('adminRole', 'admin');
+        showToast('Login successful', 'success');
+        setTimeout(() => navigate('/admin/dashboard'), 500);
+        return;
       }
 
-      if (
-        formData.email === 'staffdemo@infinityresort.com' &&
-        formData.password === 'Staff123!'
-      ) {
-        isAuthenticated = true;
-        isStaff = true;
-        localStorage.setItem('staffEmail', formData.email);
+      if (role === 'staff') {
+        localStorage.setItem('staffEmail', userData.email || formData.email);
         localStorage.setItem('isStaffLoggedIn', 'true');
         localStorage.setItem('staffRole', 'staff');
+        showToast('Login successful', 'success');
+        setTimeout(() => navigate('/staff/dashboard'), 500);
+        return;
       }
 
-      if (isAuthenticated) {
-        showToast('Login successful', 'success');
-        setTimeout(() => {
-          if (isStaff) {
-            navigate('/staff/dashboard');
-          } else {
-            navigate('/admin/dashboard');
-          }
-        }, 500);
-      } else {
-        showToast('Invalid credentials', 'error');
-      }
-    } catch {
-      showToast('Login failed', 'error');
+      showToast('This account does not have admin or staff access.', 'error');
+    } catch (error) {
+      showToast(error.message || 'Login failed', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -96,17 +87,13 @@ export default function AdminLoginPage() {
   return (
     <div className={styles.container}>
       <div className={styles.overlay} onClick={handleCancel} />
-      
+
       <div className={styles.modal}>
-        {/* Close button */}
         <button className={styles.closeBtn} onClick={handleCancel}>
-          ✕
+          x
         </button>
 
-        {/* Header */}
         <div className={styles.header}>
-
-          {/* ✅ ADDED (logo + title ONLY) */}
           <div className={styles.brand}>
             <img src={logo} alt="Infinity Garden Logo" />
             <div>
@@ -114,7 +101,6 @@ export default function AdminLoginPage() {
               <p className={styles.brandSub}>Resort Hotel & Pavilion</p>
             </div>
           </div>
-
 
           <h2>Admin & Staff Login</h2>
           <p>Secure access for administrators and staff members</p>
@@ -142,7 +128,7 @@ export default function AdminLoginPage() {
               id="password"
               type="password"
               name="password"
-              placeholder="••••••••"
+              placeholder="........"
               value={formData.password}
               onChange={handleChange}
               className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
@@ -153,9 +139,9 @@ export default function AdminLoginPage() {
 
           <div className={styles.infoBanner}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
             <p>This login is protected. Only authorized staff and admin can access.</p>
           </div>

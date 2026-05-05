@@ -6,6 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+from django.middleware.csrf import get_token
 from datetime import timedelta
 from datetime import datetime
 
@@ -67,6 +70,12 @@ class UserViewSet(viewsets.ModelViewSet):
     def logout(self, request):
         logout(request)
         return Response({'detail': 'Logged out successfully.'}, status=status.HTTP_200_OK)
+
+    @method_decorator(ensure_csrf_cookie)
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def csrf(self, request):
+        """Set the CSRF cookie for SPA clients and return the current token."""
+        return Response({'csrfToken': get_token(request)}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def create_staff(self, request):

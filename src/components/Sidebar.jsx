@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from '../styles/Sidebar.module.css';
 import logo from '../assets/logo.png';
+import { authAPI } from '../utils/api';
 
 import {
   FaTachometerAlt,
@@ -100,11 +101,21 @@ export default function Sidebar({ role = 'staff' }) {
     return module.to;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      console.error('Logout request failed:', error);
+    }
+
     localStorage.removeItem('adminEmail');
     localStorage.removeItem('isAdminLoggedIn');
     localStorage.removeItem('adminSession');
     localStorage.removeItem('adminRole');
+    localStorage.removeItem('staffEmail');
+    localStorage.removeItem('isStaffLoggedIn');
+    localStorage.removeItem('staffRole');
+    localStorage.removeItem('access_token');
     navigate('/');
   };
 
