@@ -417,6 +417,14 @@ class FeedbackViewSet(viewsets.ModelViewSet):
     serializer_class = FeedbackSerializer
     permission_classes = [IsAdminUser]
 
+    def get_permissions(self):
+        """Allow public feedback submission while keeping management admin-only."""
+        if self.action == 'create':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
     def get_queryset(self):
         queryset = Feedback.objects.all()
         status_filter = self.request.query_params.get('status')

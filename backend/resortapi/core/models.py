@@ -120,6 +120,7 @@ class Facility(models.Model):
     
     class Meta:
         ordering = ['room_type', 'name']
+        verbose_name_plural = 'Facilities'
 
 
 class BlackoutDate(models.Model):
