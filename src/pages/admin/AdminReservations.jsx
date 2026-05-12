@@ -3,9 +3,16 @@ import Sidebar from '../../components/Sidebar';
 import { reservationsAPI } from '../../utils/api';
 import styles from '../../styles/AdminReservations.module.css';
 
+const shortenId = (value) => {
+  const text = String(value || '');
+  if (text.length <= 14) return text;
+  return `${text.slice(0, 8)}...${text.slice(-4)}`;
+};
+
 const normalizeReservation = (reservation) => ({
   id: reservation.id,
   booking_id: reservation.reservation_id || reservation.id,
+  booking_id_short: shortenId(reservation.reservation_id || reservation.id),
   guest_name: reservation.guest_full_name || `${reservation.first_name || ''} ${reservation.last_name || ''}`.trim() || 'Guest',
   facility_name: reservation.facility_name || reservation.facility?.name || 'Facility',
   payment: reservation.payment_method || 'N/A',
@@ -132,7 +139,7 @@ export default function AdminReservations({ role = 'admin' }) {
                 ) : (
                   filteredReservations.map((reservation) => (
                     <tr key={reservation.id}>
-                      <td>{reservation.booking_id}</td>
+                      <td title={reservation.booking_id}>{reservation.booking_id_short}</td>
                       <td>{reservation.guest_name}</td>
                       <td>{reservation.facility_name}</td>
                       <td>{new Date(reservation.check_in).toLocaleDateString()}</td>

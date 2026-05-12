@@ -202,6 +202,13 @@ class Reservation(models.Model):
 
 class Payment(models.Model):
     """Payment records linked to reservations"""
+    PAYMENT_METHOD_CHOICES = [
+        ('gcash', 'GCash'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('cash', 'Cash'),
+        ('card', 'Card'),
+    ]
+
     VERIFICATION_STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('verified', 'Verified'),
@@ -210,6 +217,7 @@ class Payment(models.Model):
     
     reservation = models.OneToOneField(Reservation, on_delete=models.CASCADE, related_name='payment')
     amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_method = models.CharField(max_length=30, choices=PAYMENT_METHOD_CHOICES, default='bank_transfer')
     reference_number = models.CharField(max_length=100, unique=True)
     proof_of_payment = models.FileField(upload_to='payments/', blank=True, null=True)
     verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='pending')

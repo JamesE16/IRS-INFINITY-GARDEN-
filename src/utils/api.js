@@ -36,7 +36,6 @@ const ensureCsrfCookie = async () => {
 const getAuthHeaders = async (method = 'GET') => {
   const token = localStorage.getItem('access_token');
   const headers = {
-    'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
@@ -50,6 +49,11 @@ const getAuthHeaders = async (method = 'GET') => {
 const apiRequest = async (path, options = {}) => {
   const method = options.method || 'GET';
   const headers = await getAuthHeaders(method);
+  const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+  if (!isFormDataBody && !('Content-Type' in (options.headers || {}))) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   return fetch(`${API_BASE_URL}${path}`, {
     credentials: 'include',
@@ -60,6 +64,29 @@ const apiRequest = async (path, options = {}) => {
       ...(options.headers || {}),
     },
   });
+};
+
+const readErrorPayload = async (response, fallbackMessage) => {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    const error = await response.json();
+    return (
+      error?.detail ||
+      error?.error ||
+      error?.message ||
+      JSON.stringify(error) ||
+      fallbackMessage
+    );
+  }
+
+  const text = await response.text();
+
+  if (text.includes('<!DOCTYPE') || text.includes('<html')) {
+    return `${fallbackMessage} The server returned an HTML error page instead of JSON. If you just changed the backend models, run Django migrations and restart the backend server.`;
+  }
+
+  return text || fallbackMessage;
 };
 
 export const authAPI = {
@@ -76,8 +103,7 @@ export const authAPI = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Registration failed');
+      throw new Error(await readErrorPayload(response, 'Registration failed.'));
     }
 
     return response.json();
@@ -90,8 +116,7 @@ export const authAPI = {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Login failed');
+      throw new Error(await readErrorPayload(response, 'Login failed.'));
     }
 
     const data = await response.json();
@@ -183,12 +208,14 @@ export const reservationsAPI = {
   create: async (reservationData) => {
     const response = await apiRequest('/reservations/', {
       method: 'POST',
-      body: JSON.stringify(reservationData),
+      body:
+        typeof FormData !== 'undefined' && reservationData instanceof FormData
+          ? reservationData
+          : JSON.stringify(reservationData),
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || JSON.stringify(error) || 'Failed to create reservation');
+      throw new Error(await readErrorPayload(response, 'Failed to create reservation.'));
     }
 
     return response.json();
@@ -208,6 +235,22 @@ export const reservationsAPI = {
       throw new Error(`Failed to fetch bookings: ${response.status}`);
     }
     return response.json();
+  },
+
+  getApprovedDates: async (facilityId) => {
+    const response = await apiRequest(`/facilities/${facilityId}/reservations/`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch facility reservations: ${response.status}`);
+    }
+
+    const reservations = await response.json();
+    const list = Array.isArray(reservations) ? reservations : reservations.results ?? [];
+
+    return list.filter((reservation) =>
+      ['confirmed', 'approved', 'checked_in'].includes(
+        (reservation.status || '').toString().toLowerCase()
+      )
+    );
   },
 
   getById: async (id) => {
@@ -307,6 +350,17 @@ export const adminAPI = {
 
     const response = await apiRequest(`/payments/by_status/?${params}`);
     if (!response.ok) throw new Error('Failed to fetch payments');
+    return response.json();
+  },
+
+  verifyPayment: async (id) => {
+    const response = await apiRequest(`/payments/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        verification_status: 'verified',
+      }),
+    });
+    if (!response.ok) throw new Error('Failed to verify payment');
     return response.json();
   },
 

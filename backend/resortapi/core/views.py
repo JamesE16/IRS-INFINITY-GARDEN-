@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
 from datetime import timedelta
 from datetime import datetime
+import uuid
 
 from .models import (
     UserProfile, Facility, BlackoutDate,
@@ -238,6 +239,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         """Client creating a reservation"""
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            payment_method = serializer.validated_data.pop('payment_method')
+            receipt_image = serializer.validated_data.pop('receipt_image', None)
             facility_id = serializer.validated_data['facility'].id
             check_in = serializer.validated_data['check_in']
             check_out = serializer.validated_data['check_out']
@@ -272,6 +275,15 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 guest=request.user if request.user.is_authenticated else None,
                 nights=nights,
                 **serializer.validated_data
+            )
+
+            Payment.objects.create(
+                reservation=reservation,
+                amount=reservation.total_amount,
+                payment_method=payment_method,
+                reference_number=f"PAY-{reservation.reservation_id}-{uuid.uuid4().hex[:6].upper()}",
+                proof_of_payment=receipt_image,
+                verification_status='pending'
             )
             
             # Log transaction
@@ -397,6 +409,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        return Payment.objects.select_related('reservation').all()
     
     @action(detail=False, methods=['get'])
     def by_status(self, request):

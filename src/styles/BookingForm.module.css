@@ -169,3 +169,308 @@
 .confirmBtn:hover {
   background: var(--navy);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DATE PICKER  (react-datepicker — styled to match your inputs)
+   ═══════════════════════════════════════════════════════════════ */
+
+.datePickerWrapper {
+  position: relative;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  transition: var(--transition);
+  background: #fff;
+}
+
+.datePickerWrapper:focus-within {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+}
+
+.datePickerError {
+  border-color: var(--red) !important;
+}
+
+.datePickerOuter {
+  width: 100%;
+  display: block;
+}
+
+.datePickerInput {
+  width: 100%;
+  padding: 11px 38px 11px 14px;
+  border: none !important;
+  border-radius: var(--radius);
+  font-size: 0.87rem;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background: transparent;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.datePickerInput:disabled {
+  background: #f9fafb;
+  color: var(--text-light);
+  cursor: not-allowed;
+}
+
+/* Calendar popup — using :global because react-datepicker injects these */
+:global(.react-datepicker) {
+  font-family: 'DM Sans', sans-serif !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
+}
+
+:global(.react-datepicker__header) {
+  background: var(--navy) !important;
+  border-bottom: none !important;
+  padding: 12px 0 8px !important;
+}
+
+:global(.react-datepicker__current-month) {
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+
+:global(.react-datepicker__navigation-icon::before) {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+:global(.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before) {
+  border-color: #fff !important;
+}
+
+:global(.react-datepicker__day-name) {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.04em !important;
+}
+
+:global(.react-datepicker__day) {
+  font-family: 'DM Sans', sans-serif !important;
+  font-size: 0.82rem !important;
+  color: var(--text) !important;
+  border-radius: var(--radius) !important;
+  transition: background 0.15s, color 0.15s !important;
+}
+
+:global(.react-datepicker__day:hover) {
+  background: rgba(30, 58, 95, 0.08) !important;
+  color: var(--navy) !important;
+}
+
+:global(.react-datepicker__day--selected),
+:global(.react-datepicker__day--keyboard-selected) {
+  background: var(--navy) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+/* Blocked/reserved dates — grayed with a red dot */
+:global(.react-datepicker__day--excluded) {
+  color: #d1d5db !important;
+  background: #fafafa !important;
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+:global(.react-datepicker__day--excluded::after) {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+:global(.react-datepicker__day--disabled) {
+  color: #d1d5db !important;
+  cursor: not-allowed !important;
+}
+
+:global(.react-datepicker__day--outside-month) {
+  color: #d1d5db !important;
+}
+
+:global(.react-datepicker__day--today) {
+  font-weight: 700 !important;
+  border: 1.5px solid var(--navy-light) !important;
+}
+
+:global(.react-datepicker__triangle) {
+  display: none !important;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PAYMENT METHOD CARDS
+   ═══════════════════════════════════════════════════════════════ */
+
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.paymentCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: #fff;
+  position: relative;
+}
+
+.paymentCard:hover {
+  border-color: var(--navy-light);
+  background: #fafafa;
+}
+
+.paymentCardActive {
+  border-color: var(--navy);
+  background: rgba(30, 58, 95, 0.04);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.08);
+}
+
+.paymentCardIcon {
+  color: var(--navy-light);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.paymentCardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.paymentCardContent strong {
+  font-size: 0.87rem;
+  color: var(--navy);
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.paymentCardContent small {
+  font-size: 0.76rem;
+  color: var(--text-light);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.paymentCheck {
+  color: var(--navy);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RECEIPT UPLOADER
+   ═══════════════════════════════════════════════════════════════ */
+
+.receiptZone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: #fafafa;
+  transition: var(--transition);
+  overflow: hidden;
+  min-height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receiptZoneDrag {
+  border-color: var(--navy-light);
+  background: rgba(30, 58, 95, 0.04);
+}
+
+.receiptLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 22px 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.receiptLabel svg { color: var(--text-light); }
+
+.receiptText {
+  font-size: 0.84rem;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.5;
+}
+
+.receiptText strong { color: var(--navy); }
+
+.receiptHint {
+  font-size: 0.73rem;
+  color: var(--text-light);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.receiptPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  width: 100%;
+}
+
+.receiptImg {
+  max-width: 100%;
+  max-height: 190px;
+  border-radius: var(--radius);
+  object-fit: contain;
+  border: 1px solid var(--border);
+}
+
+.pdfBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-light);
+  font-size: 0.8rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.pdfBadge svg { color: var(--navy-light); }
+
+.receiptRemove {
+  font-size: 0.78rem;
+  color: var(--red);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: 'DM Sans', sans-serif;
+  padding: 0;
+}
+
+.receiptRemove:hover { opacity: 0.75; }
