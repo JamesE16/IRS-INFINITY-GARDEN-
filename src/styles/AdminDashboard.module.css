@@ -56,6 +56,7 @@
 }
 
 .notifyBtn {
+  position: relative;
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -72,6 +73,25 @@
 .notifyBtn:hover {
   background: rgba(255,255,255,0.28);
   border-color: rgba(255,255,255,0.35);  
+}
+
+.notifyBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  border: 2px solid #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 /* LOGOUT BUTTON */
@@ -501,6 +521,91 @@
   transition: background 0.15s;
 }
 .closeBtn:hover {
+  background: var(--navy-light, #2d55c7);
+}
+
+.notificationModal {
+  max-width: 520px;
+}
+
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.notificationItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.notificationDot {
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14);
+}
+
+.notificationItem strong {
+  display: block;
+  color: var(--navy, #1a3c8f);
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.notificationItem p {
+  color: #334155;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0 0 6px;
+}
+
+.notificationItem span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.emptyNotifications {
+  padding: 28px 12px;
+  text-align: center;
+  color: #64748b;
+}
+
+.emptyNotifications strong {
+  display: block;
+  color: var(--navy, #1a3c8f);
+  margin-bottom: 5px;
+}
+
+.emptyNotifications p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.proceedBtn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--navy, #1a3c8f);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.proceedBtn:hover {
   background: var(--navy-light, #2d55c7);
 }
 

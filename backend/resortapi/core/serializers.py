@@ -99,12 +99,16 @@ class ReservationListSerializer(serializers.ModelSerializer):
     facility_image = serializers.CharField(source='facility.image_url', read_only=True)
     guest_full_name = serializers.SerializerMethodField()
     payment_method = serializers.CharField(source='payment.payment_method', read_only=True, allow_null=True)
+    payment_status = serializers.CharField(source='payment.verification_status', read_only=True, allow_null=True)
+    proof_of_payment = serializers.FileField(source='payment.proof_of_payment', read_only=True, allow_null=True)
     
     class Meta:
         model = Reservation
         fields = [
             'id', 'reservation_id', 'facility', 'facility_name', 'facility_image',
-            'guest_full_name', 'payment_method', 'check_in', 'check_out', 'num_guests', 'status',
+            'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address', 'valid_id',
+            'payment_method', 'payment_status', 'proof_of_payment',
+            'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status',
             'total_amount', 'created_at'
         ]
     
@@ -214,9 +218,20 @@ class TransactionLogSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
+    reservation_id = serializers.CharField(source='reservation.reservation_id', read_only=True)
+    guest_name = serializers.SerializerMethodField()
+    facility_name = serializers.CharField(source='reservation.facility.name', read_only=True)
+    proof_of_payment = serializers.FileField(source='reservation.payment.proof_of_payment', read_only=True, allow_null=True)
+
     class Meta:
         model = Notification
-        fields = ['id', 'reservation', 'message', 'is_read', 'created_at']
+        fields = [
+            'id', 'reservation', 'reservation_id', 'guest_name', 'facility_name',
+            'proof_of_payment', 'message', 'is_read', 'created_at'
+        ]
+
+    def get_guest_name(self, obj):
+        return f"{obj.reservation.first_name} {obj.reservation.last_name}".strip()
 
 
 class ScheduleSerializer(serializers.ModelSerializer):

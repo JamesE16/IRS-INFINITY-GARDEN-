@@ -67,7 +67,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
     const value = (status || '').toLowerCase();
     if (value === 'paid' || value === 'verified') return 'paid';
     if (value === 'pending') return 'pending';
-    if (value === 'failed' || value === 'declined' || value === 'rejected') return 'failed';
+    if (value === 'failed' || value === 'declined' || value === 'rejected') return 'declined';
     return 'unknown';
   };
 
@@ -83,7 +83,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
         total: summary.total + 1,
         paid: summary.paid + (status === 'paid' ? 1 : 0),
         pending: summary.pending + (status === 'pending' ? 1 : 0),
-        failed: summary.failed + (status === 'failed' ? 1 : 0),
+        failed: summary.failed + (status === 'declined' ? 1 : 0),
         totalAmount: summary.totalAmount + (Number(transaction.amount) || 0),
       };
     }, { total: 0, paid: 0, pending: 0, failed: 0, totalAmount: 0 });
@@ -92,20 +92,6 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
   const handleView = (transaction) => {
     setSelectedTransaction(transaction);
     setShowModal(true);
-  };
-
-  const handleVerify = async (transaction) => {
-    try {
-      const updated = await adminAPI.verifyPayment(transaction.id);
-      const normalized = normalizeTransaction(updated);
-
-      setTransactions((prev) =>
-        prev.map((item) => (item.id === transaction.id ? normalized : item))
-      );
-    } catch (err) {
-      console.error(err);
-      setError('Unable to verify payment.');
-    }
   };
 
   const handlePrintReceipt = (transaction) => {
@@ -247,6 +233,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                   {filteredTransactions.map((transaction) => {
                     const status = normalizeStatus(transaction.status);
                     const isVerified = status === 'paid';
+                    const isDeclined = status === 'declined';
 
                     return (
                       <tr key={transaction.id}>
@@ -264,20 +251,23 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                             <button className={styles.viewBtn} onClick={() => handleView(transaction)}>
                               <FaEye /> View
                             </button>
-                            <button
-                              className={`${styles.verifyBtn} ${isVerified ? styles.verifiedBtn : ''}`}
-                              onClick={() => !isVerified && handleVerify(transaction)}
-                              disabled={isVerified}
-                            >
-                              <FaCheckCircle /> {isVerified ? 'Verified' : 'Verify'}
-                            </button>
-                            <button
-                              className={`${styles.printBtn} ${!isVerified ? styles.disabledBtn : ''}`}
-                              onClick={() => isVerified && handlePrintReceipt(transaction)}
-                              disabled={!isVerified}
-                            >
-                              <FaPrint /> Print Receipt
-                            </button>
+                            {!isDeclined && (
+                              <>
+                                <span
+                                  className={`${styles.paymentState} ${isVerified ? styles.verifiedState : styles.pendingState}`}
+                                >
+                                  {isVerified ? <FaCheckCircle /> : <FaClock />}
+                                  {isVerified ? 'Verified' : 'Awaiting Confirmation'}
+                                </span>
+                                <button
+                                  className={`${styles.printBtn} ${!isVerified ? styles.disabledBtn : ''}`}
+                                  onClick={() => isVerified && handlePrintReceipt(transaction)}
+                                  disabled={!isVerified}
+                                >
+                                  <FaPrint /> Print Receipt
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       </tr>

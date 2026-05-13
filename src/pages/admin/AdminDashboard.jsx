@@ -48,6 +48,9 @@ export default function AdminDashboard({ role = 'admin' }) {
     availableCottages: 0,
     availablePavilion: 0,
   });
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,13 +83,26 @@ export default function AdminDashboard({ role = 'admin' }) {
       } catch (err) {
         console.error('Failed to load availability:', err);
       }
+
+      try {
+        const notificationData = await adminAPI.getNotifications(true);
+        const unread = Array.isArray(notificationData)
+          ? notificationData
+          : notificationData.results ?? [];
+        setNotificationCount(unread.length);
+        setNotifications(unread);
+      } catch (err) {
+        console.error('Failed to load notifications:', err);
+      }
     };
 
     fetchData();
   }, []);
 
   const isAdmin = role === 'admin';
-  const handleNotifications = () => navigate('/admin/notifications');
+  const reservationPath = isAdmin ? '/admin/reservations' : '/staff/reservations';
+  const handleNotifications = () => setShowNotifications(true);
+  const proceedToReservations = () => navigate(reservationPath);
 
   // ── Group reservations by date so multiple rooms show on same day ────────────
   const reservationsByDate = reservations.reduce((acc, r) => {
@@ -187,13 +203,14 @@ export default function AdminDashboard({ role = 'admin' }) {
                   : 'Infinity Garden Resort - Staff View'}
               </p>
             </div>
-            {isAdmin && (
-              <div className={styles.headerActions}>
-                <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View notifications">
-                  <FaBell />
-                </button>
-              </div>
-            )}
+            <div className={styles.headerActions}>
+              <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View booking notifications">
+                <FaBell />
+                {notificationCount > 0 && (
+                  <span className={styles.notifyBadge}>{notificationCount}</span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -312,6 +329,44 @@ export default function AdminDashboard({ role = 'admin' }) {
       </div>
 
       {/* ── Reserved Rooms Modal ─────────────────────────────────────── */}
+      {showNotifications && (
+        <div className={styles.modalOverlay} onClick={() => setShowNotifications(false)}>
+          <div className={`${styles.modal} ${styles.notificationModal}`} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>Notifications</h3>
+              <button className={styles.modalClose} onClick={() => setShowNotifications(false)}>x</button>
+            </div>
+
+            <div className={styles.notificationList}>
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <div className={styles.notificationItem} key={notification.id}>
+                    <div className={styles.notificationDot} />
+                    <div>
+                      <strong>{notification.guest_name || 'New guest booking'}</strong>
+                      <p>{notification.message}</p>
+                      <span>
+                        {notification.facility_name || 'Reservation'} -{' '}
+                        {new Date(notification.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className={styles.emptyNotifications}>
+                  <strong>No new notifications</strong>
+                  <p>New guest bookings will appear here.</p>
+                </div>
+              )}
+            </div>
+
+            <button className={styles.proceedBtn} onClick={proceedToReservations}>
+              Proceed to Reservation Management
+            </button>
+          </div>
+        </div>
+      )}
+
       {selectedDay && (
         <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>

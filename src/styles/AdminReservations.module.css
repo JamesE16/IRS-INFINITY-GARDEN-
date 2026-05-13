@@ -249,8 +249,27 @@
   background: #dcfce7;
 }
 
+.status_confirmed {
+  background: #dcfce7;
+}
+
 .status_cancelled {
   background: #fee2e2;
+}
+
+.idCell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.unreadDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #0891b2;
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.14);
 }
 
 .actions {
@@ -343,7 +362,7 @@
 }
 
 .largeModal {
-  width: 560px;
+  width: 860px;
   max-width: 95%;
   padding: 0;
   border-radius: 16px;
@@ -381,6 +400,16 @@
   padding: 20px 24px;
 }
 
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 14px;
+}
+
+.fullRow {
+  grid-column: 1 / -1;
+}
+
 .modalBody label {
   display: block;
   font-weight: 600;
@@ -413,6 +442,55 @@
   border: 1px solid #d1d5db;
   color: #111827;
   cursor: not-allowed;
+}
+
+.receiptPanel {
+  margin-top: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.receiptHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.receiptHeader a {
+  color: #2563eb;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.receiptImage {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  background: #111827;
+}
+
+.receiptFrame {
+  display: block;
+  width: 100%;
+  height: 520px;
+  border: 0;
+  background: #fff;
+}
+
+.noReceipt {
+  margin: 0;
+  padding: 24px;
+  color: #64748b;
+  text-align: center;
 }
 
 .modalFooter {

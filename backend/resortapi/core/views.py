@@ -285,6 +285,14 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 proof_of_payment=receipt_image,
                 verification_status='pending'
             )
+
+            Notification.objects.create(
+                reservation=reservation,
+                message=(
+                    f"New reservation from {reservation.first_name} {reservation.last_name} "
+                    f"for {reservation.facility.name}. Payment receipt is ready for review."
+                )
+            )
             
             # Log transaction
             TransactionLog.objects.create(
@@ -313,6 +321,30 @@ class ReservationViewSet(viewsets.ModelViewSet):
             reservation.reviewed_by = request.user
             reservation.reviewed_at = timezone.now()
             reservation.save()
+
+            if new_status == 'confirmed':
+                try:
+                    payment = reservation.payment
+                    payment.verification_status = 'verified'
+                    payment.paid_at = timezone.now()
+                    payment.save(update_fields=['verification_status', 'paid_at', 'updated_at'])
+
+                    TransactionLog.objects.create(
+                        user=request.user,
+                        action='payment_verified',
+                        reservation=reservation,
+                        details={'method': 'reservation_confirmation'}
+                    )
+                except Payment.DoesNotExist:
+                    pass
+            elif new_status == 'cancelled':
+                try:
+                    payment = reservation.payment
+                    payment.verification_status = 'rejected'
+                    payment.paid_at = None
+                    payment.save(update_fields=['verification_status', 'paid_at', 'updated_at'])
+                except Payment.DoesNotExist:
+                    pass
             
             # Log transaction
             action_name = 'reservation_confirmed' if new_status == 'confirmed' else 'reservation_cancelled'
@@ -348,6 +380,14 @@ class ReservationViewSet(viewsets.ModelViewSet):
         
         reservation.status = 'cancelled'
         reservation.save()
+
+        try:
+            payment = reservation.payment
+            payment.verification_status = 'rejected'
+            payment.paid_at = None
+            payment.save(update_fields=['verification_status', 'paid_at', 'updated_at'])
+        except Payment.DoesNotExist:
+            pass
         
         # Log transaction
         TransactionLog.objects.create(
@@ -410,7 +450,22 @@ class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminUser]
 
+    def sync_payment_statuses(self):
+        now = timezone.now()
+        Payment.objects.filter(
+            reservation__status='cancelled'
+        ).exclude(
+            verification_status='rejected'
+        ).update(verification_status='rejected', paid_at=None, updated_at=now)
+
+        Payment.objects.filter(
+            reservation__status='confirmed'
+        ).exclude(
+            verification_status='verified'
+        ).update(verification_status='verified', paid_at=now, updated_at=now)
+
     def get_queryset(self):
+        self.sync_payment_statuses()
         return Payment.objects.select_related('reservation').all()
     
     @action(detail=False, methods=['get'])
@@ -424,6 +479,33 @@ class PaymentViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(payments, many=True)
         return Response(serializer.data)
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    """Reservation notifications for admin and staff."""
+    queryset = Notification.objects.select_related('reservation', 'reservation__facility', 'reservation__payment').all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAdminUser]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        unread = self.request.query_params.get('unread')
+        if unread in ['1', 'true', 'True']:
+            queryset = queryset.filter(is_read=False)
+        return queryset
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({'status': 'Notifications marked as read'}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+        serializer = self.get_serializer(notification)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):

@@ -376,11 +376,19 @@
   color: #991b1b;
 }
 
+.statusDeclined {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
+  width: max-content;
+  min-width: 330px;
+  margin: 0 auto;
 }
 
 .actionBtn,
@@ -426,6 +434,31 @@
   color: var(--navy, #1a3c8f);
   box-shadow: none;
   transform: none;
+}
+
+.paymentState {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #e2e8f4);
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.verifiedState {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: #3b82f6;
+  color: var(--navy, #1a3c8f);
+}
+
+.pendingState {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
 }
 
 .disabledBtn,

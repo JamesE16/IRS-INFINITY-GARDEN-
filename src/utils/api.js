@@ -1,4 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
 
@@ -350,6 +351,31 @@ export const adminAPI = {
 
     const response = await apiRequest(`/payments/by_status/?${params}`);
     if (!response.ok) throw new Error('Failed to fetch payments');
+    return response.json();
+  },
+
+  getNotifications: async (unreadOnly = false) => {
+    const params = new URLSearchParams();
+    if (unreadOnly) params.append('unread', 'true');
+
+    const response = await apiRequest(`/notifications/?${params}`);
+    if (!response.ok) throw new Error('Failed to fetch notifications');
+    return response.json();
+  },
+
+  markNotificationRead: async (id) => {
+    const response = await apiRequest(`/notifications/${id}/mark_read/`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to mark notification as read');
+    return response.json();
+  },
+
+  markAllNotificationsRead: async () => {
+    const response = await apiRequest('/notifications/mark_all_read/', {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to mark notifications as read');
     return response.json();
   },
 

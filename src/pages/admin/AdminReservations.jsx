@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
-import { reservationsAPI } from '../../utils/api';
+import { adminAPI, API_ORIGIN, reservationsAPI } from '../../utils/api';
 import styles from '../../styles/AdminReservations.module.css';
 
 const shortenId = (value) => {
@@ -16,13 +16,33 @@ const normalizeReservation = (reservation) => ({
   guest_name: reservation.guest_full_name || `${reservation.first_name || ''} ${reservation.last_name || ''}`.trim() || 'Guest',
   facility_name: reservation.facility_name || reservation.facility?.name || 'Facility',
   payment: reservation.payment_method || 'N/A',
+  payment_status: reservation.payment_status || 'pending',
+  receipt_url: reservation.proof_of_payment || '',
+  contact: reservation.contact || '',
+  email: reservation.email || '',
+  address: reservation.address || '',
+  valid_id: reservation.valid_id || '',
   check_in: reservation.check_in,
   check_out: reservation.check_out,
+  guests: reservation.num_guests || 0,
+  nights: reservation.nights || 0,
+  total_amount: reservation.total_amount || 0,
+  special_requests: reservation.special_requests || '',
+  created_at: reservation.created_at,
   status: (reservation.status || 'pending').toLowerCase(),
 });
 
+const toReceiptSrc = (url) => {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
+const isPdfReceipt = (url) => /\.pdf($|\?)/i.test(url || '');
+
 export default function AdminReservations({ role = 'admin' }) {
   const [reservations, setReservations] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,9 +53,16 @@ export default function AdminReservations({ role = 'admin' }) {
     const loadReservations = async () => {
       setIsLoading(true);
       try {
-        const data = await reservationsAPI.getAll();
+        const [data, notificationData] = await Promise.all([
+          reservationsAPI.getAll(),
+          adminAPI.getNotifications(true),
+        ]);
         const list = Array.isArray(data) ? data : data.results ?? [];
         setReservations(list.map(normalizeReservation));
+        const unread = Array.isArray(notificationData)
+          ? notificationData
+          : notificationData.results ?? [];
+        setNotifications(unread);
         setError('');
       } catch (err) {
         console.error(err);
@@ -47,6 +74,13 @@ export default function AdminReservations({ role = 'admin' }) {
 
     loadReservations();
   }, []);
+
+  const unreadByReservation = useMemo(() => {
+    return notifications.reduce((acc, notification) => {
+      acc[notification.reservation] = notification;
+      return acc;
+    }, {});
+  }, [notifications]);
 
   const filteredReservations = useMemo(() => {
     if (filter === 'all') return reservations;
@@ -81,6 +115,19 @@ export default function AdminReservations({ role = 'admin' }) {
     setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
   };
 
+  const handleViewReservation = async (reservation) => {
+    setSelectedReservation(reservation);
+    const notification = unreadByReservation[reservation.id];
+    if (!notification) return;
+
+    try {
+      await adminAPI.markNotificationRead(notification.id);
+      setNotifications((prev) => prev.filter((item) => item.id !== notification.id));
+    } catch (err) {
+      console.error('Unable to mark notification as read:', err);
+    }
+  };
+
   return (
     <div className={styles.adminShell}>
       <Sidebar role={role} />
@@ -113,7 +160,6 @@ export default function AdminReservations({ role = 'admin' }) {
 
         <div className={styles.container}>
           {error && <div className={styles.errorBanner}>{error}</div>}
-
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
@@ -139,7 +185,12 @@ export default function AdminReservations({ role = 'admin' }) {
                 ) : (
                   filteredReservations.map((reservation) => (
                     <tr key={reservation.id}>
-                      <td title={reservation.booking_id}>{reservation.booking_id_short}</td>
+                      <td title={reservation.booking_id}>
+                        <div className={styles.idCell}>
+                          {unreadByReservation[reservation.id] && <span className={styles.unreadDot} />}
+                          <span>{reservation.booking_id_short}</span>
+                        </div>
+                      </td>
                       <td>{reservation.guest_name}</td>
                       <td>{reservation.facility_name}</td>
                       <td>{new Date(reservation.check_in).toLocaleDateString()}</td>
@@ -153,7 +204,7 @@ export default function AdminReservations({ role = 'admin' }) {
                         <td className={styles.actions}>
                           <button
                             className={styles.viewBtn}
-                            onClick={() => setSelectedReservation(reservation)}
+                            onClick={() => handleViewReservation(reservation)}
                           >
                             View
                           </button>
@@ -207,20 +258,92 @@ export default function AdminReservations({ role = 'admin' }) {
               </div>
 
               <div className={styles.modalBody}>
-                <label>Guest Name</label>
-                <input value={selectedReservation.guest_name} readOnly />
+                <div className={styles.detailGrid}>
+                  <div>
+                    <label>Guest Name</label>
+                    <input value={selectedReservation.guest_name} readOnly />
+                  </div>
+                  <div>
+                    <label>Contact</label>
+                    <input value={selectedReservation.contact || 'N/A'} readOnly />
+                  </div>
+                  <div>
+                    <label>Email</label>
+                    <input value={selectedReservation.email || 'N/A'} readOnly />
+                  </div>
+                  <div>
+                    <label>Valid ID</label>
+                    <input value={selectedReservation.valid_id || 'N/A'} readOnly />
+                  </div>
+                  <div className={styles.fullRow}>
+                    <label>Address</label>
+                    <input value={selectedReservation.address || 'N/A'} readOnly />
+                  </div>
+                  <div>
+                    <label>Facility</label>
+                    <input value={selectedReservation.facility_name} readOnly />
+                  </div>
+                  <div>
+                    <label>Guests</label>
+                    <input value={selectedReservation.guests || 'N/A'} readOnly />
+                  </div>
+                  <div>
+                    <label>Check-in</label>
+                    <input value={new Date(selectedReservation.check_in).toLocaleDateString()} readOnly />
+                  </div>
+                  <div>
+                    <label>Check-out</label>
+                    <input value={new Date(selectedReservation.check_out).toLocaleDateString()} readOnly />
+                  </div>
+                  <div>
+                    <label>Nights</label>
+                    <input value={selectedReservation.nights || 'N/A'} readOnly />
+                  </div>
+                  <div>
+                    <label>Total Amount</label>
+                    <input value={`PHP ${Number(selectedReservation.total_amount || 0).toLocaleString()}`} readOnly />
+                  </div>
+                  <div>
+                    <label>Payment Method</label>
+                    <input value={selectedReservation.payment} readOnly />
+                  </div>
+                  <div>
+                    <label>Payment Status</label>
+                    <input value={selectedReservation.payment_status} readOnly />
+                  </div>
+                  <div className={styles.fullRow}>
+                    <label>Special Requests</label>
+                    <input value={selectedReservation.special_requests || 'None'} readOnly />
+                  </div>
+                </div>
 
-                <label>Facility</label>
-                <input value={selectedReservation.facility_name} readOnly />
-
-                <label>Payment Method</label>
-                <input value={selectedReservation.payment} readOnly />
-
-                <label>Check-in</label>
-                <input value={new Date(selectedReservation.check_in).toLocaleDateString()} readOnly />
-
-                <label>Check-out</label>
-                <input value={new Date(selectedReservation.check_out).toLocaleDateString()} readOnly />
+                <div className={styles.receiptPanel}>
+                  <div className={styles.receiptHeader}>
+                    <strong>Attached Payment Receipt</strong>
+                    {selectedReservation.receipt_url && (
+                      <a href={toReceiptSrc(selectedReservation.receipt_url)} target="_blank" rel="noreferrer">
+                        Open file
+                      </a>
+                    )}
+                  </div>
+                  {selectedReservation.receipt_url ? (
+                    isPdfReceipt(selectedReservation.receipt_url) ? (
+                      <iframe
+                        className={styles.receiptFrame}
+                        src={toReceiptSrc(selectedReservation.receipt_url)}
+                        title="Payment receipt"
+                      />
+                    ) : (
+                      <img
+                        className={styles.receiptImage}
+                        src={toReceiptSrc(selectedReservation.receipt_url)}
+                        alt="Payment receipt"
+                      />
+                    )
+                  ) : (
+                    <p className={styles.noReceipt}>No receipt image was attached to this reservation.</p>
+                  )}
+                </div>
               </div>
 
               <div className={styles.modalFooter}>
