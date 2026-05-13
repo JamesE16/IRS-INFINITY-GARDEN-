@@ -33,7 +33,7 @@
 }
 
 .heroEyebrow {
- display: inline-block;
+  display: inline-block;
   background: rgba(30, 58, 95, 0.6);
   color: #fff;
   font-size: 0.72rem;
@@ -52,13 +52,11 @@
   line-height: 1.1;
   margin-bottom: 0.75rem;
   text-shadow: 0 2px 20px rgba(0,0,0,0.3);
-  font-family: 'DM Sans', sans-serif; /* ✅ applied here */
-
-  
+  font-family: 'DM Sans', sans-serif;
 }
+
 .heroTitle span {
   color: #ffd166;
-  
 }
 
 .heroSub {
@@ -66,7 +64,6 @@
   font-size: 1.05rem;
   font-weight: 400;
   margin-bottom: 0.5rem;
-  
 }
 
 .heroDesc {
@@ -200,7 +197,7 @@
 /* ── CTA BAND ── */
 .ctaBand {
   background: var(--navy-dark);
-  padding: 60px 2rem;
+  padding: 40px 2rem 20px;
 }
 
 .ctaBand h2 {
@@ -212,14 +209,14 @@
 
 .ctaBand p {
   color: rgba(255,255,255,0.7);
-  margin-bottom: 1.75rem;
+  margin-bottom: 0;
   font-size: 0.95rem;
 }
 
 /* ── FEEDBACK SECTION ── */
 .feedbackSection {
   background: var(--navy-dark);
-  padding: 3rem 2rem;
+  padding: 20px 2rem 40px;
   text-align: center;
 }
 
@@ -265,7 +262,6 @@
   }
 }
 
-
 .fadeImage {
   width: 100%;
   height: 100%;
@@ -289,16 +285,14 @@
   cursor: pointer;
   transition: var(--transition);
   display: flex;
-  align-items: center;     
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
   text-align: center;
   margin: 0 auto;
 }
 
 .viewBtn:hover {
-  background:#2a4f7c;
+  background: #2a4f7c;
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(30, 58, 95, 0.3);
-
-
 }

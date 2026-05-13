@@ -123,18 +123,18 @@ export default function AdminReservations({ role = 'admin' }) {
                   <th>Facility</th>
                   <th>Date</th>
                   <th>Status</th>
-                  <th>Actions</th>
+                  {filter !== 'all' && <th>Actions</th>}
                 </tr>
               </thead>
 
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="6">Loading reservations...</td>
+                    <td colSpan={filter !== 'all' ? 6 : 5}>Loading reservations...</td>
                   </tr>
                 ) : filteredReservations.length === 0 ? (
                   <tr>
-                    <td colSpan="6">No reservations found.</td>
+                    <td colSpan={filter !== 'all' ? 6 : 5}>No reservations found.</td>
                   </tr>
                 ) : (
                   filteredReservations.map((reservation) => (
@@ -148,40 +148,43 @@ export default function AdminReservations({ role = 'admin' }) {
                           {reservation.status}
                         </span>
                       </td>
-                      <td className={styles.actions}>
-                        <button
-                          className={styles.viewBtn}
-                          onClick={() => setSelectedReservation(reservation)}
-                        >
-                          View
-                        </button>
 
-                        {reservation.status === 'confirmed' && (
+                      {filter !== 'all' && (
+                        <td className={styles.actions}>
                           <button
-                            className={styles.cancelBtnSmall}
-                            onClick={() => handleArchive(reservation.id)}
+                            className={styles.viewBtn}
+                            onClick={() => setSelectedReservation(reservation)}
                           >
-                            Archive
+                            View
                           </button>
-                        )}
 
-                        {reservation.status === 'pending' && (
-                          <>
-                            <button
-                              className={styles.approveBtn}
-                              onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
-                            >
-                              Approve
-                            </button>
+                          {reservation.status === 'confirmed' && (
                             <button
                               className={styles.cancelBtnSmall}
-                              onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                              onClick={() => handleArchive(reservation.id)}
                             >
-                              Cancel
+                              Archive
                             </button>
-                          </>
-                        )}
-                      </td>
+                          )}
+
+                          {reservation.status === 'pending' && (
+                            <>
+                              <button
+                                className={styles.approveBtn}
+                                onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
+                              >
+                                Approve
+                              </button>
+                              <button
+                                className={styles.cancelBtnSmall}
+                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

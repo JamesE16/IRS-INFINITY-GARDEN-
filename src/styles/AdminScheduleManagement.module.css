@@ -14,22 +14,22 @@
 .topHeader {
   background: linear-gradient(135deg, var(--navy, #1a3c8f) 0%, var(--navy-light, #2d55c7) 100%);
   color: #fff;
-  padding: 20px 2rem;  
+  padding: 20px 2rem;
   border-bottom: 2px solid rgba(255,255,255,0.1);
 }
 
 .topHeader h1 {
-  font-size: 1.8rem; 
+  font-size: 1.8rem;
   font-weight: 700;
-  margin: 0; 
-  line-height: 1.2;  
+  margin: 0;
+  line-height: 1.2;
 }
 
 .topHeader p {
-  color: rgba(255, 255, 255, 0.85);  
-  font-size: 0.95rem;  
-  margin: 0;  
-  line-height: 1.3;  
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.3;
   margin-top: 5.5px;
 }
 
@@ -81,19 +81,20 @@
   gap: 25px;
 }
 
+/* CALENDAR BOX */
 .calendarBox {
   margin-top: 10px;
   background: #fff;
-  padding: 22px 24px;
+  padding: 18px 20px;
   border-radius: 14px;
   border: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 2px 8px rgba(26, 60, 143, 0.06);
 }
 
 .calendarBox h3 {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   color: var(--navy, #1a3c8f);
 }
 
@@ -101,15 +102,16 @@
   width: 100%;
 }
 
+/* CALENDAR HEADER */
 .calHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .calHeader h2 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--navy, #1a3c8f);
 }
@@ -119,8 +121,8 @@
   color: #fff;
   border: none;
   border-radius: 6px;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   font-size: 10px;
   cursor: pointer;
   display: flex;
@@ -133,40 +135,38 @@
   background: var(--navy-light, #2d55c7);
 }
 
-/* DAYS */
 .daysRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  margin-bottom: 8px;
+  gap: 2px;
+  margin-bottom: 4px;
 }
 
 .dayName {
   text-align: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #94a3b8;
   text-transform: uppercase;
-  padding: 6px 0;
+  padding: 4px 0;
 }
 
-/* GRID */
 .row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  margin-bottom: 8px;
+  gap: 2px;
+  margin-bottom: 4px;
 }
 
 .cell {
-  min-height: 58px;
-  border-radius: 6px;
+  min-height: 55px;
+  border-radius: 5px;
   border: 1px solid #f1f5f9;
-  padding: 5px 6px;
+  padding: 3px 4px;
   background: #fff;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   transition: background 0.12s;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .date {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--navy, #1a3c8f);
 }
@@ -201,12 +201,12 @@
 .event {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  padding: 2px 4px;
+  padding: 1px 3px;
   border-radius: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -214,14 +214,13 @@
 }
 
 .dot {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: #93c5fd;
   flex-shrink: 0;
 }
 
-/* MODAL OVERLAY */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -233,7 +232,6 @@
   padding: 20px;
 }
 
-/* MODAL PANEL */
 .modal {
   background: #fff;
   border-radius: 14px;
@@ -259,7 +257,6 @@
   display: none;
 }
 
-/* MODAL HEADER */
 .modalHeader {
   display: flex;
   align-items: center;
@@ -360,7 +357,8 @@
 }
 
 /* STATUS BADGES */
-.statusApproved {
+.statusApproved,
+.statusActive {
   display: inline-block;
   background: #d1fae5;
   color: #065f46;
@@ -380,16 +378,6 @@
   font-weight: 600;
 }
 
-.statusActive {
-  display: inline-block;
-  background: #d1fae5;
-  color: #065f46;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
 .statusInactive {
   display: inline-block;
   background: #fee2e2;
@@ -400,7 +388,6 @@
   font-weight: 600;
 }
 
-/* MODAL ACTIONS */
 .modalActions {
   padding: 16px 24px;
   display: flex;
@@ -409,8 +396,6 @@
   background: #f9fafb;
   border-radius: 0 0 12px 12px;
 }
-
-
 
 .cancelBtn:disabled {
   opacity: 0.5;

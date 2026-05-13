@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
+import { adminAPI } from "../../utils/api";
 
 import {
   format,
@@ -16,80 +17,114 @@ import {
 
 import styles from "../../styles/AdminScheduleManagement.module.css";
 
-// ───────── FULL YEAR RESERVATIONS (WITH NAMES + STATUS) ─────────
-const rawReservations = [
-  // JANUARY
-  { date: "2026-01-03", label: "Pavilion A", customer: "Juan Dela Cruz", status: "pending" },
-  { date: "2026-01-07", label: "Garde Cottage", customer: "Maria Santos", status: "approved" },
-  { date: "2026-01-12", label: "Room 101", customer: "John Reyes", status: "pending" },
-  { date: "2026-01-15", label: "New Year Event - Pavilion B", customer: "ABC Corp", status: "approved" },
-
-  // FEBRUARY
-  { date: "2026-02-02", label: "Cottage 2", customer: "Ana Lopez", status: "pending" },
-  { date: "2026-02-05", label: "Room 102", customer: "Carlos Mendoza", status: "approved" },
-
-  // MARCH
-  { date: "2026-03-03", label: "Cottage 3", customer: "Elena Cruz", status: "pending" },
-  { date: "2026-03-06", label: "Room 101", customer: "Miguel Torres", status: "approved" },
-
-  // APRIL
-  { date: "2026-04-03", label: "Cottage 1", customer: "Sofia Reyes", status: "pending" },
-  { date: "2026-04-07", label: "Pavilion A", customer: "David Lim", status: "approved" },
-  { date: "2026-04-11", label: "Cottage 3", customer: "Isabella Garcia", status: "pending" },
-  { date: "2026-04-15", label: "Room 101", customer: "Andres Cruz", status: "approved" },
-  { date: "2026-04-20", label: "Wedding Event - Pavilion B", customer: "Grace Tan", status: "pending" },
-  { date: "2026-04-24", label: "Room 201", customer: "Mark Villanueva", status: "approved" },
-
-  // MAY
-  { date: "2026-05-02", label: "Pavilion A", customer: "Liam Santos", status: "pending" },
-  { date: "2026-05-06", label: "Room 102", customer: "Noah Reyes", status: "approved" },
-
-  // JUNE
-  { date: "2026-06-01", label: "Room 101", customer: "Emma Garcia", status: "pending" },
-  { date: "2026-06-05", label: "Cottage 3", customer: "Lucas Mendoza", status: "approved" },
-
-  // JULY
-  { date: "2026-07-02", label: "Cottage 1", customer: "Sophia Cruz", status: "pending" },
-  { date: "2026-07-06", label: "Room 101", customer: "Ethan Lim", status: "approved" },
-
-  // AUGUST
-  { date: "2026-08-03", label: "Room 102", customer: "Olivia Santos", status: "pending" },
-  { date: "2026-08-07", label: "Cottage 2", customer: "James Reyes", status: "approved" },
-
-  // SEPTEMBER
-  { date: "2026-09-02", label: "Room 101", customer: "Ava Cruz", status: "pending" },
-  { date: "2026-09-06", label: "Cottage 3", customer: "Benjamin Garcia", status: "approved" },
-
-  // OCTOBER
-  { date: "2026-10-03", label: "Cottage 1", customer: "Charlotte Lim", status: "pending" },
-  { date: "2026-10-07", label: "Room 102", customer: "Daniel Mendoza", status: "approved" },
-
-  // NOVEMBER
-  { date: "2026-11-02", label: "Room 101", customer: "Amelia Reyes", status: "pending" },
-  { date: "2026-11-06", label: "Cottage 2", customer: "Henry Santos", status: "approved" },
-
-  // DECEMBER
-  { date: "2026-12-01", label: "Room 101", customer: "Mia Cruz", status: "pending" },
-  { date: "2026-12-05", label: "Cottage 3", customer: "Alexander Garcia", status: "approved" },
-  { date: "2026-12-20", label: "Wedding Event - Pavilion B", customer: "Sophia & Mark", status: "approved" },
-  { date: "2026-12-31", label: "New Year Countdown - Pavilion A", customer: "Event Group", status: "pending" }
-];
-
-const reservations = rawReservations.map((reservation, index) => ({
-  ...reservation,
-  guests: 4 + (index % 4)
-}));
-
 export default function AdminScheduleManagement({ role = 'admin' }) {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 3));
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState("pending");
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [reservations, setReservations] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    const fetchReservations = async () => {
+      setIsLoading(true);
+      try {
+        const response = await adminAPI.getCalendarReservations();
+        // getCalendarReservations returns { date, room } — but here we need
+        // full reservation data, so fetch all reservations directly
+        const data = await fetchAllReservations();
+        setReservations(data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load reservations:', err);
+        setError('Unable to load reservations.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []);
+
+  // Fetch full reservation list and normalize fields
+  const fetchAllReservations = async () => {
+    const { default: api } = await import('../../utils/api');
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/reservations/`,
+      {
+        credentials: 'include',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) throw new Error('Failed to fetch reservations');
+
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data.results ?? [];
+
+    // Normalize each reservation to a consistent shape
+    const normalized = [];
+    list.forEach((r) => {
+      const facilityName =
+        r.facility_name ||
+        r.facility?.name ||
+        r.room_name ||
+        r.room ||
+        'Reserved';
+
+      const customerName =
+        r.guest_name ||
+        r.customer_name ||
+        r.user_name ||
+        r.user?.full_name ||
+        r.user?.email ||
+        'Guest';
+
+      const checkIn  = r.check_in  || r.check_in_date  || r.date;
+      const checkOut = r.check_out || r.check_out_date || null;
+      const status   = (r.status || 'pending').toLowerCase();
+      const guests   = r.guests ?? r.guest_count ?? r.num_guests ?? 1;
+
+      if (!checkIn) return;
+
+      // Expand multi-night stays
+      if (checkOut && checkOut !== checkIn) {
+        let current = new Date(checkIn);
+        const end   = new Date(checkOut);
+        while (current < end) {
+          normalized.push({
+            id: r.id,
+            date: current.toISOString().split('T')[0],
+            label: facilityName,
+            customer: customerName,
+            status,
+            guests,
+          });
+          current.setDate(current.getDate() + 1);
+        }
+      } else {
+        normalized.push({
+          id: r.id,
+          date: checkIn,
+          label: facilityName,
+          customer: customerName,
+          status,
+          guests,
+        });
+      }
+    });
+
+    return normalized;
+  };
 
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  // FILTER
+  // Filter reservations by current month + active tab
   const filteredReservations = reservations.filter(r => {
     const resDate = new Date(r.date);
     const sameMonth = isSameMonth(resDate, currentDate);
@@ -97,13 +132,12 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
     return sameMonth && statusMatch;
   });
 
-  const getCount = (type) => {
-    return reservations.filter(r => {
+  const getCount = (type) =>
+    reservations.filter(r => {
       const resDate = new Date(r.date);
       const sameMonth = isSameMonth(resDate, currentDate);
       return type === "all" ? sameMonth : sameMonth && r.status === type;
     }).length;
-  };
 
   const renderHeader = () => (
     <div className={styles.calHeader}>
@@ -128,35 +162,39 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
 
   const renderCells = () => {
     const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart);
-    const endDate = endOfWeek(monthEnd);
+    const monthEnd   = endOfMonth(monthStart);
+    const startDate  = startOfWeek(monthStart);
+    const endDate    = endOfWeek(monthEnd);
 
     const rows = [];
     let days = [];
-    let day = startDate;
+    let day  = startDate;
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const event = filteredReservations.find(r =>
+        // Get ALL reservations on this day (not just first)
+        const dayReservations = filteredReservations.filter(r =>
           isSameDay(new Date(r.date), day)
         );
-
         const isDisabled = !isSameMonth(day, monthStart);
+        const hasEvent   = dayReservations.length > 0;
 
         days.push(
           <div
             key={day.toString()}
-            className={`${styles.cell} ${isDisabled ? styles.disabled : ""} ${event ? styles.hasEvent : ""}`}
-            onClick={() => event && setSelectedReservation(event)}
+            className={`${styles.cell} ${isDisabled ? styles.disabled : ""} ${hasEvent ? styles.hasEvent : ""}`}
+            onClick={() => hasEvent && setSelectedReservation(dayReservations)}
           >
             <span className={styles.date}>{format(day, "d")}</span>
 
-            {event && (
-              <div className={styles.event}>
+            {dayReservations.slice(0, 2).map((event, idx) => (
+              <div key={idx} className={styles.event}>
                 <span className={styles.dot}></span>
-                {event.label} - {event.customer} ({event.status})
+                {event.label}
               </div>
+            ))}
+            {dayReservations.length > 2 && (
+              <div className={styles.moreEvents}>+{dayReservations.length - 2} more</div>
             )}
           </div>
         );
@@ -189,7 +227,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
                 : 'Infinity Garden Resort - Staff View'}
             </p>
           </div>
-
         </div>
 
         <div className={styles.container}>
@@ -208,27 +245,53 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
           <div className={styles.calendarBox}>
             <h3>Reservation Calendar and Availability</h3>
 
-            <div className={styles.calendar}>
-              {renderHeader()}
-              {renderDays()}
-              {renderCells()}
-            </div>
+            {error && (
+              <div className={styles.errorBanner}>
+                <p>{error}</p>
+              </div>
+            )}
+
+            {isLoading ? (
+              <div className={styles.loadingState}>
+                <p>Loading reservations...</p>
+              </div>
+            ) : (
+              <div className={styles.calendar}>
+                {renderHeader()}
+                {renderDays()}
+                {renderCells()}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
+      {/* Modal — shows all reserved rooms for the clicked day */}
       {selectedReservation && (
         <div className={styles.modalOverlay} onClick={() => setSelectedReservation(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3>Reservation Details</h3>
+              <h3>Reserved Facilities</h3>
               <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.modalRow}><span>Name</span><strong>{selectedReservation.customer}</strong></div>
-              <div className={styles.modalRow}><span>Room / Facility</span><strong>{selectedReservation.label}</strong></div>
-              <div className={styles.modalRow}><span>Guests</span><strong>{selectedReservation.guests}</strong></div>
-              <div className={styles.modalRow}><span>Date</span><strong>{selectedReservation.date}</strong></div>
+              {selectedReservation.map((r, idx) => (
+                <div key={idx} className={styles.modalItem}>
+                  <div className={styles.modalRow}>
+                    <span>Room / Facility</span>
+                    <strong>{r.label}</strong>
+                  </div>
+                  <div className={styles.modalRow}>
+                    <span>Status</span>
+                    <strong className={r.status === 'approved' ? styles.statusApproved : styles.statusPending}>
+                      {r.status}
+                    </strong>
+                  </div>
+                  {idx < selectedReservation.length - 1 && (
+                    <hr className={styles.modalDivider} />
+                  )}
+                </div>
+              ))}
             </div>
             <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
           </div>

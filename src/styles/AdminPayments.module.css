@@ -9,7 +9,6 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
 }
 
 .header {
@@ -17,7 +16,6 @@
   color: #fff;
   padding: 20px 2rem;  
   border-bottom: 2px solid rgba(255,255,255,0.1);
- 
 }
 
 .headerContent {
@@ -98,70 +96,6 @@
   }
 }
 
-.table th,
-.table td,
-.table td div,
-.table td span,
-.table td small,
-.table td strong {
-  color: var(--navy, #1a3c8f);
-  font-weight: 600;
-}
-
-.table button {
-  background: transparent;
-  border: 1px solid var(--navy, #1a3c8f);
-  color: var(--navy, #1a3c8f);
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  box-shadow: none;
-}
-
-.table button:hover,
-.table button:active {
-  background: var(--navy, #1a3c8f);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
-  transform: none;
-}
-
-/* Shared management table styling */
-.table {
-  background: #fff;
-}
-
-.table thead,
-.table th {
-  background: #f8fafc;
-}
-
-.table th,
-.table td {
-  text-align: center;
-  vertical-align: middle;
-  color: var(--navy, #1a3c8f);
-}
-
-.table th {
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.table tbody tr:nth-child(even) {
-  background: #f8fafc;
-}
-
-.table tbody tr:hover {
-  background: rgba(59, 130, 246, 0.05);
-}
-
-.table button:hover,
-.table button:active {
-  transform: none;
-}
-
 .statCard {
   background: #fff;
   border-radius: 12px;
@@ -220,7 +154,6 @@
   line-height: 1;
 }
 
-/* Summary Section */
 .summarySection {
   background: #fff;
   border-radius: 12px;
@@ -263,7 +196,6 @@
   color: var(--navy, #1a3c8f);
 }
 
-/* ===== ERROR BANNER FROM DASHBOARD ===== */
 .errorBanner {
   display: flex;
   align-items: center;
@@ -307,13 +239,15 @@
   font-size: 0.9rem;
 }
 
-/* ===== TABLE WRAPPER ===== */
 .tableWrapper {
   background: #fff;
   border-radius: 12px;
   border: 1px solid var(--border, #e2e8f4);
-  overflow: hidden;
   box-shadow: 0 2px 8px rgba(26, 60, 143, 0.06);
+  max-height: 400px;        
+  overflow-y: auto;         
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -322,7 +256,13 @@
 }
 
 .table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   background: #f8fafc;
+}
+
+.table thead {
   border-bottom: 1px solid var(--border, #e2e8f4);
 }
 
@@ -332,6 +272,8 @@
   font-weight: 700;
   color: var(--navy, #1a3c8f);
   font-size: 0.9rem;
+  white-space: nowrap;
+  background: #f8fafc;
 }
 
 .table td {
@@ -343,17 +285,41 @@
   vertical-align: middle;
 }
 
+.table th,
+.table td,
+.table td div,
+.table td span,
+.table td small,
+.table td strong {
+  color: var(--navy, #1a3c8f);
+  font-weight: 600;
+}
+
+.table button {
+  background: transparent;
+  border: 1px solid var(--navy, #1a3c8f);
+  color: var(--navy, #1a3c8f);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.table button:hover,
+.table button:active {
+  background: var(--navy, #1a3c8f);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+  transform: none;
+}
+
 .table tbody tr:nth-child(even) {
   background: #f8fafc;
 }
 
 .table tbody tr:hover {
   background: rgba(59, 130, 246, 0.05);
-}
-
-.table button:hover,
-.table button:active {
-  transform: none;
 }
 
 .transactionId {
@@ -433,6 +399,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .actionBtn:hover,
@@ -478,7 +445,7 @@
   transform: none;
 }
 
-/* ===== EXACT MODAL FROM DASHBOARD ===== */
+/* ===== MODAL ===== */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -649,5 +616,9 @@
 
   .statsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .tableWrapper {
+    max-height: 400px;
   }
 }

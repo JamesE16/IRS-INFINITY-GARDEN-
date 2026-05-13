@@ -18,26 +18,6 @@ import {
   isSameDay
 } from "date-fns";
 
-// ─── MOCK DATA (remove when backend is ready) ─────────────────────────────────
-const MOCK_STATS = {
-  total_reservations: 45,
-  approved_count: 32,
-  pending_count: 8,
-  cancelled_count: 5,
-  total_revenue: 124500,
-  average_booking_value: 2767,
-  total_guests: 200,
-  repeat_guests: 45,
-};
-
-const MOCK_RESERVATIONS = [
-  { date: "2026-04-07", name: "Cristalyn Llarenas",      room: "Pavilion A",  guests: 5 },
-  { date: "2026-04-11", name: "James Higoy",   room: "Cottage 3",   guests: 3 },
-  { date: "2026-04-20", name: "Joanna Cooper",   room: "Pavilion B",  guests: 8 },
-  { date: "2026-04-24", name: "Sheena Emperador",  room: "Room 201",    guests: 2 },
-  { date: "2026-04-29", name: "Zean Marquez", room: "Pavilion A",  guests: 6 },
-];
-
 // ─── STAT CARD COMPONENT ──────────────────────────────────────────────────────
 function StatCard({ label, value, iconBg, iconStroke, children }) {
   return (
@@ -61,31 +41,60 @@ export default function AdminDashboard({ role = 'admin' }) {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedReservation, setSelectedReservation] = useState(null);
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
+  const [selectedDay, setSelectedDay] = useState(null); // holds array of rooms for clicked day
+  const [reservations, setReservations] = useState([]);
+  const [availability, setAvailability] = useState({
+    availableRooms: 0,
+    availableCottages: 0,
+    availablePavilion: 0,
+  });
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
         const summary = await adminAPI.getReservationSummary();
         const guestReport = await adminAPI.getGuestReport();
         setStats({ ...summary, ...guestReport });
-
-        // DYNAMIC: uncomment to fetch real calendar reservations
-        // const calendarData = await adminAPI.getCalendarReservations();
-        // setReservations(calendarData);
-
       } catch (err) {
-        console.log('Using demo data (backend offline)');
-        setStats(MOCK_STATS);
+        console.error('Failed to load stats:', err);
+        setError('Unable to load dashboard stats.');
+      }
+
+      try {
+        const calendarData = await adminAPI.getCalendarReservations();
+        // Expected shape: [{ date: "2026-04-07", room: "Pavilion A" }, ...]
+        // If multiple rooms share a date, group them below
+        setReservations(Array.isArray(calendarData) ? calendarData : calendarData.results ?? []);
+      } catch (err) {
+        console.error('Failed to load calendar reservations:', err);
+      }
+
+      try {
+        const avail = await adminAPI.getAvailability();
+        // Expected shape: { availableRooms: 10, availableCottages: 4, availablePavilion: 0 }
+        setAvailability({
+          availableRooms: avail.availableRooms ?? 0,
+          availableCottages: avail.availableCottages ?? 0,
+          availablePavilion: avail.availablePavilion ?? 0,
+        });
+      } catch (err) {
+        console.error('Failed to load availability:', err);
       }
     };
-    fetchStats();
+
+    fetchData();
   }, []);
 
   const isAdmin = role === 'admin';
-
   const handleNotifications = () => navigate('/admin/notifications');
+
+  // ── Group reservations by date so multiple rooms show on same day ────────────
+  const reservationsByDate = reservations.reduce((acc, r) => {
+    const key = format(new Date(r.date), 'yyyy-MM-dd');
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(r.room);
+    return acc;
+  }, {});
 
   // ── Calendar helpers ────────────────────────────────────────────────────────
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
@@ -124,7 +133,9 @@ export default function AdminDashboard({ role = 'admin' }) {
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const reservation = reservations.find(r => isSameDay(new Date(r.date), day));
+        const key = format(day, 'yyyy-MM-dd');
+        const rooms = reservationsByDate[key] || [];
+        const hasReservation = rooms.length > 0;
         const isToday = isSameDay(day, new Date());
         const notThisMonth = !isSameMonth(day, monthStart);
 
@@ -133,17 +144,18 @@ export default function AdminDashboard({ role = 'admin' }) {
             key={day.toString()}
             className={[
               styles.cell,
-              notThisMonth  ? styles.disabled  : "",
-              reservation   ? styles.reserved  : "",
-              isToday && !reservation ? styles.today : "",
+              notThisMonth   ? styles.disabled  : "",
+              hasReservation ? styles.reserved  : "",
+              isToday && !hasReservation ? styles.today : "",
             ].join(" ")}
-            onClick={() => reservation && setSelectedReservation(reservation)}
+            onClick={() => hasReservation && setSelectedDay(rooms)}
           >
             <span className={styles.cellDay}>{format(day, "d")}</span>
-            {reservation && (
+            {/* Show first room, with +N if multiple */}
+            {hasReservation && (
               <span className={styles.cellEvent}>
                 <span className={styles.cellEventDot} />
-                {reservation.room}
+                {rooms[0]}{rooms.length > 1 ? ` +${rooms.length - 1}` : ''}
               </span>
             )}
           </div>
@@ -157,11 +169,6 @@ export default function AdminDashboard({ role = 'admin' }) {
     }
     return <div>{rows}</div>;
   };
-
-  // DYNAMIC: replace these with real availability data from API
-  const availableRooms    = 10;
-  const availableCottages = 4;
-  const availablePavilion = 0;
 
   return (
     <div className={styles.adminShell}>
@@ -284,16 +291,16 @@ export default function AdminDashboard({ role = 'admin' }) {
                 <p className={styles.summarySectionTitle}>Reservation Availability</p>
                 <div className={styles.summaryRow}>
                   <span>Available Rooms</span>
-                  <strong>{availableRooms}</strong>
+                  <strong>{availability.availableRooms}</strong>
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Available Cottage</span>
-                  <strong>{availableCottages}</strong>
+                  <strong>{availability.availableCottages}</strong>
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Available Pavilion</span>
-                  <strong className={availablePavilion === 0 ? styles.summaryRed : ""}>
-                    {availablePavilion}
+                  <strong className={availability.availablePavilion === 0 ? styles.summaryRed : ""}>
+                    {availability.availablePavilion}
                   </strong>
                 </div>
               </div>
@@ -304,21 +311,23 @@ export default function AdminDashboard({ role = 'admin' }) {
         </div>
       </div>
 
-      {/* ── Reservation Detail Modal ─────────────────────────────────── */}
-      {selectedReservation && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedReservation(null)}>
+      {/* ── Reserved Rooms Modal ─────────────────────────────────────── */}
+      {selectedDay && (
+        <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3>Reservation Details</h3>
-              <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
+              <h3>Reserved Facilities</h3>
+              <button className={styles.modalClose} onClick={() => setSelectedDay(null)}>✕</button>
             </div>
             <div className={styles.modalBody}>
-              <div className={styles.modalRow}><span>Name</span><strong>{selectedReservation.name}</strong></div>
-              <div className={styles.modalRow}><span>Room / Facility</span><strong>{selectedReservation.room}</strong></div>
-              <div className={styles.modalRow}><span>Guests</span><strong>{selectedReservation.guests}</strong></div>
-              <div className={styles.modalRow}><span>Date</span><strong>{selectedReservation.date}</strong></div>
+              {selectedDay.map((room, index) => (
+                <div className={styles.modalRow} key={index}>
+                  <span>Room / Facility</span>
+                  <strong>{room}</strong>
+                </div>
+              ))}
             </div>
-            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
+            <button className={styles.closeBtn} onClick={() => setSelectedDay(null)}>Close</button>
           </div>
         </div>
       )}

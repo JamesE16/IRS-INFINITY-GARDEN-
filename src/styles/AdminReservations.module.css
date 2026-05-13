@@ -12,7 +12,6 @@
   overflow-x: hidden;
 }
 
-/* HEADER */
 .header {
   background: linear-gradient(135deg, var(--navy), var(--navy-light));
   color: white;
@@ -28,7 +27,6 @@
   gap: 24px;
 }
 
-/* ADD BUTTON */
 .addBtn {
   display: flex;
   align-items: center;
@@ -83,14 +81,12 @@
   background: #f8fafc;
 }
 
-/* ACTIVE TAB */
 .active {
   background: rgba(59, 130, 246, 0.12);
   border-color: #3b82f6;
   color: var(--navy);
 }
 
-/* CONTAINER */
 .container {
   max-width: 1400px;
   width: 100%;
@@ -98,7 +94,6 @@
   padding: 25px 2rem 32px;
 }
 
-/* SCROLLABLE TABLE WITH FIXED HEADER */
 .tableWrapper {
   background: #fff;
   max-height: 420px;
@@ -110,7 +105,6 @@
   border-radius: 10px;
 }
 
-/* SCROLLBAR STYLING */
 .tableWrapper::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -161,7 +155,6 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-/* Remove bottom border on last row */
 .table tbody tr:last-child td {
   border-bottom: none;
 }

@@ -409,6 +409,89 @@ export const adminAPI = {
     if (!response.ok) throw new Error('Failed to fetch transaction logs');
     return response.json();
   },
+
+  // ── Calendar: fetch all reservations and map to { date, room } ──────────────
+  getCalendarReservations: async () => {
+    const response = await apiRequest('/reservations/');
+    if (!response.ok) throw new Error('Failed to fetch calendar reservations');
+
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data.results ?? [];
+
+    // Only show approved/confirmed/checked_in reservations on the calendar
+    const active = list.filter((r) =>
+      ['approved', 'confirmed', 'checked_in'].includes(
+        (r.status || '').toLowerCase()
+      )
+    );
+
+    // Map each reservation to { date, room }
+    // Supports multi-night stays by expanding check_in → check_out range
+    const entries = [];
+    active.forEach((r) => {
+      const facilityName =
+        r.facility_name ||
+        r.facility?.name ||
+        r.room_name ||
+        r.room ||
+        'Reserved';
+
+      const checkIn  = r.check_in  || r.check_in_date  || r.date;
+      const checkOut = r.check_out || r.check_out_date || r.date;
+
+      if (!checkIn) return;
+
+      if (checkOut && checkOut !== checkIn) {
+        // Expand multi-night stays so every night shows on the calendar
+        let current = new Date(checkIn);
+        const end   = new Date(checkOut);
+        while (current < end) {
+          entries.push({
+            date: current.toISOString().split('T')[0],
+            room: facilityName,
+          });
+          current.setDate(current.getDate() + 1);
+        }
+      } else {
+        entries.push({
+          date: checkIn,
+          room: facilityName,
+        });
+      }
+    });
+
+    return entries;
+  },
+
+  // ── Availability: count available facilities by type ────────────────────────
+  getAvailability: async () => {
+    const response = await apiRequest('/facilities/');
+    if (!response.ok) throw new Error('Failed to fetch facilities for availability');
+
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : data.results ?? [];
+
+    const available = list.filter((f) => {
+      const status = (
+        f.availability_status?.is_available ??
+        f.is_available ??
+        f.available ??
+        true
+      );
+      return status === true;
+    });
+
+    const count = (keyword) =>
+      available.filter((f) =>
+        (f.type || f.name || '').toLowerCase().includes(keyword)
+      ).length;
+
+    return {
+      availableRooms:    count('room'),
+      availableCottages: count('cottage'),
+      availablePavilion: count('pavilion'),
+    };
+  },
 };
 
 export default {
