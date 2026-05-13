@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../context/BookingContext';
 import { authAPI } from '../../utils/api';
 import styles from '../../styles/AdminLoginPage.module.css';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/login-logo.png';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
@@ -96,14 +96,9 @@ export default function AdminLoginPage() {
         <div className={styles.header}>
           <div className={styles.brand}>
             <img src={logo} alt="Infinity Garden Logo" />
-            <div>
-              <h3 className={styles.brandTitle}>Infinity Garden</h3>
-              <p className={styles.brandSub}>Resort Hotel & Pavilion</p>
-            </div>
           </div>
 
           <h2>Admin & Staff Login</h2>
-          <p>Secure access for administrators and staff members</p>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>
@@ -137,15 +132,6 @@ export default function AdminLoginPage() {
             {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
           </div>
 
-          <div className={styles.infoBanner}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
-            </svg>
-            <p>This login is protected. Only authorized staff and admin can access.</p>
-          </div>
-
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={handleCancel} disabled={isLoading}>
               Cancel
@@ -155,12 +141,6 @@ export default function AdminLoginPage() {
             </button>
           </div>
         </form>
-
-        <div className={styles.demoNote}>
-          <strong>Demo Credentials:</strong>
-          <p>Admin: admin@infinitygarden.com | infinity123</p>
-          <p>Staff: staffdemo@infinityresort.com | Staff123!</p>
-        </div>
       </div>
     </div>
   );
