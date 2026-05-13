@@ -42,6 +42,8 @@ export default function RoomDetailPage() {
     navigate('/booking');
   };
 
+  const facilityType = room.type || 'Room';
+
   const half = (arr) => ({
     col1: arr.filter((_, i) => i % 2 === 0),
     col2: arr.filter((_, i) => i % 2 === 1),
@@ -61,7 +63,7 @@ export default function RoomDetailPage() {
       <div className="back-bar">
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
           <span className={styles.arrow}>←</span>
-          <span>Back to Room</span>
+          <span>Back</span>
         </button>
       </div>
 
@@ -144,7 +146,7 @@ export default function RoomDetailPage() {
             onClick={handleBook}
             disabled={!room.available}
           >
-            {room.available ? 'Book This Room' : 'Currently Unavailable'}
+            {room.available ? `Book This ${facilityType}` : 'Currently Unavailable'}
           </button>
         </div>
       </div>

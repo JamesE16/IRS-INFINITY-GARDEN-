@@ -46,6 +46,10 @@
   gap: 1rem;
 }
 
+.singleDateRow {
+  grid-template-columns: 1fr;
+}
+
 @media (max-width: 560px) {
   .row { grid-template-columns: 1fr; }
 }

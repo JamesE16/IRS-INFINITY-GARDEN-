@@ -45,6 +45,8 @@ export function BookingProvider({ children }) {
       const subtotal = Number(booking.subtotal ?? roomPrice * nights);
       const tax = Number(booking.tax ?? subtotal * 0.15);
       const total = Number(booking.total ?? subtotal + tax);
+      const roomType = booking.roomType || booking.room_type || matchedFacility?.type || catalogRoom?.type || '';
+      const isOvernightStay = roomType.toLowerCase().includes('room');
 
       return {
         ...booking,
@@ -64,7 +66,7 @@ export function BookingProvider({ children }) {
           matchedFacility?.name ||
           catalogRoom?.name ||
           'Selected Room',
-        roomType: booking.roomType || booking.room_type || matchedFacility?.type || catalogRoom?.type || '',
+        roomType,
         roomImg:
           booking.roomImg ||
           booking.room_image ||
@@ -80,6 +82,8 @@ export function BookingProvider({ children }) {
         checkout,
         guests: Number(booking.guests ?? booking.num_guests ?? matchedFacility?.guests ?? catalogRoom?.guests ?? 1),
         nights,
+        unitLabel: booking.unitLabel || (isOvernightStay ? 'night' : 'day'),
+        isOvernightStay,
         subtotal,
         tax,
         total,

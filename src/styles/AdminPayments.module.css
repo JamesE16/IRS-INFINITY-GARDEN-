@@ -391,6 +391,10 @@
   margin: 0 auto;
 }
 
+.singleAction {
+  justify-content: center;
+}
+
 .actionBtn,
 .viewBtn,
 .verifyBtn,

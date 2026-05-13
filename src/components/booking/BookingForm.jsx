@@ -89,10 +89,12 @@ function ReceiptUploader({ value, onChange, error }) {
 export default function BookingForm({ room, onPriceChange }) {
   const navigate = useNavigate();
   const { submitBooking, addBooking, showToast } = useBooking();
+  const isOvernightStay = (room.type || '').toLowerCase().includes('room');
+  const stayUnitLabel = isOvernightStay ? 'night' : 'day';
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '', address: '',
-    validId: '', guests: '1', special: '', paymentMethod: '',
+    guests: '1', special: '', paymentMethod: '',
   });
 
   const [checkinDate,  setCheckinDate]  = useState(null);
@@ -111,11 +113,19 @@ export default function BookingForm({ room, onPriceChange }) {
   }, [room?.backendId]);
 
   const toDateStr = (d) => (d ? d.toISOString().split('T')[0] : '');
+  const addDays = (date, days) => {
+    if (!date) return null;
+    const next = new Date(date);
+    next.setDate(next.getDate() + days);
+    return next;
+  };
 
   const recalc = (cin, cout, guests) => {
-    const nights = calcNights(toDateStr(cin), toDateStr(cout));
+    const nights = isOvernightStay
+      ? calcNights(toDateStr(cin), toDateStr(cout))
+      : cin ? 1 : 0;
     const { subtotal, tax, total } = calcTotal(room.price, nights);
-    onPriceChange({ nights, subtotal, tax, total, guests });
+    onPriceChange({ nights, subtotal, tax, total, guests, unitLabel: stayUnitLabel });
   };
 
   const handleChange = (e) => {
@@ -126,6 +136,13 @@ export default function BookingForm({ room, onPriceChange }) {
 
   const handleCheckinChange = (date) => {
     setCheckinDate(date);
+    if (!isOvernightStay) {
+      setCheckoutDate(date ? addDays(date, 1) : null);
+      recalc(date, date ? addDays(date, 1) : null, form.guests);
+      setErrors((p) => ({ ...p, checkin: null, checkout: null }));
+      return;
+    }
+
     if (checkoutDate && date && checkoutDate <= date) {
       setCheckoutDate(null);
       onPriceChange({ nights: 0, subtotal: 0, tax: 0, total: 0, guests: form.guests });
@@ -147,9 +164,8 @@ export default function BookingForm({ room, onPriceChange }) {
     if (!form.email.trim())   errs.email         = 'Email address is required.';
     if (!form.phone.trim())   errs.phone         = 'Phone number is required.';
     if (!form.address.trim()) errs.address       = 'Address is required.';
-    if (!form.validId.trim()) errs.validId       = 'Valid ID is required.';
-    if (!checkinDate)         errs.checkin       = 'Check-in date is required.';
-    if (!checkoutDate)        errs.checkout      = 'Check-out date is required.';
+    if (!checkinDate)         errs.checkin       = isOvernightStay ? 'Check-in date is required.' : 'Booking date is required.';
+    if (isOvernightStay && !checkoutDate) errs.checkout = 'Check-out date is required.';
     if (!form.guests)         errs.guests        = 'Number of guests is required.';
     if (!form.paymentMethod)  errs.paymentMethod = 'Please select a payment method.';
     if (!receiptFile)         errs.receipt       = 'Please upload your payment receipt.';
@@ -162,7 +178,7 @@ export default function BookingForm({ room, onPriceChange }) {
       setErrors(errs);
       const labels = {
         name: 'Full Name', email: 'Email', phone: 'Phone', address: 'Address',
-        validId: 'Valid ID', checkin: 'Check-in', checkout: 'Check-out',
+        checkin: isOvernightStay ? 'Check-in' : 'Booking Date', checkout: 'Check-out',
         guests: 'Guests', paymentMethod: 'Payment Method', receipt: 'Receipt',
       };
       showToast(`Please complete: ${Object.keys(errs).map((k) => labels[k]).join(', ')}`, 'error');
@@ -170,8 +186,8 @@ export default function BookingForm({ room, onPriceChange }) {
     }
 
     const checkin  = toDateStr(checkinDate);
-    const checkout = toDateStr(checkoutDate);
-    const nights   = calcNights(checkin, checkout);
+    const checkout = toDateStr(isOvernightStay ? checkoutDate : addDays(checkinDate, 1));
+    const nights   = isOvernightStay ? calcNights(checkin, checkout) : 1;
     const { subtotal, tax, total } = calcTotal(room.price, nights);
     const nameParts = form.name.trim().split(/\s+/);
     const firstName = nameParts[0];
@@ -187,7 +203,7 @@ export default function BookingForm({ room, onPriceChange }) {
       publicId: room.publicId, externalId: room.externalId,
       roomName: room.name, roomType: room.type, roomImg: room.img, roomPrice: room.price,
       name: form.name, email: form.email, phone: form.phone, address: form.address,
-      validId: form.validId, checkin, checkout,
+      checkin, checkout,
       guests: parseInt(form.guests, 10), nights, subtotal, tax, total,
       special: form.special, paymentMethod: form.paymentMethod,
       status: 'Pending', createdAt: new Date().toISOString(),
@@ -207,7 +223,6 @@ export default function BookingForm({ room, onPriceChange }) {
     formData.append('email',            form.email);
     formData.append('contact',          form.phone);
     formData.append('address',          form.address);
-    formData.append('valid_id',         form.validId);
     formData.append('check_in',         checkin);
     formData.append('check_out',        checkout);
     formData.append('num_guests',       parseInt(form.guests, 10));
@@ -270,30 +285,22 @@ export default function BookingForm({ room, onPriceChange }) {
           {errors.address && <p className={styles.errorMsg}>{errors.address}</p>}
         </div>
 
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Valid ID <span>*</span></label>
-          <input className={`${styles.input} ${errors.validId ? styles.inputError : ''}`}
-            type="text" name="validId" placeholder="Passport, Driver's License, National ID"
-            value={form.validId} onChange={handleChange} />
-          {errors.validId && <p className={styles.errorMsg}>{errors.validId}</p>}
-        </div>
       </section>
 
       {/* ── STAY DETAILS ── */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Stay Details</h3>
 
-        <div className={styles.row}>
-          {/* Check-in */}
+        <div className={`${styles.row} ${!isOvernightStay ? styles.singleDateRow : ''}`}>
           <div className={styles.formGroup}>
-            <label className={styles.label}>Check-in Date <span>*</span></label>
+            <label className={styles.label}>{isOvernightStay ? 'Check-in Date' : 'Booking Date'} <span>*</span></label>
             <div className={`${styles.datePickerWrapper} ${errors.checkin ? styles.datePickerError : ''}`}>
               <DatePicker
                 selected={checkinDate}
                 onChange={handleCheckinChange}
                 minDate={today}
                 excludeDates={blockedDates}
-                placeholderText="Select check-in"
+                placeholderText={isOvernightStay ? 'Select check-in' : 'Select booking date'}
                 dateFormat="MMM dd, yyyy"
                 className={styles.datePickerInput}
                 wrapperClassName={styles.datePickerOuter}
@@ -312,34 +319,35 @@ export default function BookingForm({ room, onPriceChange }) {
             {errors.checkin && <p className={styles.errorMsg}>{errors.checkin}</p>}
           </div>
 
-          {/* Check-out */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Check-out Date <span>*</span></label>
-            <div className={`${styles.datePickerWrapper} ${errors.checkout ? styles.datePickerError : ''}`}>
-              <DatePicker
-                selected={checkoutDate}
-                onChange={handleCheckoutChange}
-                minDate={minCheckoutDate}
-                excludeDates={blockedDates}
-                placeholderText="Select check-out"
-                dateFormat="MMM dd, yyyy"
-                className={styles.datePickerInput}
-                wrapperClassName={styles.datePickerOuter}
-                showPopperArrow={false}
-                autoComplete="off"
-                disabled={!checkinDate}
-              />
-              <span className={styles.inputIcon}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8" y1="2" x2="8" y2="6"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-              </span>
+          {isOvernightStay && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Check-out Date <span>*</span></label>
+              <div className={`${styles.datePickerWrapper} ${errors.checkout ? styles.datePickerError : ''}`}>
+                <DatePicker
+                  selected={checkoutDate}
+                  onChange={handleCheckoutChange}
+                  minDate={minCheckoutDate}
+                  excludeDates={blockedDates}
+                  placeholderText="Select check-out"
+                  dateFormat="MMM dd, yyyy"
+                  className={styles.datePickerInput}
+                  wrapperClassName={styles.datePickerOuter}
+                  showPopperArrow={false}
+                  autoComplete="off"
+                  disabled={!checkinDate}
+                />
+                <span className={styles.inputIcon}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </span>
+              </div>
+              {errors.checkout && <p className={styles.errorMsg}>{errors.checkout}</p>}
             </div>
-            {errors.checkout && <p className={styles.errorMsg}>{errors.checkout}</p>}
-          </div>
+          )}
         </div>
 
         <div className={styles.formGroup}>

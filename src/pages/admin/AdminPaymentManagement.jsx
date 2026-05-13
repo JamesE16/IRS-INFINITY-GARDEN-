@@ -192,6 +192,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
               { key: 'all', label: 'All' },
               { key: 'paid', label: 'Verified' },
               { key: 'pending', label: 'Pending' },
+              { key: 'declined', label: 'Declined' },
             ].map((status) => (
               <button
                 key={status.key}
@@ -200,7 +201,8 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
               >
                 {status.label} ({
                   status.key === 'all' ? stats.total :
-                  status.key === 'paid' ? stats.paid : stats.pending
+                  status.key === 'paid' ? stats.paid :
+                  status.key === 'pending' ? stats.pending : stats.failed
                 })
               </button>
             ))}
@@ -247,7 +249,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                         </td>
                         <td>{new Date(transaction.date).toLocaleDateString()}</td>
                         <td>
-                          <div className={styles.actions}>
+                          <div className={`${styles.actions} ${isDeclined ? styles.singleAction : ''}`}>
                             <button className={styles.viewBtn} onClick={() => handleView(transaction)}>
                               <FaEye /> View
                             </button>

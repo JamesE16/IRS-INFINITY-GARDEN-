@@ -3,6 +3,7 @@ import styles from "../../styles/BookingSummary.module.css";
 
 export default function BookingSummary({ room, pricing }) {
   const { nights = 0, subtotal = 0, tax = 0, total = 0, guests = 1 } = pricing;
+  const unitLabel = pricing.unitLabel || ((room.type || '').toLowerCase().includes('room') ? 'night' : 'day');
 
   return (
     <div className={styles.card}>
@@ -28,7 +29,7 @@ export default function BookingSummary({ room, pricing }) {
       {/* Price breakdown */}
       <div className={styles.line}>
         <span className={styles.lineLabel}>
-          {room.price} × {nights} night{nights !== 1 ? 's' : ''}
+          {room.price} × {nights} {unitLabel}{nights !== 1 ? 's' : ''}
         </span>
         <span className={styles.lineValue}>₱{subtotal.toFixed(0)}</span>
       </div>

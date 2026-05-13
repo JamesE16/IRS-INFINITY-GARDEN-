@@ -27,6 +27,8 @@ export default function BookingConfirmedPage() {
   }
 
   const b = confirmedBooking;
+  const isOvernightStay = b.isOvernightStay ?? (b.roomType || '').toLowerCase().includes('room');
+  const unitLabel = b.unitLabel || (isOvernightStay ? 'Night' : 'Day');
 
   return (
     <div className="page">
@@ -67,7 +69,6 @@ export default function BookingConfirmedPage() {
             </div>
           </div>
 
-          {/* Check-in / Check-out */}
           <div className={styles.datesGrid}>
             <div className={styles.dateItem}>
               <span className={styles.dateLabel}>
@@ -77,30 +78,32 @@ export default function BookingConfirmedPage() {
                   <line x1="8"  y1="2" x2="8"  y2="6"/>
                   <line x1="3"  y1="10" x2="21" y2="10"/>
                 </svg>
-                Check-in
+                {isOvernightStay ? 'Check-in' : 'Booking Date'}
               </span>
               <p className={styles.dateVal}>{formatDate(b.checkin)}</p>
-              <p className={styles.dateSub}>After 3:00 PM</p>
+              {isOvernightStay && <p className={styles.dateSub}>After 3:00 PM</p>}
             </div>
-            <div className={styles.dateItem}>
-              <span className={styles.dateLabel}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8"  y1="2" x2="8"  y2="6"/>
-                  <line x1="3"  y1="10" x2="21" y2="10"/>
-                </svg>
-                Check-out
-              </span>
-              <p className={styles.dateVal}>{formatDate(b.checkout)}</p>
-              <p className={styles.dateSub}>Before 12:00 PM</p>
-            </div>
+            {isOvernightStay && (
+              <div className={styles.dateItem}>
+                <span className={styles.dateLabel}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8"  y1="2" x2="8"  y2="6"/>
+                    <line x1="3"  y1="10" x2="21" y2="10"/>
+                  </svg>
+                  Check-out
+                </span>
+                <p className={styles.dateVal}>{formatDate(b.checkout)}</p>
+                <p className={styles.dateSub}>Before 12:00 PM</p>
+              </div>
+            )}
           </div>
 
           {/* Price breakdown */}
           <div className={styles.priceBreakdown}>
             <div className={styles.priceRow}>
-              <span>{b.nights} Night{b.nights !== 1 ? 's' : ''}</span>
+              <span>{b.nights} {unitLabel}{b.nights !== 1 ? 's' : ''}</span>
               <span>₱{b.subtotal.toFixed(0)}</span>
             </div>
             <div className={styles.priceRow}>
@@ -154,7 +157,7 @@ export default function BookingConfirmedPage() {
               <li>A confirmation email has been sent to {b.email}</li>
               <li>You can view and manage your booking in the "My Bookings" section</li>
               <li>Free cancellation is available up to 48 hours before check-in</li>
-              <li>Check-in starts at 3:00 PM on your arrival date</li>
+              <li>{isOvernightStay ? 'Check-in starts at 3:00 PM on your arrival date' : 'Your facility is reserved for the selected booking date'}</li>
             </ul>
           </div>
         </div>

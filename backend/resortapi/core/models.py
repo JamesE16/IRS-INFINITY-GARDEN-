@@ -166,7 +166,7 @@ class Reservation(models.Model):
     contact = models.CharField(max_length=20)
     email = models.EmailField()
     address = models.TextField()
-    valid_id = models.CharField(max_length=100)
+    valid_id = models.CharField(max_length=100, blank=True, default='')
     
     # Reservation dates
     check_in = models.DateField()

@@ -21,7 +21,6 @@ const normalizeReservation = (reservation) => ({
   contact: reservation.contact || '',
   email: reservation.email || '',
   address: reservation.address || '',
-  valid_id: reservation.valid_id || '',
   check_in: reservation.check_in,
   check_out: reservation.check_out,
   guests: reservation.num_guests || 0,
@@ -270,10 +269,6 @@ export default function AdminReservations({ role = 'admin' }) {
                   <div>
                     <label>Email</label>
                     <input value={selectedReservation.email || 'N/A'} readOnly />
-                  </div>
-                  <div>
-                    <label>Valid ID</label>
-                    <input value={selectedReservation.valid_id || 'N/A'} readOnly />
                   </div>
                   <div className={styles.fullRow}>
                     <label>Address</label>

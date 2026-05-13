@@ -14,7 +14,7 @@ export default function BookingPage() {
 
   // Pricing state — updated live by BookingForm
   const [pricing, setPricing] = useState({
-    nights: 0, subtotal: 0, tax: 0, total: 0, guests: 1,
+    nights: 0, subtotal: 0, tax: 0, total: 0, guests: 1, unitLabel: 'night',
   });
 
   if (facilitiesLoading && !selectedRoom) {
@@ -46,7 +46,7 @@ export default function BookingPage() {
       <div className="back-bar">
         <button className={styles.backBtn} onClick={() => navigate(-1)}>
   <span className={styles.arrow}>←</span>
-  <span>Back to Room</span>
+  <span>Back</span>
 </button>
       </div>
 

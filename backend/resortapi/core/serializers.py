@@ -106,7 +106,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = [
             'id', 'reservation_id', 'facility', 'facility_name', 'facility_image',
-            'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address', 'valid_id',
+            'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address',
             'payment_method', 'payment_status', 'proof_of_payment',
             'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status',
             'total_amount', 'created_at'
@@ -128,7 +128,7 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = [
             'id', 'reservation_id', 'facility', 'first_name', 'last_name', 'contact', 'email',
-            'address', 'valid_id', 'check_in', 'check_out', 'num_guests', 'special_requests',
+            'address', 'check_in', 'check_out', 'num_guests', 'special_requests',
             'nights', 'total_amount', 'status', 'payment_method', 'payment_status', 'proof_of_payment',
             'reviewed_by', 'reviewed_by_username', 'reviewed_at', 'review_notes',
             'created_at', 'updated_at'
@@ -143,7 +143,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = [
-            'facility', 'first_name', 'last_name', 'contact', 'email', 'address', 'valid_id',
+            'facility', 'first_name', 'last_name', 'contact', 'email', 'address',
             'check_in', 'check_out', 'num_guests', 'special_requests',
             'total_amount', 'payment_method', 'receipt_image'
         ]
