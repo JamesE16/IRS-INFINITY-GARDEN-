@@ -1,51 +1,47 @@
-import { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../utils/api';
-import { clearAuthStorage, getUserRole, persistAuthenticatedRole } from '../utils/auth';
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useIdleTimeout } from '../hooks/useIdleTimeout';
+import { refreshAccessToken } from '../utils/api';
+
+/** Decode JWT payload without a library */
+function isTokenValid(token) {
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Check expiry with 10s buffer
+    return payload.exp > Math.floor(Date.now() / 1000) + 10;
+  } catch {
+    return false;
+  }
+}
 
 export function ProtectedRoute({ children }) {
-  const location = useLocation();
-  const [authState, setAuthState] = useState('checking');
+  const [authState, setAuthState] = useState('checking'); // 'checking' | 'ok' | 'denied'
 
   useEffect(() => {
-    let isMounted = true;
+    const token = localStorage.getItem('access_token');
+    const role  = localStorage.getItem('adminRole');
 
-    const verifyAdminSession = async () => {
-      try {
-        const user = await authAPI.getCurrentUser();
-        const role = getUserRole(user);
+    if (isTokenValid(token) && role === 'admin') {
+      setAuthState('ok');
+      return;
+    }
 
-        if (!isMounted) return;
-
-        if (role === 'admin') {
-          persistAuthenticatedRole(user, 'admin');
-          setAuthState('allowed');
-          return;
-        }
-
-        clearAuthStorage();
-        setAuthState('denied');
-      } catch {
-        if (!isMounted) return;
-        clearAuthStorage();
+    // Token missing or expired — try silent refresh
+    refreshAccessToken().then((success) => {
+      const newRole = localStorage.getItem('adminRole');
+      if (success && newRole === 'admin') {
+        setAuthState('ok');
+      } else {
         setAuthState('denied');
       }
-    };
-
-    verifyAdminSession();
-
-    return () => {
-      isMounted = false;
-    };
+    });
   }, []);
 
-  if (authState === 'checking') {
-    return null;
-  }
+  // Idle timeout — only active when authenticated
+  useIdleTimeout(authState === 'ok');
 
-  if (authState !== 'allowed') {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
+  if (authState === 'checking') return null;
+  if (authState === 'denied')   return <Navigate to="/login" replace />;
   return children;
 }

@@ -47,7 +47,7 @@ const getAuthHeaders = async (method = 'GET') => {
   return headers;
 };
 
-const apiRequest = async (path, options = {}) => {
+const apiRequest = async (path, options = {}, _isRetry = false) => {
   const method = options.method || 'GET';
   const headers = await getAuthHeaders(method);
   const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
@@ -56,7 +56,7 @@ const apiRequest = async (path, options = {}) => {
     headers['Content-Type'] = 'application/json';
   }
 
-  return fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: 'include',
     ...options,
     method,
@@ -65,6 +65,16 @@ const apiRequest = async (path, options = {}) => {
       ...(options.headers || {}),
     },
   });
+
+  // On 401, try to refresh the token once then retry
+  if (response.status === 401 && !_isRetry) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      return apiRequest(path, options, true);
+    }
+  }
+
+  return response;
 };
 
 const readErrorPayload = async (response, fallbackMessage) => {
@@ -89,6 +99,40 @@ const readErrorPayload = async (response, fallbackMessage) => {
 
   return text || fallbackMessage;
 };
+//Token Refresh
+/**
+ * Silently exchanges the stored refresh token for a new access token.
+ * Returns true on success, false if refresh fails (user must re-login).
+ */
+let _isRefreshing = false;
+export const refreshAccessToken = async () => {
+  if (_isRefreshing) return false;
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return false;
+
+  _isRefreshing = true;
+  try {
+    const res = await fetch(`${API_BASE_URL}/token/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh: refreshToken }),
+    });
+    if (!res.ok) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      return false;
+    }
+    const data = await res.json();
+    localStorage.setItem('access_token', data.access);
+    if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+    return true;
+  } catch {
+    return false;
+  } finally {
+    _isRefreshing = false;
+  }
+};
+
 
 export const authAPI = {
   register: async (email, password, firstName, lastName) => {
@@ -122,11 +166,9 @@ export const authAPI = {
 
     const data = await response.json();
 
-    if (data.token) {
-      localStorage.setItem('access_token', data.token);
-    } else if (data.auth_token) {
-      localStorage.setItem('access_token', data.auth_token);
-    }
+    // Store JWT tokens returned by the backend
+    if (data.access) localStorage.setItem('access_token', data.access);
+    if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
 
     return data;
   },
@@ -138,11 +180,18 @@ export const authAPI = {
   },
 
   logout: async () => {
-    const response = await apiRequest('/users/logout/', {
-      method: 'POST',
-    });
+    try {
+      await apiRequest('/users/logout/', { method: 'POST' });
+    } catch { /* ignore */ }
     localStorage.removeItem('access_token');
-    return response.ok;
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('isStaffLoggedIn');
+    localStorage.removeItem('adminRole');
+    localStorage.removeItem('staffRole');
+    localStorage.removeItem('adminEmail');
+    localStorage.removeItem('staffEmail');
+    return true;
   },
 };
 
@@ -462,7 +511,7 @@ export const adminAPI = {
         r.room ||
         'Reserved';
 
-      const checkIn  = r.check_in  || r.check_in_date  || r.date;
+      const checkIn = r.check_in || r.check_in_date || r.date;
       const checkOut = r.check_out || r.check_out_date || r.date;
 
       if (!checkIn) return;
@@ -470,7 +519,7 @@ export const adminAPI = {
       if (checkOut && checkOut !== checkIn) {
         // Expand multi-night stays so every night shows on the calendar
         let current = new Date(checkIn);
-        const end   = new Date(checkOut);
+        const end = new Date(checkOut);
         while (current < end) {
           entries.push({
             date: current.toISOString().split('T')[0],
@@ -513,7 +562,7 @@ export const adminAPI = {
       ).length;
 
     return {
-      availableRooms:    count('room'),
+      availableRooms: count('room'),
       availableCottages: count('cottage'),
       availablePavilion: count('pavilion'),
     };
