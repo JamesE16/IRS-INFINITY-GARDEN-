@@ -12,6 +12,7 @@ from django.middleware.csrf import get_token
 from datetime import timedelta
 from datetime import datetime
 import uuid
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import (
     UserProfile, Facility, BlackoutDate,
@@ -53,7 +54,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
-        """Authenticate a user, create a session, and return their profile"""
+        """Authenticate a user and return JWT tokens + user profile"""
         email = request.data.get('email')
         password = request.data.get('password')
         if not email or not password:
@@ -64,8 +65,18 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
         login(request, user)
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
         serializer = self.get_serializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({
+            **serializer.data,
+            'access': access_token,
+            'refresh': refresh_token,
+        }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def logout(self, request):
