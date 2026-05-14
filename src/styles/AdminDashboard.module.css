@@ -2,18 +2,11 @@
   position: relative;
   display: flex;
   min-height: 100vh;
-  background:
-    url('https://i1.wp.com/usamanagement.com/wp-content/uploads/2018/03/pexels-photo-338504.jpeg?fit=3000%2C2000')
-    center / cover fixed no-repeat;
+  background: var(--bg);
 }
 
 .adminShell::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 31, 69, 0.58);
-  pointer-events: none;
-  z-index: 0;
+  content: none;
 }
 
 .mainContent {
@@ -27,11 +20,10 @@
 }
 
 .header {
-  background: rgba(15, 31, 69, 0.82);
-  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
   color: #fff;
   padding: 20px 2rem;  
-  border-bottom: 2px solid rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .headerContent {
