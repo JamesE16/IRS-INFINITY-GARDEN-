@@ -74,9 +74,19 @@ export default function AdminLoginPage() {
         return;
       }
 
-      showToast('This account does not have admin or staff access.', 'error');
-    } catch (error) {
-      showToast(error.message || 'Login failed', 'error');
+      const message = 'This account does not have admin or staff access.';
+      setErrors({
+        email: message,
+        password: message,
+      });
+      showToast(message, 'error');
+    } catch {
+      const message = 'Incorrect email/username or password. Please try again.';
+      setErrors({
+        email: message,
+        password: message,
+      });
+      showToast(message, 'error');
     } finally {
       setIsLoading(false);
     }
