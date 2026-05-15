@@ -180,7 +180,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 class FeedbackSerializer(serializers.ModelSerializer):
     guest_name = serializers.SerializerMethodField()
-    reservation_reference = serializers.CharField(source='reservation.reservation_id', read_only=True)
+    reservation_reference = serializers.SerializerMethodField()
 
     class Meta:
         model = Feedback
@@ -193,6 +193,18 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     def get_guest_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
+
+    def get_reservation_reference(self, obj):
+        if obj.reservation:
+            return obj.reservation.reservation_id
+
+        matched_reservation = Reservation.objects.filter(
+            email__iexact=obj.email,
+            first_name__iexact=obj.first_name,
+            last_name__iexact=obj.last_name,
+        ).order_by('-created_at').first()
+
+        return matched_reservation.reservation_id if matched_reservation else None
 
 
 # ============================================================

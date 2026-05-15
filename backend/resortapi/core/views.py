@@ -553,6 +553,18 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by('-submitted_at')
 
+    def perform_create(self, serializer):
+        reservation = serializer.validated_data.get('reservation')
+
+        if reservation is None:
+            reservation = Reservation.objects.filter(
+                email__iexact=serializer.validated_data.get('email', ''),
+                first_name__iexact=serializer.validated_data.get('first_name', ''),
+                last_name__iexact=serializer.validated_data.get('last_name', ''),
+            ).order_by('-created_at').first()
+
+        serializer.save(reservation=reservation)
+
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
         feedback = self.get_object()
