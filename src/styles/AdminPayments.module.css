@@ -354,11 +354,17 @@
 }
 
 .status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.72rem;
   font-weight: 600;
+  text-transform: capitalize;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .statusPaid {
@@ -371,12 +377,8 @@
   color: #92400e;
 }
 
+.statusDeclined,
 .statusFailed {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.statusDeclined {
   background: #fee2e2;
   color: #991b1b;
 }
@@ -482,7 +484,6 @@
   transform: none;
 }
 
-/* ===== MODAL ===== */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -492,6 +493,10 @@
   justify-content: center;
   z-index: 200;
   padding: 20px;
+  
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: all 0.2s ease-in-out;
 }
 
 .modal {
