@@ -19,7 +19,7 @@ import styles from "../../styles/AdminScheduleManagement.module.css";
 
 export default function AdminScheduleManagement({ role = 'admin' }) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -248,7 +248,7 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
 
         <div className={styles.container}>
           <div className={styles.tabs}>
-            {["pending", "approved", "all"].map(tab => (
+            {["all", "pending", "approved"].map(tab => (
               <button
                 key={tab}
                 className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}

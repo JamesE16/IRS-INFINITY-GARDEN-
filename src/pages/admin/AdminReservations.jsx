@@ -45,7 +45,7 @@ export default function AdminReservations({ role = 'admin' }) {
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('pending');
+  const [filter, setFilter] = useState('all');
   const isAdmin = role === 'admin';
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export default function AdminReservations({ role = 'admin' }) {
         </div>
 
         <div className={styles.filterTabs}>
-          {['pending', 'confirmed', 'cancelled', 'all'].map((tab) => (
+          {['all', 'pending', 'confirmed', 'cancelled'].map((tab) => (
             <button
               key={tab}
               className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
