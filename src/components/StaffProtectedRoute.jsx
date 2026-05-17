@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import { useIdleTimeout } from '../hooks/useIdleTimeout';
 import { refreshAccessToken } from '../utils/api';
 
-/** Decode JWT payload without a library */
 function isTokenValid(token) {
   if (!token) return false;
   try {
@@ -26,7 +25,6 @@ export function StaffProtectedRoute({ children }) {
       return;
     }
 
-    // Token missing or expired — try silent refresh
     refreshAccessToken().then((success) => {
       const newRole = localStorage.getItem('staffRole');
       if (success && newRole === 'staff') {
@@ -37,7 +35,6 @@ export function StaffProtectedRoute({ children }) {
     });
   }, []);
 
-  // Idle timeout — only active when authenticated
   useIdleTimeout(authState === 'ok');
 
   if (authState === 'checking') return null;
