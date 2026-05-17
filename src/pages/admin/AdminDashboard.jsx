@@ -41,7 +41,7 @@ export default function AdminDashboard({ role = 'admin' }) {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null); // holds array of rooms for clicked day
+  const [selectedDay, setSelectedDay] = useState(null);
   const [reservations, setReservations] = useState([]);
   const [availability, setAvailability] = useState({
     availableRooms: 0,
@@ -65,8 +65,6 @@ export default function AdminDashboard({ role = 'admin' }) {
 
       try {
         const calendarData = await adminAPI.getCalendarReservations();
-        // Expected shape: [{ date: "2026-04-07", room: "Pavilion A" }, ...]
-        // If multiple rooms share a date, group them below
         setReservations(Array.isArray(calendarData) ? calendarData : calendarData.results ?? []);
       } catch (err) {
         console.error('Failed to load calendar reservations:', err);
@@ -74,7 +72,6 @@ export default function AdminDashboard({ role = 'admin' }) {
 
       try {
         const avail = await adminAPI.getAvailability();
-        // Expected shape: { availableRooms: 10, availableCottages: 4, availablePavilion: 0 }
         setAvailability({
           availableRooms: avail.availableRooms ?? 0,
           availableCottages: avail.availableCottages ?? 0,
@@ -104,7 +101,7 @@ export default function AdminDashboard({ role = 'admin' }) {
   const handleNotifications = () => setShowNotifications(true);
   const proceedToReservations = () => navigate(reservationPath);
 
-  // ── Group reservations by date so multiple rooms show on same day ────────────
+  // ── Group reservations by date ───────────────────────────────────────────────
   const reservationsByDate = reservations.reduce((acc, r) => {
     const key = format(new Date(r.date), 'yyyy-MM-dd');
     if (!acc[key]) acc[key] = [];
@@ -112,7 +109,7 @@ export default function AdminDashboard({ role = 'admin' }) {
     return acc;
   }, {});
 
-  // ── Calendar helpers ────────────────────────────────────────────────────────
+  // ── Calendar helpers ─────────────────────────────────────────────────────────
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
@@ -160,14 +157,13 @@ export default function AdminDashboard({ role = 'admin' }) {
             key={day.toString()}
             className={[
               styles.cell,
-              notThisMonth   ? styles.disabled  : "",
-              hasReservation ? styles.reserved  : "",
+              notThisMonth            ? styles.disabled  : "",
+              hasReservation          ? styles.reserved  : "",
               isToday && !hasReservation ? styles.today : "",
             ].join(" ")}
             onClick={() => hasReservation && setSelectedDay(rooms)}
           >
             <span className={styles.cellDay}>{format(day, "d")}</span>
-            {/* Show first room, with +N if multiple */}
             {hasReservation && (
               <span className={styles.cellEvent}>
                 <span className={styles.cellEventDot} />
@@ -192,7 +188,7 @@ export default function AdminDashboard({ role = 'admin' }) {
 
       <div className={styles.mainContent}>
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
+        {/* ── Header ──────────────────────────────────────────────────── */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
@@ -204,7 +200,11 @@ export default function AdminDashboard({ role = 'admin' }) {
               </p>
             </div>
             <div className={styles.headerActions}>
-              <button className={styles.notifyBtn} onClick={handleNotifications} aria-label="View booking notifications">
+              <button
+                className={styles.notifyBtn}
+                onClick={handleNotifications}
+                aria-label="View booking notifications"
+              >
                 <FaBell />
                 {notificationCount > 0 && (
                   <span className={styles.notifyBadge}>{notificationCount}</span>
@@ -214,7 +214,7 @@ export default function AdminDashboard({ role = 'admin' }) {
           </div>
         </div>
 
-        {/* ── Main Content ────────────────────────────────────────────── */}
+        {/* ── Main Content ─────────────────────────────────────────────── */}
         <div className={styles.container}>
 
           {error && (
@@ -228,7 +228,7 @@ export default function AdminDashboard({ role = 'admin' }) {
             </div>
           )}
 
-          {/* ── Stat Cards ─────────────────────────────────────────────── */}
+          {/* ── Stat Cards ───────────────────────────────────────────────── */}
           <div className={styles.statsGrid}>
 
             <StatCard label="Total Reservations Today" value={stats?.total_reservations ?? 0}
@@ -274,7 +274,7 @@ export default function AdminDashboard({ role = 'admin' }) {
 
           </div>
 
-          {/* ── Calendar + Sidebar ──────────────────────────────────────── */}
+          {/* ── Calendar + Sidebar ────────────────────────────────────────── */}
           <div className={styles.calendarLayout}>
 
             <div className={styles.calendarWrap}>
@@ -328,13 +328,16 @@ export default function AdminDashboard({ role = 'admin' }) {
         </div>
       </div>
 
-      {/* ── Reserved Rooms Modal ─────────────────────────────────────── */}
+      {/* ── Notifications Modal ──────────────────────────────────────────── */}
       {showNotifications && (
         <div className={styles.modalOverlay} onClick={() => setShowNotifications(false)}>
-          <div className={`${styles.modal} ${styles.notificationModal}`} onClick={e => e.stopPropagation()}>
+          <div
+            className={`${styles.modal} ${styles.notificationModal}`}
+            onClick={e => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
               <h3>Notifications</h3>
-              <button className={styles.modalClose} onClick={() => setShowNotifications(false)}>x</button>
+              <button className={styles.modalClose} onClick={() => setShowNotifications(false)}>✕</button>
             </div>
 
             <div className={styles.notificationList}>
@@ -367,6 +370,7 @@ export default function AdminDashboard({ role = 'admin' }) {
         </div>
       )}
 
+      {/* ── Reserved Rooms Modal ─────────────────────────────────────────── */}
       {selectedDay && (
         <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>

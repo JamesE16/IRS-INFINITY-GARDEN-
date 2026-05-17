@@ -4,54 +4,12 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminUserManagement.module.css';
 
 const demoUsers = [
-  {
-    id: 1,
-    firstName: 'Cristalyn Grace',
-    lastName: 'Llarenas',
-    email: 'cristalgrace@gmail.com',
-    role: 'Admin',
-    isActive: true
-  },
-  {
-    id: 2,
-    firstName: 'Eigmar Clarence',
-    lastName: 'Zamora',
-    email: 'eigclarence@gmail.com',
-    role: 'Staff',
-    isActive: true
-  },
-  {
-    id: 3,
-    firstName: 'James Elmar',
-    lastName: 'Higoy',
-    email: 'jamelmar@gmail.com',
-    role: 'Staff',
-    isActive: true
-  },
-  {
-    id: 4,
-    firstName: 'Joanna Dane',
-    lastName: 'Cooper',
-    email: 'joandane@gmail.com',
-    role: 'Staff',
-    isActive: true
-  },
-  {
-    id: 5,
-    firstName: 'Sheena May',
-    lastName: 'Emperador',
-    email: 'sheenamay@gmail.com',
-    role: 'Staff',
-    isActive: true
-  },
-  {
-    id: 6,
-    firstName: 'Zean',
-    lastName: 'Marquez',
-    email: 'zeanm@gmail.com',
-    role: 'Staff',
-    isActive: true
-  }
+  { id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', role: 'Admin', isActive: true },
+  { id: 2, firstName: 'Eigmar Clarence', lastName: 'Zamora', email: 'eigclarence@gmail.com', role: 'Staff', isActive: true },
+  { id: 3, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', role: 'Staff', isActive: true },
+  { id: 4, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', role: 'Staff', isActive: true },
+  { id: 5, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', role: 'Staff', isActive: true },
+  { id: 6, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', role: 'Staff', isActive: true }
 ];
 
 const demoGuests = [
@@ -104,6 +62,10 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Custom Confirmation Modal States
+  const [confirmDeactivateUser, setConfirmDeactivateUser] = useState(null);
+
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -116,7 +78,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [mode]);
 
   const fetchUsers = async () => {
     setIsLoading(true);
@@ -181,20 +143,30 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
     }
   };
 
-  const handleToggleStatus = (userId) => {
+  const confirmToggleStatus = () => {
+    if (!confirmDeactivateUser) return;
+    
     setUsers((prev) =>
       prev.map((user) =>
-        user.id === userId ? { ...user, isActive: !user.isActive } : user
+        user.id === confirmDeactivateUser.id ? { ...user, isActive: !user.isActive } : user
       )
     );
+    setConfirmDeactivateUser(null);
   };
 
   const handleRowAction = (user) => {
     if (isAdmin && !isGuestMode) {
-      handleToggleStatus(user.id);
+      if (user.isActive) {
+        // Open custom confirmation dialog modal
+        setConfirmDeactivateUser(user);
+      } else {
+        // Activate immediately without prompt
+        setUsers((prev) =>
+          prev.map((u) => (u.id === user.id ? { ...u, isActive: true } : u))
+        );
+      }
       return;
     }
-
     setSelectedUser(user);
   };
 
@@ -311,9 +283,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
             <div className={styles.modalPanel}>
               <div className={styles.modalHeader}>
                 <h2 className={styles.modalTitle}>Add User</h2>
-                <button className={styles.modalClose} onClick={() => setShowModal(false)}>
-                  ✕
-                </button>
+                <button className={styles.modalClose} onClick={() => setShowModal(false)}>✕</button>
               </div>
               <form onSubmit={handleCreateUser}>
                 <div className={styles.formGroup}>
@@ -373,9 +343,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                   </select>
                 </div>
                 <div className={styles.modalActions}>
-                  <button type="button" className={styles.cancelBtn} onClick={() => setShowModal(false)}>
-                    Cancel
-                  </button>
+                  <button type="button" className={styles.cancelBtn} onClick={() => setShowModal(false)}>Cancel</button>
                   <button type="submit" className={styles.submitBtn} disabled={isSaving}>
                     {isSaving ? 'Saving...' : 'Create User'}
                   </button>
@@ -390,9 +358,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
             <div className={styles.modalPanel}>
               <div className={styles.modalHeader}>
                 <h2 className={styles.modalTitle}>{isGuestMode ? 'Guest Details' : 'User Details'}</h2>
-                <button className={styles.modalClose} onClick={() => setSelectedUser(null)}>
-                  x
-                </button>
+                <button className={styles.modalClose} onClick={() => setSelectedUser(null)}>✕</button>
               </div>
               <div className={styles.modalBody}>
                 <div className={styles.formGroup}>
@@ -420,8 +386,37 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                 </div>
               </div>
               <div className={styles.modalActions}>
-                <button className={styles.cancelBtn} onClick={() => setSelectedUser(null)}>
-                  Close
+                <button className={styles.cancelBtn} onClick={() => setSelectedUser(null)}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CUSTOM CONFIRM DEACTIVATE MODAL (MATCHES ARCHIVE MODAL STYLE) */}
+        {confirmDeactivateUser && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.confirmModalPanel}>
+              <button className={styles.confirmModalClose} onClick={() => setConfirmDeactivateUser(null)}>✕</button>
+              
+              <div className={styles.confirmIconContainer}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </div>
+
+              <h3 className={styles.confirmModalTitle}>Deactivate User</h3>
+              <p className={styles.confirmModalDescription}>
+                Are you sure you want to deactivate <strong>{confirmDeactivateUser.firstName} {confirmDeactivateUser.lastName}</strong>? This user will lose access to the system.
+              </p>
+
+              <div className={styles.confirmModalActions}>
+                <button className={styles.confirmCancelBtn} onClick={() => setConfirmDeactivateUser(null)}>
+                  Cancel
+                </button>
+                <button className={styles.confirmExecuteBtn} onClick={confirmToggleStatus}>
+                  Deactivate
                 </button>
               </div>
             </div>

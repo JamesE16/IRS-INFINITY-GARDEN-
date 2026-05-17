@@ -11,7 +11,6 @@
   flex-direction: column;
 }
 
-
 .headerBtn {
   display: flex;
   align-items: center;
@@ -26,10 +25,12 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+
 .headerBtn svg { 
   width: 16px; 
   height: 16px; 
 }
+
 .headerBtn:hover { 
   background: rgba(255,255,255,0.28);
 }
@@ -165,7 +166,7 @@
 }
 
 .submitBtn {
-  background: #2563eb;
+  background: var(--navy);
   border: none;
   color: #fff;
   padding: 11px 24px;  
@@ -177,7 +178,7 @@
 }
 
 .submitBtn:hover {
-  background: #1d4ed8;
+  background: var(--navy);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);  
 }
@@ -243,9 +244,11 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 900px;
+  background: #fff;
 }
 
-.table thead {
+.table thead,
+.table th {
   background: #f8fafc;
 }
 
@@ -253,19 +256,15 @@
 .table td {
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+  color: var(--navy);
 }
 
 .table th {
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--navy);
-  text-align: center;
-}
-
-.table td {
-  text-align: center;
-  color: var(--navy);
-  vertical-align: middle;
 }
 
 .table tbody tr:nth-child(even) {
@@ -274,21 +273,6 @@
 
 .table tbody tr:hover {
   background: rgba(59, 130, 246, 0.05);
-}
-
-.table button:hover,
-.table button:active {
-  transform: none;
-}
-
-.table th,
-.table td,
-.table td div,
-.table td span,
-.table td small,
-.table td strong {
-  color: var(--navy);
-  font-weight: 600;
 }
 
 .table button {
@@ -308,6 +292,16 @@
   color: #fff;
   box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
   transform: none;
+}
+
+.table th,
+.table td,
+.table td div,
+.table td span,
+.table td small,
+.table td strong {
+  color: var(--navy);
+  font-weight: 600;
 }
 
 .userName {
@@ -372,20 +366,23 @@
   margin-bottom: 18px;
 }
 
-/* ===== MODAL ===== */
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.48);
+  background: rgba(15, 23, 42, 0.45); 
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1200;
   padding: 24px;
+  
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: all 0.2s ease-in-out;
 }
 
 .modalPanel {
-  width: min(560px, 100%);
+  width: min(420px, 100%); 
   background: #fff;
   border-radius: 24px;
   box-shadow: var(--shadow-lg);
@@ -472,6 +469,107 @@
   font-size: 0.92rem;
 }
 
+/* ===== CUSTOM CONFIRMATION DIALOG MODAL LAYOUT ===== */
+.confirmModalPanel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  width: min(100%, 400px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+  position: relative;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirmModalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+}
+
+.confirmModalClose:hover {
+  color: #475569;
+}
+
+.confirmIconContainer {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.confirmIconContainer svg {
+  width: 28px;
+  height: 28px;
+  color: #ef4444;
+}
+
+.confirmModalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.confirmModalDescription {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.confirmModalActions {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+}
+
+.confirmCancelBtn,
+.confirmExecuteBtn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirmCancelBtn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.confirmCancelBtn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.confirmExecuteBtn {
+  background: #ef4444;
+  border: none;
+  color: #ffffff;
+}
+
+.confirmExecuteBtn:hover {
+  background: #dc2626;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 960px) {
   .pageHeader,
@@ -521,39 +619,4 @@
   .actionBtn {
     padding: 6px 12px;
   }
-}
-
-/* Shared management table styling */
-.table {
-  background: #fff;
-}
-
-.table thead,
-.table th {
-  background: #f8fafc;
-}
-
-.table th,
-.table td {
-  text-align: center;
-  vertical-align: middle;
-  color: var(--navy);
-}
-
-.table th {
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.table tbody tr:nth-child(even) {
-  background: #f8fafc;
-}
-
-.table tbody tr:hover {
-  background: rgba(59, 130, 246, 0.05);
-}
-
-.table button:hover,
-.table button:active {
-  transform: none;
 }

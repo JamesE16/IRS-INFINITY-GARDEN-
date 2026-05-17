@@ -1,3 +1,4 @@
+/* ── BASE AND SHELL LAYOUT ── */
 .adminShell {
   display: flex;
   min-height: 100vh;
@@ -11,6 +12,7 @@
   flex-direction: column;
 }
 
+/* ── HEADER NAVIGATION ── */
 .topHeader {
   background: linear-gradient(135deg, var(--navy, #1a3c8f) 0%, var(--navy-light, #2d55c7) 100%);
   color: #fff;
@@ -70,6 +72,7 @@
   color: var(--navy);
 }
 
+/* ── MAIN CONTENT CONTAINER ── */
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -81,7 +84,7 @@
   gap: 25px;
 }
 
-/* CALENDAR BOX */
+/* ── CALENDAR COMPONENT ── */
 .calendarBox {
   margin-top: 10px;
   background: #fff;
@@ -102,7 +105,6 @@
   width: 100%;
 }
 
-/* CALENDAR HEADER */
 .calHeader {
   display: flex;
   justify-content: space-between;
@@ -221,15 +223,48 @@
   flex-shrink: 0;
 }
 
+.moreEvents {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 1px 3px;
+}
+
+/* ── UTILITY STATES ── */
+.loadingState {
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.errorBanner p {
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(15,31,69,0.45);
+  background: rgba(15, 31, 69, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  backdrop-filter: blur(2px); 
 }
 
 .modal {
@@ -238,19 +273,14 @@
   padding: 26px 28px;
   width: 100%;
   max-width: 360px;
-  box-shadow: 0 20px 60px rgba(26,60,143,0.2);
-  animation: modalIn 0.2s ease;
+  box-shadow: 0 20px 60px rgba(26, 60, 143, 0.2);
+  position: relative; 
+  animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .modalPanel {
@@ -259,47 +289,117 @@
 
 .modalHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  flex-direction: column; /* Stacks header title text and date context nicely */
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-right: 26px; /* Protects title content from crashing into the close button */
 }
 
 .modalHeader h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--navy, #1a3c8f);
 }
 
+/* Class style for dynamic date context underneath the modal header */
+.modalHeader .modalSubtitle {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Clean, crisp Absolute Positioning for the X close icon */
 .modalClose {
+  position: absolute;
+  top: 22px;
+  right: 24px;
   background: none;
   border: none;
-  font-size: 15px;
   color: #94a3b8;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   border-radius: 6px;
-  transition: background 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
 }
 
 .modalClose:hover {
   background: #f1f5f9;
+  color: #475569;
 }
 
-/* MODAL BODY */
 .modalBody {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
+
+/* Custom Scrollbar Styling */
+.modalBody::-webkit-scrollbar {
+  width: 5px;
+}
+.modalBody::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 10px;
+}
+.modalBody::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.modalGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px; /* Increased padding gap between groups for structural rhythm */
+}
+
+.modalGroup:last-of-type {
+  margin-bottom: 4px;
+}
+
+.modalGroupLabel {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+
+.groupLabel_confirmed { background: #dcfce7; color: #15803d; }
+.groupLabel_pending   { background: #fef9c3; color: #ca8a04; }
+.groupLabel_cancelled { background: #ffe4e6; color: #b91c1c; }
+
+.modalItem {
+  display: flex;
+  flex-direction: column;
+  border-left: 4px solid #e2e8f0;
+  padding: 4px 12px; /* Added internal space padding to clear out box shifts */
+  border-radius: 0 8px 8px 0;
+}
+
+.modalItem_confirmed { border-left-color: #16a34a; background: #f0fdf4; }
+.modalItem_pending   { border-left-color: #ca8a04; background: #fefce8; }
+.modalItem_cancelled { border-left-color: #e11d48; background: #fff1f2; }
 
 .modalRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 0;
-  border-bottom: 1px solid #f1f5f9;
-  font-size: 0.875rem;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+  font-size: 0.85rem;
   color: #64748b;
 }
 
@@ -312,24 +412,38 @@
   font-weight: 700;
 }
 
+.modalDivider {
+  border: none;
+  border-top: 1px dashed #e2e8f0;
+  margin: 6px 0;
+}
+
+/* Beautifully balanced Action Close Button */
 .closeBtn {
-  margin-top: 18px;
+  margin-top: 14px;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
   background: var(--navy, #1a3c8f);
   color: #fff;
-  border-radius: 8px;
+  border-radius: 10px; /* Matches layout curvatures beautifully */
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(26, 60, 143, 0.1);
 }
 
 .closeBtn:hover {
   background: var(--navy-light, #2d55c7);
+  transform: translateY(-0.5px);
 }
 
+.closeBtn:active {
+  transform: translateY(0);
+}
+
+/* ── DATA DETAILS SHEET ── */
 .guestDetails {
   display: flex;
   flex-direction: column;
@@ -356,12 +470,14 @@
   font-weight: 600;
 }
 
-/* STATUS BADGES */
+/* ── STATUS BADGES ── */
 .statusApproved,
-.statusActive {
+.statusActive,
+.statusConfirmed,
+.statusPaid {
   display: inline-block;
-  background: #d1fae5;
-  color: #065f46;
+  background: #dcfce7;
+  color: #16a34a;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -370,18 +486,22 @@
 
 .statusPending {
   display: inline-block;
-  background: #fef3c7;
-  color: #92400e;
+  background: #fef9c3;
+  color: #ca8a04;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.statusInactive {
+.statusInactive,
+.statusDeclined,
+.statusCancelled,
+.statusCanceled,
+.statusRejected {
   display: inline-block;
-  background: #fee2e2;
-  color: #991b1b;
+  background: #ffe4e6;
+  color: #e11d48;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;

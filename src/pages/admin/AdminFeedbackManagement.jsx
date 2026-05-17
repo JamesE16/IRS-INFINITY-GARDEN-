@@ -27,6 +27,17 @@ const badgeStyle = {
   archived: styles.statusArchived
 };
 
+const shortenReference = (value, start = 8, end = 4) => {
+  if (!value) return 'N/A';
+  if (value.length <= start + end + 3) return value;
+  return `${value.slice(0, start)}...${value.slice(-end)}`;
+};
+
+const shortenText = (value, maxLength = 35) => {
+  if (!value) return '';
+  return value.length > maxLength ? `${value.slice(0, maxLength)}...` : value;
+};
+
 export default function AdminFeedbackManagement({ role = 'admin' }) {
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -231,16 +242,20 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 <tbody>
                   {filteredFeedback.map((item) => (
                     <tr key={item.id}>
-                      <td>{item.feedback_id}</td>
+                      <td title={item.feedback_id}>{shortenReference(item.feedback_id)}</td>
                       <td>
                         <div className={styles.guestInfo}>
                           <strong>{item.guest_name}</strong>
                           <small>{item.email}</small>
                         </div>
                       </td>
-                      <td>{item.reservation_reference || 'N/A'}</td>
+                      <td title={item.reservation_reference || 'No linked reservation'}>
+                        {item.reservation_reference
+                          ? shortenReference(item.reservation_reference)
+                          : 'No booking link'}
+                      </td>
                       <td>{item.rating} / 5</td>
-                      <td>{item.comment.length > 60 ? `${item.comment.slice(0, 60)}...` : item.comment}</td>
+                      <td title={item.comment}>{shortenText(item.comment)}</td>
                       <td>{new Date(item.submitted_at).toLocaleDateString()}</td>
                       <td>
                         <span className={`${styles.status} ${badgeStyle[item.status] || ''}`}>

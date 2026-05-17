@@ -236,7 +236,7 @@
   display: grid;
   grid-template-columns: 1fr 240px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
@@ -256,7 +256,7 @@
   background: #fff;
   border-radius: 14px;
   border: 1px solid var(--border, #e2e8f4);
-  padding: 22px 24px;
+  padding: 16px 18px;
   box-shadow: 0 2px 8px rgba(26,60,143,0.06);
 }
 
@@ -267,7 +267,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 8px;
 }
 
 .calMonthLabel {
@@ -294,11 +294,12 @@
   background: var(--navy-light, #2d55c7);
 }
 
+/* ===== CALENDAR GRID — ALIGNMENT FIX ===== */
 .daysRow,
 .row {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
 }
 
 .dayName {
@@ -311,15 +312,19 @@
 }
 
 .cell {
-  min-height: 50px;
+  height: 44px;              /* reduced from 58px */
+  min-height: unset;
   border-radius: 6px;
   border: 1px solid #f1f5f9;
-  padding: 5px 6px;
+  padding: 4px 5px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  justify-content: space-between;
+  gap: 0;
   cursor: default;
   transition: background 0.12s;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .cell:not(.disabled):not(.reserved):hover {
@@ -331,6 +336,7 @@
   font-weight: 700;
   color: var(--navy, #1a3c8f);
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .today {
@@ -357,9 +363,9 @@
   display: flex;
   align-items: center;
   gap: 3px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.18);
   color: #fff;
-  font-size: 10px;
+  font-size: 9px;           /* slightly smaller so long room names fit */
   font-weight: 700;
   padding: 2px 4px;
   border-radius: 4px;
@@ -367,6 +373,9 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cellEventDot {
@@ -385,7 +394,8 @@
 .sidebarSummary {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 14px;
+  height: 100%;
 }
 
 .summarySection {
@@ -394,6 +404,9 @@
   border: 1px solid var(--border, #e2e8f4);
   padding: 16px 18px;
   box-shadow: 0 2px 8px rgba(26,60,143,0.06);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .summarySectionTitle {
@@ -431,16 +444,19 @@
   color: #dc2626 !important;
 }
 
-/* ===== MODAL STYLING ===== */
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(15,31,69,0.45);
+  background: rgba(15, 31, 69, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 200;
   padding: 20px;
+
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: all 0.2s ease-in-out;
 }
 
 .modal {
@@ -495,6 +511,9 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .modalRow {
@@ -686,7 +705,7 @@
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;  
-  font-weight: 600;  /* ENHANCED: added font-weight */
+  font-weight: 600;
 }
 
 .addBtnSmall:hover {
@@ -870,7 +889,6 @@
 .downloadBtn {
   background: #1e293b;  
   color: #fff;
-  border: none;
   padding: 8px 16px; 
   border-radius: 8px;  
   font-size: 0.85rem; 
@@ -967,7 +985,6 @@
   padding: 12px;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .header {
     padding: 16px 1.5rem;

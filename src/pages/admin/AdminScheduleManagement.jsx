@@ -30,9 +30,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
     const fetchReservations = async () => {
       setIsLoading(true);
       try {
-        const response = await adminAPI.getCalendarReservations();
-        // getCalendarReservations returns { date, room } — but here we need
-        // full reservation data, so fetch all reservations directly
         const data = await fetchAllReservations();
         setReservations(data);
         setError(null);
@@ -47,9 +44,7 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
     fetchReservations();
   }, []);
 
-  // Fetch full reservation list and normalize fields
   const fetchAllReservations = async () => {
-    const { default: api } = await import('../../utils/api');
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/reservations/`,
       {
@@ -66,7 +61,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
     const data = await response.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
 
-    // Normalize each reservation to a consistent shape
     const normalized = [];
     list.forEach((r) => {
       const facilityName =
@@ -91,7 +85,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
 
       if (!checkIn) return;
 
-      // Expand multi-night stays
       if (checkOut && checkOut !== checkIn) {
         let current = new Date(checkIn);
         const end   = new Date(checkOut);
@@ -124,7 +117,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  // Filter reservations by current month + active tab
   const filteredReservations = reservations.filter(r => {
     const resDate = new Date(r.date);
     const sameMonth = isSameMonth(resDate, currentDate);
@@ -138,6 +130,33 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
       const sameMonth = isSameMonth(resDate, currentDate);
       return type === "all" ? sameMonth : sameMonth && r.status === type;
     }).length;
+
+  const getStatusClass = (status) => {
+    if (['approved', 'confirmed', 'paid'].includes(status)) return styles.statusApproved;
+    if (['cancelled', 'canceled', 'declined', 'rejected', 'inactive'].includes(status)) return styles.statusCancelled;
+    return styles.statusPending;
+  };
+
+  const getStatusGroup = (status) => {
+    if (['approved', 'confirmed', 'paid'].includes(status)) return 'confirmed';
+    if (['cancelled', 'canceled', 'declined', 'rejected', 'inactive'].includes(status)) return 'cancelled';
+    return 'pending';
+  };
+
+  const groupReservations = (list) => {
+    const grouped = { confirmed: [], pending: [], cancelled: [] };
+
+    list.forEach(r => {
+      const group = getStatusGroup(r.status);
+      grouped[group].push(r);
+    });
+
+    return [
+      { key: 'confirmed', label: 'Confirmed', items: grouped.confirmed },
+      { key: 'pending',   label: 'Pending',   items: grouped.pending   },
+      { key: 'cancelled', label: 'Cancelled', items: grouped.cancelled },
+    ].filter(g => g.items.length > 0);
+  };
 
   const renderHeader = () => (
     <div className={styles.calHeader}>
@@ -172,7 +191,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        // Get ALL reservations on this day (not just first)
         const dayReservations = filteredReservations.filter(r =>
           isSameDay(new Date(r.date), day)
         );
@@ -186,7 +204,6 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
             onClick={() => hasEvent && setSelectedReservation(dayReservations)}
           >
             <span className={styles.date}>{format(day, "d")}</span>
-
             {dayReservations.slice(0, 2).map((event, idx) => (
               <div key={idx} className={styles.event}>
                 <span className={styles.dot}></span>
@@ -266,34 +283,55 @@ export default function AdminScheduleManagement({ role = 'admin' }) {
         </div>
       </div>
 
-      {/* Modal — shows all reserved rooms for the clicked day */}
-      {selectedReservation && (
+      {selectedReservation && selectedReservation.length > 0 && (
         <div className={styles.modalOverlay} onClick={() => setSelectedReservation(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            
             <div className={styles.modalHeader}>
               <h3>Reserved Facilities</h3>
-              <button className={styles.modalClose} onClick={() => setSelectedReservation(null)}>✕</button>
+              <p className={styles.modalSubtitle}>
+                {format(new Date(selectedReservation[0].date), "MMMM d, yyyy")}
+              </p>
             </div>
+
+            <button 
+              className={styles.modalClose} 
+              onClick={() => setSelectedReservation(null)}
+              aria-label="Close Modal"
+            >
+              ✕
+            </button>
+
             <div className={styles.modalBody}>
-              {selectedReservation.map((r, idx) => (
-                <div key={idx} className={styles.modalItem}>
-                  <div className={styles.modalRow}>
-                    <span>Room / Facility</span>
-                    <strong>{r.label}</strong>
+              {groupReservations(selectedReservation).map((group) => (
+                <div key={group.key} className={styles.modalGroup}>
+                  <div className={`${styles.modalGroupLabel} ${styles[`groupLabel_${group.key}`]}`}>
+                    {group.label} ({group.items.length})
                   </div>
-                  <div className={styles.modalRow}>
-                    <span>Status</span>
-                    <strong className={r.status === 'approved' ? styles.statusApproved : styles.statusPending}>
-                      {r.status}
-                    </strong>
-                  </div>
-                  {idx < selectedReservation.length - 1 && (
-                    <hr className={styles.modalDivider} />
-                  )}
+                  {group.items.map((r, idx) => (
+                    <div
+                      key={idx}
+                      className={`${styles.modalItem} ${styles[`modalItem_${getStatusGroup(r.status)}`]}`}
+                    >
+                      <div className={styles.modalRow}>
+                        <span>Room / Facility</span>
+                        <strong>{r.label}</strong>
+                      </div>
+                      <div className={styles.modalRow}>
+                        <span>Status</span>
+                        <strong className={getStatusClass(r.status)}>
+                          {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                        </strong>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
-            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>Close</button>
+
+            <button className={styles.closeBtn} onClick={() => setSelectedReservation(null)}>
+              Close
+            </button>
           </div>
         </div>
       )}

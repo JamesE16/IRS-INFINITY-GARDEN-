@@ -170,7 +170,7 @@ export default function AdminFacilities({ role = 'admin' }) {
   return (
     <div className={styles.adminShell}>
      <Sidebar role={role} />
-      
+     
 
       <div className={styles.mainContent}>
         <div className={styles.header}>
@@ -327,71 +327,76 @@ export default function AdminFacilities({ role = 'admin' }) {
                     ×
                   </button>
                 </div>
-                <form className={styles.formGrid} onSubmit={handleSubmit}>
-                  <div className={styles.field}>
-                    <label>Name</label>
-                    <input value={form.name} onChange={(event) => handleInput('name', event.target.value)} required />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Type</label>
-                    <select value={form.type} onChange={(event) => handleInput('type', event.target.value)}>
-                      {facilityTypes.map((type) => (
-                        <option key={type} value={type}>{type}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.field}>
-                    <label>Subtype</label>
-                    <input value={form.subtype} onChange={(event) => handleInput('subtype', event.target.value)} />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Price</label>
-                    <input type="number" min="0" value={form.price} onChange={(event) => handleInput('price', event.target.value)} required />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Guests</label>
-                    <input type="number" min="1" value={form.guests} onChange={(event) => handleInput('guests', event.target.value)} required />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Size (sqm)</label>
-                    <input type="number" min="0" value={form.size} onChange={(event) => handleInput('size', event.target.value)} />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Beds</label>
-                    <input value={form.beds} onChange={(event) => handleInput('beds', event.target.value)} />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Available</label>
-                    <select value={String(form.available)} onChange={(event) => handleInput('available', event.target.value === 'true')}>
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
-                    </select>
-                  </div>
-                  <div className={styles.fieldWide}>
-                    <label>Description</label>
-                    <textarea rows="3" value={form.description} onChange={(event) => handleInput('description', event.target.value)} />
-                  </div>
-                  <div className={styles.fieldWide}>
-                    <label>Amenities (comma separated)</label>
-                    <input value={form.amenities} onChange={(event) => handleInput('amenities', event.target.value)} />
-                  </div>
-                  <div className={styles.fieldWide}>
-                    <label>Features (comma separated)</label>
-                    <input value={form.features} onChange={(event) => handleInput('features', event.target.value)} />
-                  </div>
-                  <div className={styles.fieldWide}>
-                    <label>Image URL</label>
-                    <input value={form.img} onChange={(event) => handleInput('img', event.target.value)} />
-                  </div>
-                  <div className={styles.formActions}>
-                    <button type="button" className={styles.cancelBtn} onClick={() => { setShowForm(false); resetForm(); }}>
-                      Cancel
-                    </button>
-                    <button type="submit" className={styles.saveBtn} disabled={isSaving}>
-                      {isSaving ? 'Saving...' : editedFacility ? 'Save Changes' : 'Add Facility'}
-                    </button>
-                  </div>
-                </form>
+                
+                {/* Wrapped the form layout inside modalBody container */}
+                <div className={styles.modalBody}>
+                  <form className={styles.formGrid} onSubmit={handleSubmit}>
+                    <div className={styles.field}>
+                      <label>Name</label>
+                      <input value={form.name} onChange={(event) => handleInput('name', event.target.value)} required />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Type</label>
+                      <select value={form.type} onChange={(event) => handleInput('type', event.target.value)}>
+                        {facilityTypes.map((type) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className={styles.field}>
+                      <label>Subtype</label>
+                      <input value={form.subtype} onChange={(event) => handleInput('subtype', event.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Price</label>
+                      <input type="number" min="0" value={form.price} onChange={(event) => handleInput('price', event.target.value)} required />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Guests</label>
+                      <input type="number" min="1" value={form.guests} onChange={(event) => handleInput('guests', event.target.value)} required />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Size (sqm)</label>
+                      <input type="number" min="0" value={form.size} onChange={(event) => handleInput('size', event.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Beds</label>
+                      <input value={form.beds} onChange={(event) => handleInput('beds', event.target.value)} />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Available</label>
+                      <select value={String(form.available)} onChange={(event) => handleInput('available', event.target.value === 'true')}>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                    </div>
+                    <div className={styles.fieldWide}>
+                      <label>Description</label>
+                      <textarea rows="3" value={form.description} onChange={(event) => handleInput('description', event.target.value)} />
+                    </div>
+                    <div className={styles.fieldWide}>
+                      <label>Amenities (comma separated)</label>
+                      <input value={form.amenities} onChange={(event) => handleInput('amenities', event.target.value)} />
+                    </div>
+                    <div className={styles.fieldWide}>
+                      <label>Features (comma separated)</label>
+                      <input value={form.features} onChange={(event) => handleInput('features', event.target.value)} />
+                    </div>
+                    <div className={styles.fieldWide}>
+                      <label>Image URL</label>
+                      <input value={form.img} onChange={(event) => handleInput('img', event.target.value)} />
+                    </div>
+                    <div className={styles.formActions}>
+                      <button type="button" className={styles.cancelBtn} onClick={() => { setShowForm(false); resetForm(); }}>
+                        Cancel
+                      </button>
+                      <button type="submit" className={styles.saveBtn} disabled={isSaving}>
+                        {isSaving ? 'Saving...' : editedFacility ? 'Save Changes' : 'Add Facility'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
               </div>
             </div>
           )}
