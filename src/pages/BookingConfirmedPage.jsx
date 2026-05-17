@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
 import { formatDate } from '../utils/helpers';
@@ -9,6 +10,10 @@ import styles from "../styles/BookingConfirmedPage.module.css";
 export default function BookingConfirmedPage() {
   const navigate = useNavigate();
   const { confirmedBooking } = useBooking();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   // Guard
   if (!confirmedBooking) {
@@ -42,11 +47,12 @@ export default function BookingConfirmedPage() {
               <polyline points="22 4 12 14.01 9 11.01"/>
             </svg>
           </div>
-          <h1>Booking Confirmed!</h1>
-          <p>Your reservation has been successfully confirmed</p>
+          <h1>Reservation Pending</h1>
+          <p>Your reservation request has been submitted and is waiting for confirmation</p>
           <div className={styles.refBox}>
-            <span className={styles.refLabel}>Booking Reference</span>
+            <span className={styles.refLabel}>Reservation ID</span>
             <span className={styles.refId}>{b.reservationId || b.id}</span>
+            <span className={styles.refNote}>Copy this reservation ID to track your reservation status.</span>
           </div>
         </div>
 

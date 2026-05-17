@@ -470,8 +470,7 @@ export const adminAPI = {
       body: JSON.stringify(feedbackData),
     });
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'Failed to submit feedback');
+      throw new Error(await readErrorPayload(response, 'Failed to submit feedback'));
     }
     return response.json();
   },

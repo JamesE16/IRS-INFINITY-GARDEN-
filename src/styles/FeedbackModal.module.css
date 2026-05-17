@@ -108,31 +108,87 @@
   min-height: 100px;
 }
 
+.lookupStatus {
+  color: var(--text-mid);
+  font-size: 0.8rem;
+}
+
+.reservationMatch {
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  background: #f0fdf4;
+  color: #166534;
+  padding: 0.75rem 0.875rem;
+}
+
+.reservationBlocked {
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 0.75rem 0.875rem;
+}
+
+.reservationMatch span,
+.reservationBlocked span {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.reservationMatch strong {
+  color: #14532d;
+}
+
+.reservationBlocked strong {
+  display: block;
+  color: #7f1d1d;
+}
+
+.reservationBlocked em {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-style: normal;
+}
+
 .ratingContainer {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.ratingContainer select {
-  flex: 1;
-}
-
 .stars {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .star {
-  font-size: 1.5rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 1.9rem;
   color: #ddd;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
   line-height: 1;
+}
+
+.star:hover:not(:disabled) {
+  color: #f59e0b;
+  transform: translateY(-1px);
 }
 
 .star.filled {
   color: #ffc107;
+}
+
+.star:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .error {

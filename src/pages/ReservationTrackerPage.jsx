@@ -9,6 +9,7 @@ const formatDate = (value) => {
 
 const formatStatus = (status) => {
   const text = status || 'pending';
+  if (text === 'cancelled') return 'Rejected';
   return text.charAt(0).toUpperCase() + text.slice(1).replace('_', ' ');
 };
 
@@ -53,21 +54,23 @@ export default function ReservationTrackerPage() {
     <main className={styles.page}>
       <section className={styles.header}>
         <div>
-          <span className={styles.eyebrow}>Reservation Status</span>
-          <h1>Track Your Reservation</h1>
-          <p>Enter the reservation ID shown on your booking confirmation.</p>
+          <h1>My Bookings</h1>
+          <p>Search any reservation using the reservation ID from your booking confirmation.</p>
         </div>
       </section>
 
       <section className={styles.panel}>
         <form className={styles.searchForm} onSubmit={handleSubmit}>
-          <label htmlFor="reservationId">Reservation ID</label>
+          <label htmlFor="reservationId">Find Your Reservation</label>
+          <p className={styles.formHint}>
+            This lookup works for current, pending, confirmed, and past reservation records.
+          </p>
           <div className={styles.searchRow}>
             <input
               id="reservationId"
               value={reservationId}
               onChange={(event) => setReservationId(event.target.value)}
-              placeholder="Paste your reservation ID"
+              placeholder="Enter your reservation ID"
             />
             <button type="submit" disabled={isLoading}>
               {isLoading ? 'Searching...' : 'Search'}

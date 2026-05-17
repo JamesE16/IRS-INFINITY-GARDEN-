@@ -123,6 +123,7 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
     payment_method = serializers.CharField(source='payment.payment_method', read_only=True, allow_null=True)
     payment_status = serializers.CharField(source='payment.verification_status', read_only=True, allow_null=True)
     proof_of_payment = serializers.FileField(source='payment.proof_of_payment', read_only=True, allow_null=True)
+    has_feedback = serializers.SerializerMethodField()
     
     class Meta:
         model = Reservation
@@ -131,8 +132,11 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
             'address', 'check_in', 'check_out', 'num_guests', 'special_requests',
             'nights', 'total_amount', 'status', 'payment_method', 'payment_status', 'proof_of_payment',
             'reviewed_by', 'reviewed_by_username', 'reviewed_at', 'review_notes',
-            'created_at', 'updated_at'
+            'has_feedback', 'created_at', 'updated_at'
         ]
+
+    def get_has_feedback(self, obj):
+        return obj.feedbacks.exists()
 
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
@@ -179,17 +183,54 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    reservation = serializers.PrimaryKeyRelatedField(read_only=True)
+    reservation_id = serializers.CharField(write_only=True, required=True)
     guest_name = serializers.SerializerMethodField()
     reservation_reference = serializers.SerializerMethodField()
+    facility_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Feedback
         fields = [
-            'id', 'feedback_id', 'reservation', 'reservation_reference',
-            'first_name', 'last_name', 'guest_name', 'email', 'rating',
+            'id', 'feedback_id', 'reservation', 'reservation_id', 'reservation_reference',
+            'facility_name', 'first_name', 'last_name', 'guest_name', 'email', 'rating',
             'comment', 'status', 'submitted_at', 'updated_at'
         ]
-        read_only_fields = ['feedback_id', 'submitted_at', 'updated_at']
+        read_only_fields = [
+            'feedback_id', 'first_name', 'last_name', 'guest_name', 'email',
+            'submitted_at', 'updated_at'
+        ]
+
+    def validate(self, attrs):
+        reservation_id = attrs.pop('reservation_id', '').strip()
+        reservation = Reservation.objects.filter(reservation_id__iexact=reservation_id).first()
+
+        if reservation is None:
+            raise serializers.ValidationError({
+                'reservation_id': 'Reservation ID was not found.'
+            })
+
+        if reservation.status != 'confirmed':
+            raise serializers.ValidationError({
+                'reservation_id': 'Only confirmed reservations can submit feedback.'
+            })
+
+        if reservation.feedbacks.exists():
+            raise serializers.ValidationError({
+                'reservation_id': 'Feedback has already been submitted for this reservation.'
+            })
+
+        rating = attrs.get('rating', 5)
+        if rating < 1 or rating > 5:
+            raise serializers.ValidationError({
+                'rating': 'Rating must be between 1 and 5.'
+            })
+
+        attrs['reservation'] = reservation
+        attrs['first_name'] = reservation.first_name
+        attrs['last_name'] = reservation.last_name
+        attrs['email'] = reservation.email
+        return attrs
 
     def get_guest_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
@@ -205,6 +246,11 @@ class FeedbackSerializer(serializers.ModelSerializer):
         ).order_by('-created_at').first()
 
         return matched_reservation.reservation_id if matched_reservation else None
+
+    def get_facility_name(self, obj):
+        if obj.reservation and obj.reservation.facility:
+            return obj.reservation.facility.name
+        return None
 
 
 # ============================================================

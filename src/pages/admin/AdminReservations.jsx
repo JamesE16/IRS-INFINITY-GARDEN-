@@ -41,6 +41,13 @@ const toReceiptSrc = (url) => {
 
 const isPdfReceipt = (url) => /\.pdf($|\?)/i.test(url || '');
 
+const reservationStatusLabels = {
+  cancelled: 'Rejected',
+};
+
+const formatReservationStatus = (status) =>
+  reservationStatusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1);
+
 export default function AdminReservations({ role = 'admin' }) {
   const [reservations, setReservations] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -48,7 +55,7 @@ export default function AdminReservations({ role = 'admin' }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [error, setError] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('pending');
   const [rejectTarget, setRejectTarget] = useState(null);
   const [rejectMessage, setRejectMessage] = useState('');
   const isAdmin = role === 'admin';
@@ -170,13 +177,13 @@ export default function AdminReservations({ role = 'admin' }) {
         </div>
 
         <div className={styles.filterTabs}>
-          {['all', 'pending', 'confirmed', 'cancelled'].map((tab) => (
+          {['pending', 'confirmed', 'cancelled', 'all'].map((tab) => (
             <button
               key={tab}
               className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
               onClick={() => setFilter(tab)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
+              {tab === 'all' ? 'All' : formatReservationStatus(tab)} ({getCount(tab)})
             </button>
           ))}
         </div>
@@ -219,7 +226,7 @@ export default function AdminReservations({ role = 'admin' }) {
                       <td>{new Date(reservation.check_in).toLocaleDateString()}</td>
                       <td>
                         <span className={`${styles.status} ${styles[`status_${reservation.status}`]}`}>
-                          {reservation.status}
+                          {formatReservationStatus(reservation.status)}
                         </span>
                       </td>
 

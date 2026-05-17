@@ -1,7 +1,7 @@
 .page {
   min-height: calc(100vh - 88px);
   background: #f8fafc;
-  padding: 42px 2rem 64px;
+  padding: 118px 2rem 64px;
 }
 
 .header,
@@ -46,7 +46,13 @@
   display: block;
   color: #1f2937;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+.formHint {
+  color: var(--text-mid);
+  margin: 0 0 14px;
+  line-height: 1.5;
 }
 
 .searchRow {
@@ -175,7 +181,7 @@
 
 @media (max-width: 680px) {
   .page {
-    padding: 28px 1rem 48px;
+    padding: 106px 1rem 48px;
   }
 
   .searchRow,

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { BookingProvider } from './context/BookingContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -45,6 +46,10 @@ function AppRoutes() {
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isStaffRoute = location.pathname.startsWith('/staff');
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
   return (
     <>
       {!isAdminRoute && !isStaffRoute && <NavBar />}
@@ -55,8 +60,8 @@ function AppRoutes() {
         <Route path="/rooms/:id"         element={<RoomDetailPage />} />
         <Route path="/booking"           element={<BookingPage />} />
         <Route path="/booking/confirmed" element={<BookingConfirmedPage />} />
-        <Route path="/my-bookings"       element={<Navigate to="/track-reservation" replace />} />
-        <Route path="/track-reservation" element={<ReservationTrackerPage />} />
+        <Route path="/my-bookings"       element={<ReservationTrackerPage />} />
+        <Route path="/track-reservation" element={<Navigate to="/my-bookings" replace />} />
         
         {/* Shared login page for admin and staff */}
         <Route path="/login" element={<AdminLoginPage />} />

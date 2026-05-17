@@ -322,3 +322,10 @@ class Feedback(models.Model):
     
     class Meta:
         ordering = ['-submitted_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['reservation'],
+                condition=models.Q(reservation__isnull=False),
+                name='unique_feedback_per_reservation',
+            )
+        ]

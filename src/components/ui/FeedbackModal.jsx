@@ -1,18 +1,27 @@
-import { useState } from 'react';
-import { adminAPI } from '../../utils/api';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { adminAPI, reservationsAPI } from '../../utils/api';
 import styles from '../../styles/FeedbackModal.module.css';
+
+const getFacilityName = (reservationData) =>
+  reservationData?.facility?.name || reservationData?.facility_name || 'Reserved facility';
+
+const canReviewReservation = (reservationData) =>
+  (reservationData?.status || '').toLowerCase() === 'confirmed';
+
+const alreadyHasFeedback = (reservationData) => Boolean(reservationData?.has_feedback);
 
 export default function FeedbackModal({ onClose, onSubmit }) {
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
+    reservation_id: '',
     rating: 5,
     comment: ''
   });
 
+  const [reservation, setReservation] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const verificationRequestRef = useRef(0);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,19 +29,84 @@ export default function FeedbackModal({ onClose, onSubmit }) {
       ...prev,
       [name]: name === 'rating' ? parseInt(value) : value
     }));
+    if (name === 'reservation_id') {
+      setReservation(null);
+    }
     setError('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.first_name.trim() || !formData.last_name.trim()) {
-      setError('Please enter your full name');
+  const handleRatingChange = (rating) => {
+    setFormData(prev => ({
+      ...prev,
+      rating
+    }));
+    setError('');
+  };
+
+  const verifyReservation = useCallback(async (reservationId) => {
+    const query = reservationId.trim();
+
+    if (!query) {
+      setError('Please enter your reservation ID.');
       return;
     }
-    if (!formData.email.trim()) {
-      setError('Please enter your email address');
+
+    const requestId = ++verificationRequestRef.current;
+    setIsVerifying(true);
+    setError('');
+
+    try {
+      const data = await reservationsAPI.trackByReservationId(query);
+      if (requestId !== verificationRequestRef.current) return;
+      if (!canReviewReservation(data)) {
+        setReservation(null);
+        setError('Only confirmed reservations can submit feedback.');
+        return;
+      }
+      setReservation(data);
+      if (alreadyHasFeedback(data)) {
+        setError('Feedback has already been submitted for this reservation.');
+      }
+    } catch (err) {
+      if (requestId !== verificationRequestRef.current) return;
+      setReservation(null);
+      setError(err.message || 'Reservation ID was not found.');
+    } finally {
+      if (requestId === verificationRequestRef.current) {
+        setIsVerifying(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const reservationId = formData.reservation_id.trim();
+
+    verificationRequestRef.current += 1;
+    setReservation(null);
+
+    if (!reservationId) {
+      setIsVerifying(false);
+      setError('');
+      return;
+    }
+
+    if (reservationId.length < 8) {
+      setIsVerifying(false);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      verifyReservation(reservationId);
+    }, 450);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [formData.reservation_id, verifyReservation]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.reservation_id.trim()) {
+      setError('Please enter your reservation ID.');
       return;
     }
     if (!formData.comment.trim()) {
@@ -41,9 +115,23 @@ export default function FeedbackModal({ onClose, onSubmit }) {
     }
 
     setIsSubmitting(true);
+    setError('');
 
     try {
-      await adminAPI.createFeedback(formData);
+      const linkedReservation = reservation || await reservationsAPI.trackByReservationId(formData.reservation_id.trim());
+      if (!canReviewReservation(linkedReservation)) {
+        setError('Only confirmed reservations can submit feedback.');
+        return;
+      }
+      if (alreadyHasFeedback(linkedReservation)) {
+        setError('Feedback has already been submitted for this reservation.');
+        return;
+      }
+      await adminAPI.createFeedback({
+        reservation_id: linkedReservation.reservation_id || formData.reservation_id.trim(),
+        rating: formData.rating,
+        comment: formData.comment.trim()
+      });
       onSubmit && onSubmit();
       onClose();
     } catch (err) {
@@ -62,74 +150,50 @@ export default function FeedbackModal({ onClose, onSubmit }) {
       <div className={styles.box}>
         <div className={styles.header}>
           <h3 className={styles.title}>Share Your Feedback</h3>
-          <p className={styles.subtitle}>We'd love to hear about your experience at Infinity Garden</p>
+          <p className={styles.subtitle}>Paste your reservation ID so we can connect your feedback to the facility you reserved.</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.nameRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="first_name">First Name</label>
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="Enter your first name"
-                disabled={isSubmitting}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="last_name">Last Name</label>
-              <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                value={formData.last_name}
-                onChange={handleChange}
-                placeholder="Enter your last name"
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-
           <div className={styles.formGroup}>
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="reservation_id">Reservation ID</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="reservation_id"
+              name="reservation_id"
+              value={formData.reservation_id}
               onChange={handleChange}
-              placeholder="your.email@example.com"
+              placeholder="Paste your reservation ID"
               disabled={isSubmitting}
             />
+            {isVerifying && <div className={styles.lookupStatus}>Checking reservation...</div>}
+            {reservation && (
+              <div className={alreadyHasFeedback(reservation) ? styles.reservationBlocked : styles.reservationMatch}>
+                <span>Feedback for</span>
+                <strong>{getFacilityName(reservation)}</strong>
+                {alreadyHasFeedback(reservation) && (
+                  <em>This reservation already has recorded feedback.</em>
+                )}
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="rating">Rating</label>
             <div className={styles.ratingContainer}>
-              <select 
-                id="rating" 
-                name="rating" 
-                value={formData.rating}
-                onChange={handleChange}
-                disabled={isSubmitting}
-              >
-                <option value="1">1 - Poor</option>
-                <option value="2">2 - Fair</option>
-                <option value="3">3 - Good</option>
-                <option value="4">4 - Very Good</option>
-                <option value="5">5 - Excellent</option>
-              </select>
-              <div className={styles.stars}>
+              <div className={styles.stars} id="rating" role="radiogroup" aria-label="Rating">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <span
+                  <button
                     key={star}
+                    type="button"
                     className={`${styles.star} ${star <= formData.rating ? styles.filled : ''}`}
+                    onClick={() => handleRatingChange(star)}
+                    disabled={isSubmitting}
+                    role="radio"
+                    aria-checked={formData.rating === star}
+                    aria-label={`${star} star${star > 1 ? 's' : ''}`}
                   >
                     ★
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -162,7 +226,7 @@ export default function FeedbackModal({ onClose, onSubmit }) {
             <button 
               type="submit" 
               className={styles.submitBtn}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isVerifying || alreadyHasFeedback(reservation)}
             >
               {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </button>
