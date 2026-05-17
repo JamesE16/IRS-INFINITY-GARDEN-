@@ -309,6 +309,15 @@ export const reservationsAPI = {
     return response.json();
   },
 
+  trackByReservationId: async (reservationId) => {
+    const params = new URLSearchParams({ reservation_id: reservationId });
+    const response = await apiRequest(`/reservations/track/?${params}`);
+    if (!response.ok) {
+      throw new Error(await readErrorPayload(response, 'Reservation not found.'));
+    }
+    return response.json();
+  },
+
   cancel: async (id) => {
     const response = await apiRequest(`/reservations/${id}/cancel/`, {
       method: 'POST',

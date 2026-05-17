@@ -419,6 +419,7 @@
 }
 
 .modalBody input,
+.modalBody textarea,
 .paymentSelect {
   width: 100%;
   padding: 12px;
@@ -430,6 +431,7 @@
 }
 
 .modalBody input:focus,
+.modalBody textarea:focus,
 .paymentSelect:focus {
   outline: none;
   border-color: #3b82f6;
@@ -437,11 +439,25 @@
   background: white;
 }
 
-.modalBody input[readonly] {
+.modalBody input[readonly],
+.modalBody textarea[readonly] {
   background: #f9fafb;
   border: 1px solid #d1d5db;
   color: #111827;
   cursor: not-allowed;
+}
+
+.modalBody textarea {
+  min-height: 110px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.5;
+}
+
+.rejectIntro {
+  margin: 0 0 12px;
+  color: #4b5563;
+  line-height: 1.5;
 }
 
 .receiptPanel {

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -25,6 +25,21 @@ from .serializers import (
     ReservationApproveSerializer, PaymentSerializer, FeedbackSerializer, TransactionLogSerializer,
     ReservationReportSerializer, NotificationSerializer, ScheduleSerializer
 )
+
+
+class IsStaffOrAdminRole(BasePermission):
+    """Allow Django staff/admin users and app profile staff/admin users."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+
+        if user.is_staff or user.is_superuser:
+            return True
+
+        profile = getattr(user, 'profile', None)
+        return getattr(profile, 'role', None) in ['staff', 'admin']
 
 
 # ============================================================
@@ -214,11 +229,20 @@ class BlackoutDateViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     """Manage reservations"""
     queryset = Reservation.objects.all()
+
+    def is_staff_or_admin_user(self, user):
+        if user.is_staff or user.is_superuser:
+            return True
+
+        profile = getattr(user, 'profile', None)
+        return getattr(profile, 'role', None) in ['staff', 'admin']
     
     def get_permissions(self):
         """Allow unauthenticated users to create reservations"""
-        if self.action == 'create':
+        if self.action in ['create', 'track']:
             permission_classes = [AllowAny]
+        elif self.action in ['approve', 'pending', 'by_date_range']:
+            permission_classes = [IsStaffOrAdminRole]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -228,7 +252,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             return ReservationCreateSerializer
         elif self.action == 'approve':
             return ReservationApproveSerializer
-        elif self.action in ['list', 'retrieve']:
+        elif self.action == 'list':
             return ReservationListSerializer
         return ReservationDetailSerializer
     
@@ -236,7 +260,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         
         # Admin/Staff can see all reservations
-        if user.is_staff:
+        if self.is_staff_or_admin_user(user):
             return Reservation.objects.all()
         
         # Authenticated clients see their own reservations
@@ -317,7 +341,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
+    @action(detail=True, methods=['post'], permission_classes=[IsStaffOrAdminRole])
     def approve(self, request, pk=None):
         """Admin approving/rejecting reservation"""
         reservation = self.get_object()
@@ -421,15 +445,37 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservations = Reservation.objects.filter(guest=request.user).order_by('-created_at')
         serializer = ReservationListSerializer(reservations, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[AllowAny])
+    def track(self, request):
+        """Public reservation lookup by reservation ID."""
+        reservation_id = (request.query_params.get('reservation_id') or '').strip()
+
+        if not reservation_id:
+            return Response(
+                {'error': 'reservation_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        reservation = Reservation.objects.filter(reservation_id__iexact=reservation_id).first()
+
+        if reservation is None:
+            return Response(
+                {'error': 'Reservation not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = ReservationDetailSerializer(reservation)
+        return Response(serializer.data)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAdminUser])
+    @action(detail=False, methods=['get'], permission_classes=[IsStaffOrAdminRole])
     def pending(self, request):
         """Get pending reservations (for admin review)"""
         reservations = Reservation.objects.filter(status='pending').order_by('created_at')
         serializer = ReservationDetailSerializer(reservations, many=True)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAdminUser])
+    @action(detail=False, methods=['get'], permission_classes=[IsStaffOrAdminRole])
     def by_date_range(self, request):
         """Get reservations for a date range"""
         start_date = request.query_params.get('start_date')
@@ -496,7 +542,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
     """Reservation notifications for admin and staff."""
     queryset = Notification.objects.select_related('reservation', 'reservation__facility', 'reservation__payment').all()
     serializer_class = NotificationSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsStaffOrAdminRole]
 
     def get_queryset(self):
         queryset = super().get_queryset()

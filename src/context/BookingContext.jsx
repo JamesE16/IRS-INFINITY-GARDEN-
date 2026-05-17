@@ -88,6 +88,7 @@ export function BookingProvider({ children }) {
         tax,
         total,
         status: (booking.status || 'pending').toString().toLowerCase(),
+        reviewNotes: booking.reviewNotes || booking.review_notes || '',
       };
     },
     [facilities]

@@ -64,12 +64,12 @@ export default function NavBar() {
         </NavLink>
 
         <NavLink
-          to="/my-bookings"
+          to="/track-reservation"
           className={({ isActive }) =>
             `${styles.link} ${isActive ? styles.active : ''}`
           }
         >
-          My Bookings
+          Track Reservation
         </NavLink>
       </div>
     </nav>

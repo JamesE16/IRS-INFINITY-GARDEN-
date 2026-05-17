@@ -27,6 +27,8 @@ const normalizeReservation = (reservation) => ({
   nights: reservation.nights || 0,
   total_amount: reservation.total_amount || 0,
   special_requests: reservation.special_requests || '',
+  review_notes: reservation.review_notes || '',
+  reviewed_at: reservation.reviewed_at || '',
   created_at: reservation.created_at,
   status: (reservation.status || 'pending').toLowerCase(),
 });
@@ -44,8 +46,11 @@ export default function AdminReservations({ role = 'admin' }) {
   const [notifications, setNotifications] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingStatus, setIsSavingStatus] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('all');
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectMessage, setRejectMessage] = useState('');
   const isAdmin = role === 'admin';
 
   useEffect(() => {
@@ -91,23 +96,42 @@ export default function AdminReservations({ role = 'admin' }) {
     return reservations.filter((reservation) => reservation.status === type).length;
   };
 
-  const updateReservationStatus = async (id, status) => {
+  const updateReservationStatus = async (id, status, reviewNotes = '') => {
+    setIsSavingStatus(true);
     try {
       if (status === 'confirmed') {
-        await reservationsAPI.approve(id, '', 'confirmed');
+        await reservationsAPI.approve(id, reviewNotes, 'confirmed');
       } else if (status === 'cancelled') {
-        await reservationsAPI.approve(id, '', 'cancelled');
+        await reservationsAPI.approve(id, reviewNotes, 'cancelled');
       }
 
       setReservations((prev) =>
         prev.map((reservation) =>
-          reservation.id === id ? { ...reservation, status } : reservation
+          reservation.id === id ? { ...reservation, status, review_notes: reviewNotes } : reservation
         )
       );
+      setRejectTarget(null);
+      setRejectMessage('');
     } catch (err) {
       console.error(err);
       setError('Unable to update reservation status.');
+    } finally {
+      setIsSavingStatus(false);
     }
+  };
+
+  const openRejectDialog = (reservation) => {
+    setRejectTarget(reservation);
+    setRejectMessage(reservation.review_notes || '');
+  };
+
+  const submitRejection = () => {
+    if (!rejectTarget || !rejectMessage.trim()) {
+      setError('Please add a rejection message for the guest.');
+      return;
+    }
+
+    updateReservationStatus(rejectTarget.id, 'cancelled', rejectMessage.trim());
   };
 
   const handleArchive = (id) => {
@@ -227,9 +251,9 @@ export default function AdminReservations({ role = 'admin' }) {
                               </button>
                               <button
                                 className={styles.cancelBtnSmall}
-                                onClick={() => updateReservationStatus(reservation.id, 'cancelled')}
+                                onClick={() => openRejectDialog(reservation)}
                               >
-                                Cancel
+                                Reject
                               </button>
                             </>
                           )}
@@ -310,6 +334,12 @@ export default function AdminReservations({ role = 'admin' }) {
                     <label>Special Requests</label>
                     <input value={selectedReservation.special_requests || 'None'} readOnly />
                   </div>
+                  {selectedReservation.status === 'cancelled' && (
+                    <div className={styles.fullRow}>
+                      <label>Rejection Message</label>
+                      <textarea value={selectedReservation.review_notes || 'No rejection message was added.'} readOnly />
+                    </div>
+                  )}
                 </div>
 
                 <div className={styles.receiptPanel}>
@@ -347,6 +377,50 @@ export default function AdminReservations({ role = 'admin' }) {
                   className={styles.cancelBtn}
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {rejectTarget && (
+          <div className={styles.modalOverlay}>
+            <div className={styles.modalBox}>
+              <div className={styles.modalHeader}>
+                <h3>Reject Reservation</h3>
+                <button
+                  className={styles.closeBtn}
+                  onClick={() => setRejectTarget(null)}
+                >
+                  x
+                </button>
+              </div>
+              <div className={styles.modalBody}>
+                <p className={styles.rejectIntro}>
+                  Add a message so the guest knows why reservation {rejectTarget.booking_id_short} was rejected.
+                </p>
+                <label>Message to Guest</label>
+                <textarea
+                  value={rejectMessage}
+                  onChange={(event) => setRejectMessage(event.target.value)}
+                  placeholder="Example: Your proof of payment could not be verified. Please contact the resort for assistance."
+                  rows={5}
+                />
+              </div>
+              <div className={styles.modalFooter}>
+                <button
+                  onClick={() => setRejectTarget(null)}
+                  className={styles.cancelBtn}
+                  disabled={isSavingStatus}
+                >
+                  Close
+                </button>
+                <button
+                  onClick={submitRejection}
+                  className={styles.submitBtn}
+                  disabled={isSavingStatus}
+                >
+                  {isSavingStatus ? 'Saving...' : 'Reject Reservation'}
                 </button>
               </div>
             </div>

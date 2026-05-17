@@ -109,7 +109,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address',
             'payment_method', 'payment_status', 'proof_of_payment',
             'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status',
-            'total_amount', 'created_at'
+            'total_amount', 'review_notes', 'reviewed_at', 'created_at'
         ]
     
     def get_guest_full_name(self, obj):

@@ -155,7 +155,7 @@ export default function BookingConfirmedPage() {
             <h4>What's Next?</h4>
             <ul>
               <li>A confirmation email has been sent to {b.email}</li>
-              <li>You can view and manage your booking in the "My Bookings" section</li>
+              <li>Use your reservation ID to track your booking status anytime</li>
               <li>Free cancellation is available up to 48 hours before check-in</li>
               <li>{isOvernightStay ? 'Check-in starts at 3:00 PM on your arrival date' : 'Your facility is reserved for the selected booking date'}</li>
             </ul>
@@ -164,8 +164,8 @@ export default function BookingConfirmedPage() {
 
         {/* ── ACTIONS ── */}
         <div className={styles.actions}>
-          <button className={styles.viewBtn} onClick={() => navigate('/my-bookings')}>
-            View My Bookings
+          <button className={styles.viewBtn} onClick={() => navigate('/track-reservation')}>
+            Track Reservation
           </button>
           <button className="btn-outline-navy" onClick={() => navigate('/')}>
             Return to Home

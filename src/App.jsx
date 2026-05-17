@@ -8,7 +8,7 @@ import RoomsPage         from './pages/RoomsPage';
 import RoomDetailPage    from './pages/RoomDetailPage';
 import BookingPage       from './pages/BookingPage';
 import BookingConfirmedPage from './pages/BookingConfirmedPage';
-import MyBookingsPage    from './pages/MyBookingsPage';
+import ReservationTrackerPage from './pages/ReservationTrackerPage';
 import AdminLoginPage    from './pages/admin/AdminLoginPage';
 import AdminDashboard    from './pages/admin/AdminDashboard';
 import AdminReservations from './pages/admin/AdminReservations';
@@ -55,7 +55,8 @@ function AppRoutes() {
         <Route path="/rooms/:id"         element={<RoomDetailPage />} />
         <Route path="/booking"           element={<BookingPage />} />
         <Route path="/booking/confirmed" element={<BookingConfirmedPage />} />
-        <Route path="/my-bookings"       element={<MyBookingsPage />} />
+        <Route path="/my-bookings"       element={<Navigate to="/track-reservation" replace />} />
+        <Route path="/track-reservation" element={<ReservationTrackerPage />} />
         
         {/* Shared login page for admin and staff */}
         <Route path="/login" element={<AdminLoginPage />} />
@@ -86,4 +87,3 @@ function AppRoutes() {
     </>
   );
 }
-
