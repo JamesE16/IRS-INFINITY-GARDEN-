@@ -42,7 +42,7 @@ const toReceiptSrc = (url) => {
 const isPdfReceipt = (url) => /\.pdf($|\?)/i.test(url || '');
 
 const reservationStatusLabels = {
-  cancelled: 'Rejected',
+  cancelled: 'Declined',
 };
 
 const formatReservationStatus = (status) =>
@@ -260,7 +260,7 @@ export default function AdminReservations({ role = 'admin' }) {
                                 className={styles.cancelBtnSmall}
                                 onClick={() => openRejectDialog(reservation)}
                               >
-                                Reject
+                                Decline
                               </button>
                             </>
                           )}
