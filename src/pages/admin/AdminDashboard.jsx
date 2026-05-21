@@ -250,7 +250,7 @@ export default function AdminDashboard({ role = 'admin' }) {
               <polyline points="12 6 12 12 16 14"/>
             </StatCard>
 
-            <StatCard label="Cancelled" value={stats?.cancelled_count ?? 0}
+            <StatCard label="Declined" value={stats?.cancelled_count ?? 0}
               iconBg="#fee2e2" iconStroke="#dc2626">
               <circle cx="12" cy="12" r="10"/>
               <line x1="15" y1="9" x2="9" y2="15"/>
