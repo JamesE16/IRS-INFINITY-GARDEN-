@@ -197,3 +197,29 @@ img {
   border-top: 1px solid var(--border);
   margin: 1.5rem 0;
 }
+
+/* Global scrollbar styling */
+html, body, * {
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

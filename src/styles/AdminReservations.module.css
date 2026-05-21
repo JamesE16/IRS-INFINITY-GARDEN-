@@ -123,7 +123,6 @@
 
 .tableWrapper::-webkit-scrollbar-thumb:hover {
   background: #64748b;
-  border-radius: 20px;
 }
 
 .table {

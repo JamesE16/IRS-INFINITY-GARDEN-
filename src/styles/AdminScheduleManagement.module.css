@@ -338,18 +338,21 @@
 }
 
 .modalBody::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
+  height: 8px;
 }
 .modalBody::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 10px;
+  background: transparent;
+  border-radius: 20px;
 }
 .modalBody::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 .modalBody::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #64748b;
 }
 
 .modalGroup {

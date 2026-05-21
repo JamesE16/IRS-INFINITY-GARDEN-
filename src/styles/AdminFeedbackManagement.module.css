@@ -247,17 +247,25 @@
   max-height: 350px;         
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
 }
 
 .tableWrapper::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 .tableWrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 .tableWrapper::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 999px;
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 /* ── DATA CORE LAYOUTS ── */
@@ -447,17 +455,20 @@
 }
 
 .modalBody::-webkit-scrollbar {
-  width: 14px; 
+  width: 8px;
+  height: 8px;
 }
 
 .modalBody::-webkit-scrollbar-track {
-  background: #f1f5f9; 
+  background: transparent;
+  border-radius: 20px;
 }
 
 .modalBody::-webkit-scrollbar-thumb {
-  background: #94a3b8; 
-  border: 2px solid #f1f5f9; 
-  border-radius: 999px;
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 .modalBody::-webkit-scrollbar-thumb:hover {

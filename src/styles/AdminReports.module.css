@@ -1,15 +1,17 @@
 .adminShell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   background: var(--bg, #f0f4fb);
+  overflow: hidden;
 }
 
 .mainContent {
   flex: 1;
-  min-height: 100vh;
+  height: 100vh;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .header {
@@ -58,11 +60,14 @@
   display: flex;
   flex-direction: column;
   gap: 25px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .analyticsColumn {
   flex: 1;
   min-width: 0;
+  min-height: 0;
 }
 
 .reportAlert {
@@ -80,16 +85,45 @@
   display: flex;
   flex-direction: column;
   gap: 22px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Quick Report Dashboard */
 .quickReportDashboard {
   background: #fff;
-  padding: 24px;
+  padding: 24px 30px 24px 24px;
   border-radius: 12px;
   border: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 2px 8px rgba(26, 60, 143, 0.06);
-  margin-bottom: 22px;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.quickReportDashboard::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.quickReportDashboard::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quickReportDashboard::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.quickReportDashboard::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 .dashboardHeader {
@@ -290,6 +324,7 @@
   margin: 12px 0 18px;
   min-height: 145px;
   position: relative;
+  z-index: 1;
 }
 
 .lineChart {
@@ -368,6 +403,11 @@
   position: absolute;
   transform: translate(10px, -50%);
   transition: left 0.28s ease, top 0.28s ease, opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+
+.chartTooltip[data-align='left'] {
+  transform: translate(calc(-100% - 10px), -50%);
 }
 
 .chartTooltip strong {
@@ -399,6 +439,7 @@
   margin: 12px 0 18px;
   min-height: 145px;
   position: relative;
+  z-index: 1;
 }
 
 .revenueLineChart {
@@ -829,8 +870,11 @@
 .reportPreviewPaper {
   background: #fff;
   border: 1px solid #d9e2f2;
-  overflow: auto;
-  max-height: calc(100vh - 230px);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .previewHeader {
@@ -950,16 +994,49 @@
   font-weight: 800;
 }
 
-.previewTableWrap {
+.previewTableWrap,
+.reportTableWrap {
+  border: 1px solid #dbe4f0;
+  border-radius: 6px;
   margin: 0 32px;
-  overflow-x: hidden;
+  max-height: clamp(160px, calc(100vh - 540px), 360px);
+  min-height: 160px;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.previewTableWrap::-webkit-scrollbar,
+.reportTableWrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.previewTableWrap::-webkit-scrollbar-track,
+.reportTableWrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.previewTableWrap::-webkit-scrollbar-thumb,
+.reportTableWrap::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.previewTableWrap::-webkit-scrollbar-thumb:hover,
+.reportTableWrap::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 .previewTable {
-  width: 100%;
   border-collapse: collapse;
   font-size: 0.68rem;
+  min-width: 920px;
   table-layout: fixed;
+  width: 100%;
 }
 
 .previewTable th {
@@ -970,9 +1047,12 @@
   text-align: left;
   padding: 10px;
   border-bottom: 2px solid var(--navy, #1a3c8f);
+  position: sticky;
+  top: 0;
   text-transform: uppercase;
   overflow-wrap: anywhere;
   white-space: normal;
+  z-index: 1;
 }
 
 .previewTable td {
@@ -1276,8 +1356,19 @@
 }
 
 /* Shared management table styling */
+.reportTableWrap {
+  border: 1px solid #dbe4f0;
+  border-radius: 6px;
+  max-height: 260px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .reportTable {
   background: #fff;
+  border-collapse: collapse;
+  min-width: 560px;
+  width: 100%;
 }
 
 .reportTable thead,
@@ -1295,6 +1386,9 @@
 .reportTable th {
   font-weight: 700;
   font-size: 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .reportTable tbody tr:nth-child(even) {
