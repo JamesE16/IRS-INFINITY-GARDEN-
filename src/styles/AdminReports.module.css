@@ -64,6 +64,17 @@
   flex: 1;
 }
 
+.reportAlert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .reportLayout {
   display: flex;
   flex-direction: column;
@@ -557,6 +568,106 @@
   background-color: #334155;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(30, 41, 59, 0.2);
+}
+
+.reportPreviewModal {
+  max-width: min(1120px, calc(100vw - 36px));
+  max-height: calc(100vh - 36px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.reportPreviewPaper {
+  background: #fff;
+  border: 1px solid #d9e2f2;
+  padding: 24px;
+  overflow: auto;
+  max-height: calc(100vh - 190px);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 3px solid var(--navy, #1a3c8f);
+}
+
+.previewHeader img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.previewHeader h2 {
+  margin: 0 0 6px;
+  color: var(--navy, #1a3c8f);
+  font-size: 1.45rem;
+  letter-spacing: 0;
+}
+
+.previewHeader p {
+  margin: 2px 0;
+  color: #5f6d83;
+  font-size: 0.84rem;
+}
+
+.previewStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.previewStats div {
+  border: 1px solid #dbe4f0;
+  background: #f8fafc;
+  padding: 14px;
+}
+
+.previewStats span {
+  display: block;
+  color: #667085;
+  font-size: 0.75rem;
+  margin-bottom: 8px;
+}
+
+.previewStats strong {
+  display: block;
+  color: var(--navy, #1a3c8f);
+  font-size: 1.15rem;
+}
+
+.previewTableWrap {
+  overflow-x: auto;
+}
+
+.previewTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.previewTable th {
+  background: var(--navy, #1a3c8f);
+  color: #fff;
+  text-align: left;
+  padding: 10px;
+  border: 1px solid var(--navy, #1a3c8f);
+  white-space: nowrap;
+}
+
+.previewTable td {
+  padding: 10px;
+  border: 1px solid #dbe4f0;
+  color: #172033;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.previewTable tbody tr:nth-child(even) {
+  background: #f8fafc;
 }
 
 @media (max-width: 900px) {

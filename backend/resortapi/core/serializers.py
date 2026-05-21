@@ -96,6 +96,7 @@ class BlackoutDateSerializer(serializers.ModelSerializer):
 class ReservationListSerializer(serializers.ModelSerializer):
     """Simplified serializer for listing"""
     facility_name = serializers.CharField(source='facility.name', read_only=True)
+    facility_type = serializers.CharField(source='facility.room_type.name', read_only=True)
     facility_image = serializers.CharField(source='facility.image_url', read_only=True)
     guest_full_name = serializers.SerializerMethodField()
     payment_method = serializers.CharField(source='payment.payment_method', read_only=True, allow_null=True)
@@ -105,7 +106,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
         fields = [
-            'id', 'reservation_id', 'facility', 'facility_name', 'facility_image',
+            'id', 'reservation_id', 'facility', 'facility_name', 'facility_type', 'facility_image',
             'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address',
             'payment_method', 'payment_status', 'proof_of_payment',
             'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status',

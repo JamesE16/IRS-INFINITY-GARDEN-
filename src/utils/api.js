@@ -403,6 +403,18 @@ export const adminAPI = {
     return response.json();
   },
 
+  getReservationDetailReport: async ({ startDate, endDate, facilityType = 'All', reportType = 'reservations' } = {}) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    if (facilityType && facilityType !== 'All') params.append('facility_type', facilityType);
+    if (reportType) params.append('report_type', reportType);
+
+    const response = await apiRequest(`/reports/reservation_detail/?${params}`);
+    if (!response.ok) throw new Error('Failed to fetch reservation report');
+    return response.json();
+  },
+
   getPayments: async (status = null) => {
     const params = new URLSearchParams();
     if (status) params.append('status', status);

@@ -1,59 +1,352 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import styles from '../../styles/AdminReports.module.css';
-import { reservationsAPI, facilitiesAPI } from '../../utils/api';
-import { 
-  FaCalendarAlt, FaUsers, FaChartPie, FaChartLine, 
-  FaDownload, FaPlus 
+import { adminAPI } from '../../utils/api';
+import logo from '../../assets/logo.png';
+import {
+  FaCalendarAlt,
+  FaUsers,
+  FaChartPie,
+  FaChartLine,
+  FaDownload,
+  FaPlus,
 } from 'react-icons/fa';
 
+const REPORT_TYPE_LABELS = {
+  reservations: 'Reservations',
+  payments: 'Payments',
+  facilities: 'Facilities',
+  guests: 'Guests',
+};
+
+const FACILITY_TYPES = ['All', 'Room', 'Cottage', 'Gazebo', 'Pavilion'];
+
+const money = (value) =>
+  `PHP ${Number(value || 0).toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+
+const formatDate = (value) => {
+  if (!value) return 'All dates';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString('en-PH', {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+      });
+};
+
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+const imageToDataUrl = async (src) => {
+  const response = await fetch(src);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
+const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
+  const generatedAt = new Date().toLocaleString('en-PH', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const reportTitle = `Infinity Garden Resort ${REPORT_TYPE_LABELS[filters.reportType]} Report`;
+
+  const tableRows = rows.length
+    ? rows
+        .map(
+          (report, index) => `
+            <tr>
+              <td>${escapeHtml(report.reservation_id || `REP-${String(index + 1).padStart(4, '0')}`)}</td>
+              <td>${escapeHtml(report.facility_type || 'N/A')}</td>
+              <td>${escapeHtml(report.facility_name || 'N/A')}</td>
+              <td>${escapeHtml(report.guest_full_name || `${report.first_name || ''} ${report.last_name || ''}`.trim())}</td>
+              <td>${escapeHtml(formatDate(report.check_in))}</td>
+              <td>${escapeHtml(formatDate(report.check_out))}</td>
+              <td>${escapeHtml(report.num_guests || 0)}</td>
+              <td>${escapeHtml(money(report.total_amount))}</td>
+              <td>${escapeHtml(report.status || 'N/A')}</td>
+            </tr>
+          `
+        )
+        .join('')
+    : '<tr><td colspan="9" class="empty">No records found for the selected filters.</td></tr>';
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(reportTitle)}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 36px;
+      color: #172033;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fb;
+    }
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #d9e2f2;
+      padding: 34px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #1a3c8f;
+    }
+    .logo {
+      width: 82px;
+      height: 82px;
+      object-fit: contain;
+    }
+    h1 {
+      margin: 0 0 6px;
+      color: #1a3c8f;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+    .subtle {
+      margin: 2px 0;
+      color: #5f6d83;
+      font-size: 13px;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .metric {
+      border: 1px solid #dbe4f0;
+      background: #f8fafc;
+      padding: 14px;
+    }
+    .metric span {
+      display: block;
+      color: #667085;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .metric strong {
+      display: block;
+      color: #1a3c8f;
+      font-size: 21px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+    th {
+      background: #1a3c8f;
+      color: #fff;
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #1a3c8f;
+    }
+    td {
+      padding: 10px;
+      border: 1px solid #dbe4f0;
+      vertical-align: top;
+    }
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    .empty {
+      text-align: center;
+      color: #667085;
+      padding: 22px;
+    }
+    .footer {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid #dbe4f0;
+      color: #667085;
+      font-size: 12px;
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { border: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <img class="logo" src="${logoDataUrl}" alt="Infinity Garden Resort Logo" />
+      <div>
+        <h1>${escapeHtml(reportTitle)}</h1>
+        <p class="subtle">Infinity Garden Resort Reservation Management System</p>
+        <p class="subtle">Generated by: ${escapeHtml(role === 'admin' ? 'Admin' : 'Staff')} | Generated on: ${escapeHtml(generatedAt)}</p>
+        <p class="subtle">Date range: ${escapeHtml(formatDate(filters.startDate))} to ${escapeHtml(formatDate(filters.endDate))} | Facility type: ${escapeHtml(filters.facilityType)}</p>
+      </div>
+    </header>
+
+    <section class="meta">
+      <div class="metric"><span>Total Reservations</span><strong>${escapeHtml(summary.total_reservations || 0)}</strong></div>
+      <div class="metric"><span>Total Guests</span><strong>${escapeHtml(summary.total_guests || 0)}</strong></div>
+      <div class="metric"><span>Total Revenue</span><strong>${escapeHtml(money(summary.total_revenue))}</strong></div>
+      <div class="metric"><span>Confirmed</span><strong>${escapeHtml(summary.confirmed_count || 0)}</strong></div>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Reservation ID</th>
+          <th>Type</th>
+          <th>Facility</th>
+          <th>Guest</th>
+          <th>Check-in</th>
+          <th>Check-out</th>
+          <th>Guests</th>
+          <th>Total Amount</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+
+    <footer class="footer">
+      This report was generated from the current Infinity Garden Resort database records.
+    </footer>
+  </main>
+</body>
+</html>`;
+};
+
 const AdminReports = ({ role = 'admin' }) => {
-  const [data, setData] = useState([]);
-  const [facilities, setFacilities] = useState([]);
-  const [showModal, setShowModal] = useState(null); // "generate" | "print" | null
-  const isAdmin = role === 'admin';
+  const [reportData, setReportData] = useState({
+    summary: {},
+    reservations: [],
+    facility_breakdown: [],
+  });
+  const [showModal, setShowModal] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const [filters, setFilters] = useState({
+    reportType: 'reservations',
     facilityType: 'All',
-    startDate: '2026-03-07',
-    endDate: '2026-03-10'
+    startDate: '',
+    endDate: '',
   });
 
   useEffect(() => {
-    const fetchData = async () => {
+    let ignore = false;
+
+    const fetchReport = async () => {
+      setLoading(true);
+      setError('');
+
       try {
-        const [reservationsRes, facilitiesRes] = await Promise.all([
-          reservationsAPI.getAllReservations(),
-          facilitiesAPI.getAll()
-        ]);
-        setData(reservationsRes || []);
-        setFacilities(facilitiesRes || []);
-      } catch (err) { 
-        console.error("Fetch error:", err); 
+        const response = await adminAPI.getReservationDetailReport(filters);
+        if (!ignore) {
+          setReportData({
+            summary: response.summary || {},
+            reservations: response.reservations || [],
+            facility_breakdown: response.facility_breakdown || [],
+          });
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message || 'Failed to load report data.');
+          setReportData({ summary: {}, reservations: [], facility_breakdown: [] });
+        }
+      } finally {
+        if (!ignore) setLoading(false);
       }
     };
-    fetchData();
-  }, []);
 
-  const filteredData = useMemo(() => {
-    return data.filter(item => {
-      const itemDate = item.created_at?.split('T')[0];
-      const dateMatch = itemDate >= filters.startDate && itemDate <= filters.endDate;
-      const facilityMatch = filters.facilityType === 'All' || item.facility_name === filters.facilityType;
-      return dateMatch && facilityMatch;
-    });
-  }, [data, filters]);
+    fetchReport();
 
-  const handlePrint = () => {
+    return () => {
+      ignore = true;
+    };
+  }, [filters]);
+
+  const rows = reportData.reservations;
+  const summary = reportData.summary;
+
+  const topFacilityType = useMemo(() => {
+    const top = [...(reportData.facility_breakdown || [])].sort(
+      (a, b) => (b.total_reservations || 0) - (a.total_reservations || 0)
+    )[0];
+
+    return top ? `${top.facility_type} (${top.total_reservations})` : 'No records';
+  }, [reportData.facility_breakdown]);
+
+  const closeModal = () => {
     setShowModal(null);
-    // Trigger print immediately without changing component state
-    setTimeout(() => window.print(), 100);
   };
 
-  const handleGenerate = () => {
+  const downloadReportFile = async () => {
+    const logoDataUrl = await imageToDataUrl(logo);
+    const html = buildReportHtml({
+      logoDataUrl,
+      rows,
+      summary,
+      filters,
+      role,
+    });
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const dateLabel = new Date().toISOString().slice(0, 10);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `infinity-garden-${filters.reportType}-report-${dateLabel}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadReport = async () => {
+    setError('');
+
+    try {
+      await downloadReportFile();
+    } catch (err) {
+      setError(err.message || 'Failed to generate the report file.');
+    }
+  };
+
+  const handlePrint = async () => {
     setShowModal(null);
-    // Trigger print immediately without changing component state
-    setTimeout(() => window.print(), 100);
+    const logoDataUrl = await imageToDataUrl(logo);
+    const html = buildReportHtml({ logoDataUrl, rows, summary, filters, role });
+    const printWindow = window.open('', '_blank');
+
+    if (!printWindow) {
+      setError('The print window was blocked by the browser.');
+      return;
+    }
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   return (
@@ -61,13 +354,12 @@ const AdminReports = ({ role = 'admin' }) => {
       <Sidebar role={role} />
 
       <div className={styles.mainContent}>
-        {/* ===== HEADER (UNCHANGED) ===== */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
               <h1>Reports</h1>
               <p>
-                {isAdmin
+                {role === 'admin'
                   ? 'Infinity Garden Resort Reservation Management System'
                   : 'Infinity Garden Resort - Staff View'}
               </p>
@@ -77,11 +369,9 @@ const AdminReports = ({ role = 'admin' }) => {
 
         <main className={styles.container}>
           <div className={styles.reportLayout}>
-
-            {/* LEFT SIDE */}
             <div className={styles.analyticsColumn}>
+              {error && <div className={styles.reportAlert}>{error}</div>}
 
-              {/* DASHBOARD */}
               <section className={styles.quickReportDashboard}>
                 <h3>Quick Report Dashboard</h3>
 
@@ -89,74 +379,58 @@ const AdminReports = ({ role = 'admin' }) => {
                   <div className={styles.smallStatCard}>
                     <p>Total Reservations</p>
                     <div className={styles.statMain}>
-                      <strong>{filteredData.length}</strong> <FaCalendarAlt />
+                      <strong>{summary.total_reservations || 0}</strong> <FaCalendarAlt />
                     </div>
-                    <span className={styles.trendPos}>+20 last week</span>
+                    <span className={styles.trendPos}>
+                      {loading ? 'Loading database records...' : `${rows.length} matching records`}
+                    </span>
                   </div>
 
                   <div className={styles.smallStatCard}>
                     <p>Total Guests</p>
                     <div className={styles.statMain}>
-                      <strong>{filteredData.reduce((sum, item) => sum + (item.num_guests || 0), 0)}</strong> <FaUsers />
+                      <strong>{summary.total_guests || 0}</strong> <FaUsers />
                     </div>
                   </div>
 
                   <div className={styles.smallStatCard}>
                     <p>Facility Usage Breakdown</p>
-                    <div className={styles.chartPlaceholder}>
-                      <FaChartPie />
+                    <div className={styles.statMain}>
+                      <strong>{topFacilityType}</strong> <FaChartPie />
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.graphsRow}>
                   <div className={styles.graphCard}>
-                    <p>Occupancy Report</p>
-                    <h3>{filteredData.length > 0 ? '78.5%' : '0%'}</h3>
+                    <p>Confirmed Reservations</p>
+                    <h3>{summary.confirmed_count || 0}</h3>
                     <div className={styles.miniGraph}>
                       <FaChartLine />
                     </div>
-                    {isAdmin && (
-                      <button
-                        className={styles.downloadBtn}
-                        onClick={() => setShowModal("generate")}
-                      >
-                        <FaDownload /> Download
-                      </button>
-                    )}
+                    <button className={styles.downloadBtn} onClick={() => setShowModal('generate')}>
+                      <FaDownload /> Download
+                    </button>
                   </div>
 
                   <div className={styles.graphCard}>
                     <p>Revenue Over Time</p>
-                    <h3>₱{filteredData.reduce((sum, item) => sum + (item.total_amount || 0), 0).toLocaleString()}</h3>
+                    <h3>{money(summary.total_revenue)}</h3>
                     <div className={styles.barGraphPlaceholder}></div>
-                    {isAdmin && (
-                      <button
-                        className={styles.downloadBtn}
-                        onClick={() => setShowModal("generate")}
-                      >
-                        <FaDownload /> Download
-                      </button>
-                    )}
+                    <button className={styles.downloadBtn} onClick={() => setShowModal('generate')}>
+                      <FaDownload /> Download
+                    </button>
                   </div>
                 </div>
               </section>
 
-              {/* TABLE */}
               <section className={styles.tableSection}>
                 <div className={styles.tableHeader}>
-                  <h3>
-                    Generated Reports
-                  </h3>
+                  <h3>Generated Reports</h3>
 
-                  {isAdmin && (
-                    <button
-                      className={styles.printReportBtn}
-                      onClick={() => setShowModal("print")}
-                    >
-                      <FaPlus /> Print Report
-                    </button>
-                  )}
+                  <button className={styles.printReportBtn} onClick={() => setShowModal('print')}>
+                    <FaPlus /> Print Report
+                  </button>
                 </div>
 
                 <div className={styles.tableWrapper}>
@@ -172,140 +446,120 @@ const AdminReports = ({ role = 'admin' }) => {
                     </thead>
 
                     <tbody>
-                      {filteredData.map((report, idx) => (
-                        <tr key={idx}>
-                          <td>REP-00{idx + 1}</td>
-                          <td>{report.facility_name || 'Reservations'}</td>
-                          <td>{report.created_at?.split('T')[0]}</td>
-                          <td>Admin</td>
-                          <td>
-                            <div className={styles.actionContainer}>
-                              <button className={styles.viewLink}>
-                                View
-                              </button>
+                      {rows.length > 0 ? (
+                        rows.map((report, idx) => (
+                          <tr key={report.id || idx}>
+                            <td>{report.reservation_id || `REP-${String(idx + 1).padStart(4, '0')}`}</td>
+                            <td>{report.facility_type || report.facility_name || 'Reservations'}</td>
+                            <td>{formatDate(report.created_at)}</td>
+                            <td>{role === 'admin' ? 'Admin' : 'Staff'}</td>
+                            <td>
+                              <div className={styles.actionContainer}>
+                                <button className={styles.viewLink} onClick={() => setShowModal('print')}>
+                                  View
+                                </button>
 
-                              {isAdmin && (
-                                <button
-                                  className={styles.downloadLink}
-                                  onClick={() => setShowModal("generate")}
-                                >
+                                <button className={styles.downloadLink} onClick={() => setShowModal('generate')}>
                                   Download
                                 </button>
-                              )}
-                            </div>
-                          </td>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5">{loading ? 'Loading report data...' : 'No records found.'}</td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
               </section>
             </div>
 
-            {/* RIGHT PANEL */}
             <aside className={styles.reportFilters}>
               <h4>Report Type</h4>
-              <select className={styles.sidebarSelect}>
-                <option>All Types</option>
-                <option>Reservations</option>
-                <option>Payments</option>
-                <option>Facilities</option>
-                <option>Guests</option>
+              <select
+                className={styles.sidebarSelect}
+                value={filters.reportType}
+                onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}
+              >
+                {Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
               </select>
 
               <h4>Facility Type</h4>
               <select
                 className={styles.sidebarSelect}
                 value={filters.facilityType}
-                onChange={(e) => setFilters({
-                  ...filters,
-                  facilityType: e.target.value
-                })}
+                onChange={(e) => setFilters({ ...filters, facilityType: e.target.value })}
               >
-                <option value="All">All Facilities</option>
-                <option value="Room">Room</option>
-                <option value="Cottage">Cottage</option>
-                <option value="Gazebo">Gazebo</option>
-                <option value="Pavilion">Pavilion</option>
+                {FACILITY_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type === 'All' ? 'All Facilities' : type}
+                  </option>
+                ))}
               </select>
 
               <h4>Date Range</h4>
               <input
                 type="date"
                 value={filters.startDate}
-                onChange={(e) => setFilters({
-                  ...filters,
-                  startDate: e.target.value
-                })}
+                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
               />
               <input
                 type="date"
                 value={filters.endDate}
-                onChange={(e) => setFilters({
-                  ...filters,
-                  endDate: e.target.value
-                })}
+                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
               />
 
-              {isAdmin && (
-                <button
-                  className={styles.generateMainBtn}
-                  onClick={handleGenerate}
-                >
-                  Generate Report
-                </button>
-              )}
+              <button className={styles.generateMainBtn} onClick={() => setShowModal('generate')}>
+                Generate Report
+              </button>
             </aside>
-
           </div>
         </main>
 
-        {/* PRINT MODAL (TABLE STYLE LIKE FIGMA) */}
-        {showModal === "print" && (
+        {showModal === 'print' && (
           <div className={styles.modalOverlay}>
             <div className={styles.modal} style={{ maxWidth: '520px' }}>
-              
               <div className={styles.modalHeader}>
                 <h3>Print Report</h3>
-                <button 
-                  className={styles.modalClose}
-                  onClick={() => setShowModal(null)}
-                >✕</button>
+                <button className={styles.modalClose} onClick={closeModal}>
+                  x
+                </button>
               </div>
 
               <table className={styles.reportTable}>
                 <thead>
                   <tr>
-                    <th>Report ID</th>
+                    <th>Reservation ID</th>
                     <th>Report Type</th>
                     <th>Date Generated</th>
                     <th>Generated By</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.slice(0, 4).map((r, i) => (
-                    <tr key={i}>
-                      <td>REP-00{i + 1}</td>
-                      <td>Reservations</td>
-                      <td>March {7 + i} - March {10 + i}</td>
-                      <td>Admin</td>
+                  {rows.slice(0, 4).map((r, i) => (
+                    <tr key={r.id || i}>
+                      <td>{r.reservation_id}</td>
+                      <td>{REPORT_TYPE_LABELS[filters.reportType]}</td>
+                      <td>{formatDate(r.created_at)}</td>
+                      <td>{role === 'admin' ? 'Admin' : 'Staff'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
               <div className={styles.modalFooter}>
-                <button 
-                  className={styles.cancelBtn}
-                  onClick={() => setShowModal(null)}
-                >
+                <button className={styles.cancelBtn} onClick={closeModal}>
                   Cancel
                 </button>
 
-                <button 
-                  className={styles.generateBtn}
-                  onClick={handlePrint}
-                >
+                <button className={styles.generateBtn} onClick={handlePrint}>
                   Print Report
                 </button>
               </div>
@@ -313,132 +567,105 @@ const AdminReports = ({ role = 'admin' }) => {
           </div>
         )}
 
-        {/* GENERATE MODAL */}
-        {showModal === "generate" && (
+        {showModal === 'generate' && (
           <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              
+            <div className={`${styles.modal} ${styles.reportPreviewModal}`}>
               <div className={styles.modalHeader}>
-                <h3>Generate Report</h3>
-                <button 
-                  className={styles.modalClose}
-                  onClick={() => setShowModal(null)}
-                >✕</button>
+                <h3>Report Preview</h3>
+                <button className={styles.modalClose} onClick={closeModal}>
+                  x
+                </button>
               </div>
 
-              <div className={styles.modalBody}>
-                <label>Report Type</label>
-                <select value="Reservations" readOnly>
-                  <option>Reservations</option>
-                </select>
+              <div className={styles.reportPreviewPaper}>
+                <div className={styles.previewHeader}>
+                  <img src={logo} alt="Infinity Garden Resort Logo" />
+                  <div>
+                    <h2>Infinity Garden Resort {REPORT_TYPE_LABELS[filters.reportType]} Report</h2>
+                    <p>Infinity Garden Resort Reservation Management System</p>
+                    <p>
+                      Generated by: {role === 'admin' ? 'Admin' : 'Staff'} | Date range:{' '}
+                      {formatDate(filters.startDate)} to {formatDate(filters.endDate)}
+                    </p>
+                    <p>Facility type: {filters.facilityType === 'All' ? 'All Facilities' : filters.facilityType}</p>
+                  </div>
+                </div>
 
-                <label>Facility Type</label>
-                <select value={filters.facilityType} readOnly>
-                  <option value="All">All Facilities</option>
-                  <option value="Room">Room</option>
-                  <option value="Cottage">Cottage</option>
-                  <option value="Gazebo">Gazebo</option>
-                  <option value="Pavilion">Pavilion</option>
-                </select>
+                <div className={styles.previewStats}>
+                  <div>
+                    <span>Total Reservations</span>
+                    <strong>{summary.total_reservations || 0}</strong>
+                  </div>
+                  <div>
+                    <span>Total Guests</span>
+                    <strong>{summary.total_guests || 0}</strong>
+                  </div>
+                  <div>
+                    <span>Total Revenue</span>
+                    <strong>{money(summary.total_revenue)}</strong>
+                  </div>
+                  <div>
+                    <span>Confirmed</span>
+                    <strong>{summary.confirmed_count || 0}</strong>
+                  </div>
+                </div>
 
-                <label>Generated by</label>
-                <input type="text" value="Admin" readOnly />
-
-                <label>Date Range</label>
-                <div className={styles.modalDates}>
-                  <input type="text" value={new Date(filters.startDate).toLocaleDateString()} readOnly />
-                  <span>—</span>
-                  <input type="text" value={new Date(filters.endDate).toLocaleDateString()} readOnly />
+                <div className={styles.previewTableWrap}>
+                  <table className={styles.previewTable}>
+                    <thead>
+                      <tr>
+                        <th>Reservation ID</th>
+                        <th>Type</th>
+                        <th>Facility</th>
+                        <th>Guest</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Guests</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.length > 0 ? (
+                        rows.map((report, index) => (
+                          <tr key={report.id || index}>
+                            <td>{report.reservation_id || `REP-${String(index + 1).padStart(4, '0')}`}</td>
+                            <td>{report.facility_type || 'N/A'}</td>
+                            <td>{report.facility_name || 'N/A'}</td>
+                            <td>{report.guest_full_name || `${report.first_name || ''} ${report.last_name || ''}`.trim()}</td>
+                            <td>{formatDate(report.check_in)}</td>
+                            <td>{formatDate(report.check_out)}</td>
+                            <td>{report.num_guests || 0}</td>
+                            <td>{money(report.total_amount)}</td>
+                            <td>{report.status || 'N/A'}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="9">No records found for the selected filters.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
               <div className={styles.modalFooter}>
-                <button 
-                  className={styles.cancelBtn}
-                  onClick={() => setShowModal(null)}
-                >
+                <button className={styles.cancelBtn} onClick={closeModal}>
                   Cancel
                 </button>
 
-                <button 
-                  className={styles.generateBtn}
-                  onClick={handleGenerate}
-                >
-                  Generate Report
+                <button className={styles.cancelBtn} onClick={handlePrint}>
+                  Print
+                </button>
+
+                <button className={styles.generateBtn} onClick={handleDownloadReport}>
+                  Download Report
                 </button>
               </div>
             </div>
           </div>
         )}
-
-        {/* Hidden Print Container */}
-        <div className={styles.printContainer} style={{ display: 'none' }}>
-          <div className={styles.printHeader}>
-            <h1>Infinity Garden Resort - Reports</h1>
-            <p>Generated on {new Date().toLocaleDateString()} | Date Range: {filters.startDate} to {filters.endDate}</p>
-            <p>Facility Type: {filters.facilityType} | Total Records: {filteredData.length}</p>
-          </div>
-
-          <div className={styles.printContent}>
-            {/* Quick Report Dashboard */}
-            <section className={styles.printSection}>
-              <h2>Quick Report Dashboard</h2>
-
-              <div className={styles.printStats}>
-                <div className={styles.printStat}>
-                  <h3>Total Reservations</h3>
-                  <p>{filteredData.length}</p>
-                </div>
-                <div className={styles.printStat}>
-                  <h3>Total Guests</h3>
-                  <p>{filteredData.reduce((sum, item) => sum + (item.num_guests || 0), 0)}</p>
-                </div>
-                <div className={styles.printStat}>
-                  <h3>Occupancy Rate</h3>
-                  <p>{filteredData.length > 0 ? '78.5%' : '0%'}</p>
-                </div>
-                <div className={styles.printStat}>
-                  <h3>Total Revenue</h3>
-                  <p>₱{filteredData.reduce((sum, item) => sum + (item.total_amount || 0), 0).toLocaleString()}</p>
-                </div>
-              </div>
-            </section>
-
-            {/* Generated Reports Table */}
-            <section className={styles.printSection}>
-              <h2>Generated Reports</h2>
-              <table className={styles.printTable}>
-                <thead>
-                  <tr>
-                    <th>Report ID</th>
-                    <th>Facility Type</th>
-                    <th>Guest Name</th>
-                    <th>Check-in Date</th>
-                    <th>Check-out Date</th>
-                    <th>Guests</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((report, idx) => (
-                    <tr key={idx}>
-                      <td>{report.reservation_id || `REP-00${idx + 1}`}</td>
-                      <td>{report.facility_name || 'N/A'}</td>
-                      <td>{report.first_name} {report.last_name}</td>
-                      <td>{report.check_in}</td>
-                      <td>{report.check_out}</td>
-                      <td>{report.num_guests}</td>
-                      <td>₱{report.total_amount?.toLocaleString() || '0'}</td>
-                      <td>{report.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
-          </div>
-        </div>
-
       </div>
     </div>
   );

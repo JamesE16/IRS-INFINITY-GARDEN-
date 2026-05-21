@@ -623,20 +623,35 @@ class FeedbackViewSet(viewsets.ModelViewSet):
 
 class ReportViewSet(viewsets.ViewSet):
     """Generate reports"""
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsStaffOrAdminRole]
+
+    def get_filtered_reservations(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        facility_type = request.query_params.get('facility_type')
+        report_type = request.query_params.get('report_type', 'reservations')
+
+        query = Reservation.objects.select_related(
+            'facility', 'facility__room_type', 'payment'
+        ).all()
+
+        if start_date:
+            query = query.filter(created_at__date__gte=start_date)
+        if end_date:
+            query = query.filter(created_at__date__lte=end_date)
+        if facility_type and facility_type.lower() != 'all':
+            query = query.filter(facility__room_type__name__iexact=facility_type)
+        if report_type == 'payments':
+            query = query.filter(payment__isnull=False)
+        elif report_type == 'guests':
+            query = query.exclude(email='')
+
+        return query.order_by('-created_at')
     
     @action(detail=False, methods=['get'])
     def reservation_summary(self, request):
         """Get reservation summary report"""
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-        
-        query = Reservation.objects.all()
-        
-        if start_date:
-            query = query.filter(created_at__gte=start_date)
-        if end_date:
-            query = query.filter(created_at__lte=end_date)
+        query = self.get_filtered_reservations(request)
         
         total_reservations = query.count()
         confirmed_count = query.filter(status='confirmed').count()
@@ -659,6 +674,51 @@ class ReportViewSet(viewsets.ViewSet):
         }
         
         return Response(data)
+
+    @action(detail=False, methods=['get'])
+    def reservation_detail(self, request):
+        """Get full database-backed reservation report data."""
+        query = self.get_filtered_reservations(request)
+
+        total_reservations = query.count()
+        confirmed_count = query.filter(status='confirmed').count()
+        approved_count = query.filter(status='approved').count()
+        pending_count = query.filter(status='pending').count()
+        cancelled_count = query.filter(status='cancelled').count()
+        total_guests = query.aggregate(Sum('num_guests'))['num_guests__sum'] or 0
+        total_revenue = query.filter(
+            status__in=['approved', 'confirmed', 'checked_in', 'checked_out']
+        ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        average_booking_value = total_revenue / total_reservations if total_reservations > 0 else 0
+
+        facility_breakdown = list(
+            query.values('facility__room_type__name')
+            .annotate(total_reservations=Count('id'), total_revenue=Sum('total_amount'))
+            .order_by('facility__room_type__name')
+        )
+
+        serializer = ReservationListSerializer(query, many=True)
+        return Response({
+            'summary': {
+                'total_reservations': total_reservations,
+                'approved_count': approved_count,
+                'confirmed_count': confirmed_count,
+                'pending_count': pending_count,
+                'cancelled_count': cancelled_count,
+                'total_guests': total_guests,
+                'total_revenue': total_revenue,
+                'average_booking_value': average_booking_value,
+            },
+            'facility_breakdown': [
+                {
+                    'facility_type': item['facility__room_type__name'] or 'Uncategorized',
+                    'total_reservations': item['total_reservations'],
+                    'total_revenue': item['total_revenue'] or 0,
+                }
+                for item in facility_breakdown
+            ],
+            'reservations': serializer.data,
+        })
     
     @action(detail=False, methods=['get'])
     def facility_utilization(self, request):
