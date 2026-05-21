@@ -18,7 +18,6 @@ import {
   isSameDay
 } from "date-fns";
 
-// ─── STAT CARD COMPONENT ──────────────────────────────────────────────────────
 function StatCard({ label, value, iconBg, iconStroke, children }) {
   return (
     <div className={styles.statCard}>
@@ -35,7 +34,6 @@ function StatCard({ label, value, iconBg, iconStroke, children }) {
   );
 }
 
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function AdminDashboard({ role = 'admin' }) {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -101,7 +99,6 @@ export default function AdminDashboard({ role = 'admin' }) {
   const handleNotifications = () => setShowNotifications(true);
   const proceedToReservations = () => navigate(reservationPath);
 
-  // ── Group reservations by date ───────────────────────────────────────────────
   const reservationsByDate = reservations.reduce((acc, r) => {
     const key = format(new Date(r.date), 'yyyy-MM-dd');
     if (!acc[key]) acc[key] = [];
@@ -109,7 +106,6 @@ export default function AdminDashboard({ role = 'admin' }) {
     return acc;
   }, {});
 
-  // ── Calendar helpers ─────────────────────────────────────────────────────────
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
@@ -188,7 +184,6 @@ export default function AdminDashboard({ role = 'admin' }) {
 
       <div className={styles.mainContent}>
 
-        {/* ── Header ──────────────────────────────────────────────────── */}
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.title}>
@@ -214,7 +209,6 @@ export default function AdminDashboard({ role = 'admin' }) {
           </div>
         </div>
 
-        {/* ── Main Content ─────────────────────────────────────────────── */}
         <div className={styles.container}>
 
           {error && (
@@ -228,7 +222,6 @@ export default function AdminDashboard({ role = 'admin' }) {
             </div>
           )}
 
-          {/* ── Stat Cards ───────────────────────────────────────────────── */}
           <div className={styles.statsGrid}>
 
             <StatCard label="Total Reservations Today" value={stats?.total_reservations ?? 0}
@@ -274,7 +267,6 @@ export default function AdminDashboard({ role = 'admin' }) {
 
           </div>
 
-          {/* ── Calendar + Sidebar ────────────────────────────────────────── */}
           <div className={styles.calendarLayout}>
 
             <div className={styles.calendarWrap}>
@@ -328,7 +320,6 @@ export default function AdminDashboard({ role = 'admin' }) {
         </div>
       </div>
 
-      {/* ── Notifications Modal ──────────────────────────────────────────── */}
       {showNotifications && (
         <div className={styles.modalOverlay} onClick={() => setShowNotifications(false)}>
           <div
@@ -370,7 +361,6 @@ export default function AdminDashboard({ role = 'admin' }) {
         </div>
       )}
 
-      {/* ── Reserved Rooms Modal ─────────────────────────────────────────── */}
       {selectedDay && (
         <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>

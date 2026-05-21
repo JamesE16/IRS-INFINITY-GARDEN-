@@ -1,13 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const IDLE_TIMEOUT_MS = 5 * 60 * 1000; 
 const IDLE_EVENTS = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll', 'click'];
 
-/**
- * Logs out the user after IDLE_TIMEOUT_MS of inactivity.
- * Only active when `enabled` is true (i.e. user is authenticated).
- */
+
 export function useIdleTimeout(enabled = true) {
   const navigate = useNavigate();
   const timerRef = useRef(null);
@@ -35,7 +32,7 @@ export function useIdleTimeout(enabled = true) {
     IDLE_EVENTS.forEach((evt) =>
       window.addEventListener(evt, resetTimer, { passive: true })
     );
-    resetTimer(); // start timer immediately on mount
+    resetTimer(); 
 
     return () => {
       IDLE_EVENTS.forEach((evt) =>

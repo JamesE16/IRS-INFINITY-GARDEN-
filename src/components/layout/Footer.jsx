@@ -4,7 +4,6 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.grid}>
-        {/* Col 1 — About */}
         <div className={styles.col}>
           <h4 className={styles.brandTitle}>Infinity Garden Resort</h4>
           <p>
@@ -13,7 +12,6 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Col 2 — Contact */}
         <div className={styles.col}>
           <h4>Contact Us</h4>
           <div className={styles.contactItem}>
@@ -38,7 +36,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Col 3 — Check-in info */}
         <div className={styles.col}>
           <h4>Check-in &amp; Check-out</h4>
           <p>Check-in: <strong>1:00 PM onwards</strong></p>

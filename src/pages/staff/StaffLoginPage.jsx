@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../context/BookingContext';
+import { authAPI } from '../../utils/api';
 import styles from '../../styles/AdminLoginPage.module.css';
 import logo from '../../assets/logo.png'; // ✅ added
 
@@ -47,49 +48,36 @@ export default function StaffLoginPage() {
 
     setIsLoading(true);
     try {
-      let isAuthenticated = false;
+      const userData = await authAPI.login(formData.email, formData.password);
+      const role = userData?.profile?.role;
 
-      try {
-        // For now, no backend, so skip fetch
-        // const response = await fetch('http://localhost:8000/api/users/login/', {
-        //   method: 'POST',
-        //   mode: 'cors',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(formData),
-        // });
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('isStaffLoggedIn');
+      localStorage.removeItem('adminRole');
+      localStorage.removeItem('staffRole');
 
-        // if (response.ok) {
-        //   const userData = await response.json();
-        //   isAuthenticated = true;
-
-        //   localStorage.setItem('staffEmail', formData.email);
-        //   localStorage.setItem('isStaffLoggedIn', 'true');
-        //   localStorage.setItem('staffRole', userData.profile?.role || 'staff');
-        // }
-      } catch {
-        // Demo login
-        if (
-          formData.email === 'staffdemo@infinityresort.com' &&
-          formData.password === 'Staff123!'
-        ) {
-          isAuthenticated = true;
-          localStorage.setItem('staffEmail', formData.email);
-          localStorage.setItem('isStaffLoggedIn', 'true');
-          localStorage.setItem('staffRole', 'staff');
-          showToast('Demo staff login', 'success');
-        }
-      }
-
-      if (isAuthenticated) {
+      if (role === 'staff') {
+        localStorage.setItem('staffEmail', userData.email || formData.email);
+        localStorage.setItem('isStaffLoggedIn', 'true');
+        localStorage.setItem('staffRole', 'staff');
         showToast('Login successful', 'success');
         setTimeout(() => navigate('/staff/dashboard'), 500);
-      } else {
-        showToast('Invalid credentials', 'error');
+        return;
       }
+
+      const message = 'This account does not have staff access.';
+      setErrors({
+        email: message,
+        password: message,
+      });
+      showToast(message, 'error');
     } catch {
-      showToast('Login failed', 'error');
+      const message = 'Incorrect email/username or password. Please try again.';
+      setErrors({
+        email: message,
+        password: message,
+      });
+      showToast(message, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -173,11 +161,6 @@ export default function StaffLoginPage() {
             </button>
           </div>
         </form>
-
-        <div className={styles.demoNote}>
-          <strong>Demo Credentials:</strong>
-          <p>Email: staffdemo@infinityresort.com | Password: Staff123!</p>
-        </div>
       </div>
     </div>
   );

@@ -85,17 +85,12 @@ const ALL_MODULES = [
   },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
-/**
- * @param {{ role: 'admin' | 'staff' }} props
- */
+
 export default function Sidebar({ role = 'staff' }) {
   const navigate = useNavigate();
 
-  // Filter modules by role
   const visibleModules = ALL_MODULES.filter((m) => m.roles.includes(role));
 
-  // Resolve the correct `to` path per role
   const resolveLink = (module) => {
     if (role === 'staff' && module.staffTo) return module.staffTo;
     return module.to;
@@ -121,7 +116,6 @@ export default function Sidebar({ role = 'staff' }) {
 
   return (
     <aside className={styles.sidebar}>
-      {/* Brand */}
       <div className={styles.brand}>
         <img src={logo} alt="Infinity Garden Logo" />
         <div className={styles.brandText}>
@@ -132,7 +126,6 @@ export default function Sidebar({ role = 'staff' }) {
 
       <div className={styles.divider} />
 
-      {/* Navigation */}
       <nav className={styles.navList}>
         {visibleModules.map((module) => (
           <NavLink
@@ -147,7 +140,6 @@ export default function Sidebar({ role = 'staff' }) {
           </NavLink>
         ))}
 
-        {/* Logout — always visible */}
         <button
           type="button"
           onClick={handleLogout}

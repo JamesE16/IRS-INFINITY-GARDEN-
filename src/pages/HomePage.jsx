@@ -11,11 +11,9 @@ export default function HomePage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   const handleFeedbackSuccess = () => {
-    // Could add a toast notification here
     console.log('Feedback submitted successfully');
   };
 
-  // DYNAMIC IMAGES FOR WHY CHOOSE SECTION
   const images = [
     "https://media.timeout.com/images/101599123/750/422/image.jpg",
     "https://i.pinimg.com/736x/79/ba/46/79ba463c09cae3f2543c6b237a11f8d8.jpg",
@@ -93,7 +91,6 @@ export default function HomePage() {
 
   return (
     <div className="page">
-      {/* ── HERO ── */}
       <section className={styles.hero}>
         <div className={styles.heroBg} />
         <div className={styles.heroOverlay} />
@@ -114,7 +111,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── AMENITIES ── */}
       <section className={`section section-bg ${styles.amenitiesSection}`}>
         <div className="container">
           <div className="section-header">
@@ -133,7 +129,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WHY CHOOSE ── */}
       <section className="section section-white">
         <div className="container">
           <div className={styles.whyGrid}>
@@ -167,7 +162,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA BAND ── */}
       <section className={styles.ctaBand}>
         <div className="container" style={{ textAlign: 'center' }}>
           <h2>Ready to Experience Paradise?</h2>
@@ -175,7 +169,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEEDBACK SECTION ── */}
       <section className={styles.feedbackSection}>
         <div className="container">
           <button 
