@@ -249,7 +249,6 @@ export default function BookingForm({ room, onPriceChange }) {
   return (
     <div className={styles.card}>
 
-      {/* ── GUEST INFORMATION ── */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Guest Information</h3>
 
@@ -287,7 +286,6 @@ export default function BookingForm({ room, onPriceChange }) {
 
       </section>
 
-      {/* ── STAY DETAILS ── */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Stay Details</h3>
 
@@ -379,7 +377,6 @@ export default function BookingForm({ room, onPriceChange }) {
         </div>
       </section>
 
-      {/* ── PAYMENT ── */}
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Payment</h3>
 
@@ -419,7 +416,6 @@ export default function BookingForm({ room, onPriceChange }) {
         </div>
       </section>
 
-      {/* ── CANCELLATION NOTICE ── */}
       <div className={styles.notice}>
         <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>

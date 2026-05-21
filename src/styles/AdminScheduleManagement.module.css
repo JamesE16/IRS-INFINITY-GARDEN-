@@ -230,7 +230,6 @@
   padding: 1px 3px;
 }
 
-/* ── UTILITY STATES ── */
 .loadingState {
   padding: 40px;
   text-align: center;
@@ -289,10 +288,10 @@
 
 .modalHeader {
   display: flex;
-  flex-direction: column; /* Stacks header title text and date context nicely */
+  flex-direction: column; 
   align-items: flex-start;
   margin-bottom: 20px;
-  padding-right: 26px; /* Protects title content from crashing into the close button */
+  padding-right: 26px; 
 }
 
 .modalHeader h3 {
@@ -302,7 +301,6 @@
   color: var(--navy, #1a3c8f);
 }
 
-/* Class style for dynamic date context underneath the modal header */
 .modalHeader .modalSubtitle {
   margin: 4px 0 0 0;
   font-size: 0.85rem;
@@ -310,7 +308,6 @@
   color: #64748b;
 }
 
-/* Clean, crisp Absolute Positioning for the X close icon */
 .modalClose {
   position: absolute;
   top: 22px;
@@ -340,7 +337,6 @@
   padding-right: 4px;
 }
 
-/* Custom Scrollbar Styling */
 .modalBody::-webkit-scrollbar {
   width: 5px;
 }
@@ -359,7 +355,7 @@
 .modalGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: 18px; /* Increased padding gap between groups for structural rhythm */
+  margin-bottom: 18px; 
 }
 
 .modalGroup:last-of-type {
@@ -385,7 +381,7 @@
   display: flex;
   flex-direction: column;
   border-left: 4px solid #e2e8f0;
-  padding: 4px 12px; /* Added internal space padding to clear out box shifts */
+  padding: 4px 12px; 
   border-radius: 0 8px 8px 0;
 }
 
@@ -418,7 +414,6 @@
   margin: 6px 0;
 }
 
-/* Beautifully balanced Action Close Button */
 .closeBtn {
   margin-top: 14px;
   width: 100%;
@@ -426,7 +421,7 @@
   border: none;
   background: var(--navy, #1a3c8f);
   color: #fff;
-  border-radius: 10px; /* Matches layout curvatures beautifully */
+  border-radius: 10px; 
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
@@ -443,7 +438,6 @@
   transform: translateY(0);
 }
 
-/* ── DATA DETAILS SHEET ── */
 .guestDetails {
   display: flex;
   flex-direction: column;
@@ -470,7 +464,6 @@
   font-weight: 600;
 }
 
-/* ── STATUS BADGES ── */
 .statusApproved,
 .statusActive,
 .statusConfirmed,

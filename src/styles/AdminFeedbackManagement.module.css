@@ -345,7 +345,6 @@
   background: rgba(59, 130, 246, 0.05);
 }
 
-/* ── STATUS PILLS SYSTEM ── */
 .status {
   display: inline-flex;
   align-items: center;
@@ -406,7 +405,7 @@
   margin-bottom: 0;
   border-bottom: 1px solid #f1f5f9;
   padding: 24px 28px 14px 28px;
-  flex-shrink: 0; /* Prevents the header from resizing or squishing */
+  flex-shrink: 0; 
 }
 
 .modalHeader h3 {
@@ -435,30 +434,28 @@
   color: #475569;
 }
 
-/* INTERNAL SCROLL ENGINE - ONLY FIELDS MOVES AND SCROLL TRACK EXTENDS ON THE RIGHT */
 .modalBody {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px 14px 24px 28px; /* Adds perfect spacing inside scroll channel */
+  padding: 24px 14px 24px 28px; 
   
-  /* Enables internal scrolling strictly inside the panel */
+  
   overflow-y: scroll;
   overflow-x: hidden;
 }
 
-/* Custom platform scroll engine for the internal container body */
 .modalBody::-webkit-scrollbar {
   width: 14px; 
 }
 
 .modalBody::-webkit-scrollbar-track {
-  background: #f1f5f9; /* Solid light silver track backdrop look from layout image */
+  background: #f1f5f9; 
 }
 
 .modalBody::-webkit-scrollbar-thumb {
-  background: #94a3b8; /* Dark gray handle shade */
+  background: #94a3b8; 
   border: 2px solid #f1f5f9; 
   border-radius: 999px;
 }
@@ -467,7 +464,6 @@
   background: #64748b;
 }
 
-/* Directional Arrow buttons aligned seamlessly with the body track */
 .modalBody::-webkit-scrollbar-button {
   display: block;
   height: 14px; 
@@ -538,14 +534,13 @@
   box-shadow: 0 0 0 3px rgba(26, 60, 143, 0.1);
 }
 
-/* FIXED BUTTON BAR BOTTOM - STATIONARY */
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   border-top: 1px solid #f1f5f9;
   padding: 18px 28px 24px 28px;
-  flex-shrink: 0; /* Locks the actions bar into place at the bottom */
+  flex-shrink: 0; 
 }
 
 .cancelBtn, .submitBtn {

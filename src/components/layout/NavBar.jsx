@@ -8,7 +8,6 @@ import logo from '../../assets/logo.png';
 export default function NavBar() {
   const navigate = useNavigate();
 
-// Listen for Ctrl+L keyboard shortcut (hidden login access)
       useEffect(() => {
         const handleKeyDown = (e) => {
           if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
@@ -23,14 +22,11 @@ export default function NavBar() {
 
   return (
     <nav className={styles.navbar}>
-      {/* BRAND */}
       <NavLink to="/" className={styles.brand}>
-        {/* Logo Image */}
         <div className={styles.logo}>
           <img src={logo} alt="Infinity Garden Logo" />
         </div>
 
-        {/* Brand Text */}
         <div className={styles.brandText}>
           <span className={styles.brandName}>
             <span className={styles.infinity}>Infinity</span>
@@ -42,7 +38,6 @@ export default function NavBar() {
         </div>
       </NavLink>
 
-      {/* NAV LINKS */}
       <div className={styles.links}>
         <NavLink
           to="/"

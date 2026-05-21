@@ -328,7 +328,6 @@ export default function AdminFacilities({ role = 'admin' }) {
                   </button>
                 </div>
                 
-                {/* Wrapped the form layout inside modalBody container */}
                 <div className={styles.modalBody}>
                   <form className={styles.formGrid} onSubmit={handleSubmit}>
                     <div className={styles.field}>

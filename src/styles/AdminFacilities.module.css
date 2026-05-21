@@ -601,7 +601,6 @@
   flex-shrink: 0;
 }
 
-/* CONTAINER CLASS FOR INTERNAL SCROLLING */
 .modalBody {
   flex: 1;
   overflow-y: auto;

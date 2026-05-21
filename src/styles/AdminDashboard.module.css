@@ -125,7 +125,6 @@
   border-color: rgba(255,255,255,0.35); 
 }
 
-/* ===== MAIN CONTAINER ===== */
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -154,7 +153,6 @@
   font-size: 0.875rem;
 }
 
-/* ===== STAT CARDS ===== */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -231,7 +229,6 @@
   line-height: 1;
 }
 
-/* ===== CALENDAR LAYOUT ===== */
 .calendarLayout {
   display: grid;
   grid-template-columns: 1fr 240px;
@@ -294,7 +291,6 @@
   background: var(--navy-light, #2d55c7);
 }
 
-/* ===== CALENDAR GRID — ALIGNMENT FIX ===== */
 .daysRow,
 .row {
   display: grid;
@@ -312,7 +308,7 @@
 }
 
 .cell {
-  height: 44px;              /* reduced from 58px */
+  height: 44px;             
   min-height: unset;
   border-radius: 6px;
   border: 1px solid #f1f5f9;
@@ -365,7 +361,7 @@
   gap: 3px;
   background: rgba(255,255,255,0.18);
   color: #fff;
-  font-size: 9px;           /* slightly smaller so long room names fit */
+  font-size: 9px;          
   font-weight: 700;
   padding: 2px 4px;
   border-radius: 4px;
@@ -390,7 +386,6 @@
   opacity: 0.3;
 }
 
-/* ===== SIDEBAR SUMMARY ===== */
 .sidebarSummary {
   display: flex;
   flex-direction: column;
@@ -635,7 +630,6 @@
   background: var(--navy-light, #2d55c7);
 }
 
-/* ===== PAYMENT/REPORTS SECTIONS ===== */
 .topHeader {
   background: white;
   padding: 20px 2rem;  
@@ -812,7 +806,6 @@
   font-weight: 600;
 }
 
-/* ===== REPORTS PAGE LAYOUT ===== */
 .reportGridContainer {
   display: grid;
   grid-template-columns: 1fr 320px;
