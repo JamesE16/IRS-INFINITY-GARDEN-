@@ -9,7 +9,8 @@ import {
   FaChartPie,
   FaChartLine,
   FaDownload,
-  FaPlus,
+  FaFilter,
+  FaPrint,
 } from 'react-icons/fa';
 
 const REPORT_TYPE_LABELS = {
@@ -20,6 +21,7 @@ const REPORT_TYPE_LABELS = {
 };
 
 const FACILITY_TYPES = ['All', 'Room', 'Cottage', 'Gazebo', 'Pavilion'];
+const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const money = (value) =>
   `PHP ${Number(value || 0).toLocaleString('en-PH', {
@@ -37,6 +39,25 @@ const formatDate = (value) => {
         month: 'short',
         day: '2-digit',
       });
+};
+
+const formatDateTime = (value = new Date()) =>
+  new Date(value).toLocaleString('en-PH', {
+    year: 'numeric',
+    month: 'long',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+const getStatusClass = (status) => {
+  const normalized = String(status || '').toLowerCase();
+  if (normalized.includes('confirm') || normalized.includes('paid') || normalized.includes('approved')) {
+    return 'status-good';
+  }
+  if (normalized.includes('pending')) return 'status-waiting';
+  if (normalized.includes('cancel') || normalized.includes('reject')) return 'status-bad';
+  return 'status-neutral';
 };
 
 const escapeHtml = (value) =>
@@ -60,14 +81,10 @@ const imageToDataUrl = async (src) => {
 };
 
 const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
-  const generatedAt = new Date().toLocaleString('en-PH', {
-    year: 'numeric',
-    month: 'long',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const generatedAt = formatDateTime();
   const reportTitle = `Infinity Garden Resort ${REPORT_TYPE_LABELS[filters.reportType]} Report`;
+  const generatedBy = role === 'admin' ? 'Admin' : 'Staff';
+  const facilityLabel = filters.facilityType === 'All' ? 'All Facilities' : filters.facilityType;
 
   const tableRows = rows.length
     ? rows
@@ -82,7 +99,7 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
               <td>${escapeHtml(formatDate(report.check_out))}</td>
               <td>${escapeHtml(report.num_guests || 0)}</td>
               <td>${escapeHtml(money(report.total_amount))}</td>
-              <td>${escapeHtml(report.status || 'N/A')}</td>
+              <td><span class="status ${getStatusClass(report.status)}">${escapeHtml(report.status || 'N/A')}</span></td>
             </tr>
           `
         )
@@ -98,34 +115,45 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      padding: 36px;
+      padding: 32px;
       color: #172033;
       font-family: Arial, Helvetica, sans-serif;
-      background: #f5f7fb;
+      background: #eef3f9;
     }
     .page {
-      max-width: 1120px;
+      max-width: 1160px;
       margin: 0 auto;
       background: #fff;
-      border: 1px solid #d9e2f2;
-      padding: 34px;
+      border: 1px solid #d8e2f0;
+      box-shadow: 0 18px 50px rgba(23, 32, 51, 0.08);
     }
     .header {
       display: flex;
-      align-items: center;
-      gap: 18px;
-      padding-bottom: 20px;
-      border-bottom: 3px solid #1a3c8f;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 30px 34px 24px;
+      border-top: 7px solid #1a3c8f;
+      border-bottom: 1px solid #dbe4f0;
     }
+    .brand { display: flex; align-items: center; gap: 16px; }
     .logo {
-      width: 82px;
-      height: 82px;
+      width: 72px;
+      height: 72px;
       object-fit: contain;
+    }
+    .document-label {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin: 0 0 7px;
+      text-transform: uppercase;
     }
     h1 {
       margin: 0 0 6px;
       color: #1a3c8f;
-      font-size: 28px;
+      font-size: 25px;
       letter-spacing: 0;
     }
     .subtle {
@@ -133,103 +161,208 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       color: #5f6d83;
       font-size: 13px;
     }
+    .report-stamp {
+      border: 1px solid #cbd8ee;
+      color: #1a3c8f;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px 12px;
+      text-align: center;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin: 0;
+      border-bottom: 1px solid #dbe4f0;
+    }
+    .info {
+      border-right: 1px solid #dbe4f0;
+      padding: 16px 20px;
+    }
+    .info:last-child { border-right: 0; }
+    .info span {
+      color: #64748b;
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .info strong {
+      color: #172033;
+      display: block;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .content { padding: 24px 34px 32px; }
     .meta {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin: 24px 0;
+      margin: 0 0 24px;
     }
     .metric {
       border: 1px solid #dbe4f0;
       background: #f8fafc;
-      padding: 14px;
+      padding: 15px;
+      border-radius: 4px;
     }
     .metric span {
       display: block;
       color: #667085;
       font-size: 12px;
-      margin-bottom: 8px;
+      font-weight: 700;
+      margin-bottom: 9px;
+      text-transform: uppercase;
     }
     .metric strong {
       display: block;
-      color: #1a3c8f;
+      color: #172033;
       font-size: 21px;
+    }
+    .section-title {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 4px 0 12px;
+    }
+    .section-title h2 {
+      color: #172033;
+      font-size: 16px;
+      margin: 0;
+    }
+    .section-title span {
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 12px;
       font-size: 12px;
     }
     th {
-      background: #1a3c8f;
-      color: #fff;
+      background: #eff4fb;
+      color: #1a3c8f;
+      font-size: 11px;
+      letter-spacing: 0.04em;
       text-align: left;
-      padding: 10px;
-      border: 1px solid #1a3c8f;
+      padding: 11px 10px;
+      text-transform: uppercase;
+      border-bottom: 2px solid #1a3c8f;
     }
     td {
-      padding: 10px;
-      border: 1px solid #dbe4f0;
+      padding: 11px 10px;
+      border-bottom: 1px solid #dbe4f0;
       vertical-align: top;
     }
     tbody tr:nth-child(even) { background: #f8fafc; }
+    .status {
+      border-radius: 999px;
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .status-good { background: #dcfce7; color: #166534; }
+    .status-waiting { background: #fef3c7; color: #92400e; }
+    .status-bad { background: #fee2e2; color: #991b1b; }
+    .status-neutral { background: #e2e8f0; color: #334155; }
     .empty {
       text-align: center;
       color: #667085;
       padding: 22px;
     }
+    .signature {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 30px;
+    }
+    .signature div {
+      border-top: 1px solid #94a3b8;
+      color: #64748b;
+      font-size: 12px;
+      padding-top: 8px;
+    }
     .footer {
-      margin-top: 24px;
-      padding-top: 14px;
+      background: #f8fafc;
       border-top: 1px solid #dbe4f0;
       color: #667085;
       font-size: 12px;
+      padding: 14px 34px;
     }
     @media print {
       body { background: #fff; padding: 0; }
-      .page { border: 0; }
+      .page { border: 0; box-shadow: none; }
     }
   </style>
 </head>
 <body>
   <main class="page">
     <header class="header">
-      <img class="logo" src="${logoDataUrl}" alt="Infinity Garden Resort Logo" />
-      <div>
-        <h1>${escapeHtml(reportTitle)}</h1>
-        <p class="subtle">Infinity Garden Resort Reservation Management System</p>
-        <p class="subtle">Generated by: ${escapeHtml(role === 'admin' ? 'Admin' : 'Staff')} | Generated on: ${escapeHtml(generatedAt)}</p>
-        <p class="subtle">Date range: ${escapeHtml(formatDate(filters.startDate))} to ${escapeHtml(formatDate(filters.endDate))} | Facility type: ${escapeHtml(filters.facilityType)}</p>
+      <div class="brand">
+        <img class="logo" src="${logoDataUrl}" alt="Infinity Garden Resort Logo" />
+        <div>
+          <p class="document-label">Official Management Report</p>
+          <h1>${escapeHtml(reportTitle)}</h1>
+          <p class="subtle">Infinity Garden Resort Reservation Management System</p>
+        </div>
       </div>
+      <div class="report-stamp">Generated Report</div>
     </header>
 
-    <section class="meta">
-      <div class="metric"><span>Total Reservations</span><strong>${escapeHtml(summary.total_reservations || 0)}</strong></div>
-      <div class="metric"><span>Total Guests</span><strong>${escapeHtml(summary.total_guests || 0)}</strong></div>
-      <div class="metric"><span>Total Revenue</span><strong>${escapeHtml(money(summary.total_revenue))}</strong></div>
-      <div class="metric"><span>Confirmed</span><strong>${escapeHtml(summary.confirmed_count || 0)}</strong></div>
+    <section class="info-grid">
+      <div class="info"><span>Generated By</span><strong>${escapeHtml(generatedBy)}</strong></div>
+      <div class="info"><span>Generated On</span><strong>${escapeHtml(generatedAt)}</strong></div>
+      <div class="info"><span>Date Range</span><strong>${escapeHtml(formatDate(filters.startDate))} to ${escapeHtml(formatDate(filters.endDate))}</strong></div>
+      <div class="info"><span>Facility Type</span><strong>${escapeHtml(facilityLabel)}</strong></div>
     </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Reservation ID</th>
-          <th>Type</th>
-          <th>Facility</th>
-          <th>Guest</th>
-          <th>Check-in</th>
-          <th>Check-out</th>
-          <th>Guests</th>
-          <th>Total Amount</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>${tableRows}</tbody>
-    </table>
+    <div class="content">
+      <section class="meta">
+        <div class="metric"><span>Total Reservations</span><strong>${escapeHtml(summary.total_reservations || 0)}</strong></div>
+        <div class="metric"><span>Total Guests</span><strong>${escapeHtml(summary.total_guests || 0)}</strong></div>
+        <div class="metric"><span>Total Revenue</span><strong>${escapeHtml(money(summary.total_revenue))}</strong></div>
+        <div class="metric"><span>Confirmed</span><strong>${escapeHtml(summary.confirmed_count || 0)}</strong></div>
+      </section>
+
+      <div class="section-title">
+        <h2>Reservation Details</h2>
+        <span>${escapeHtml(rows.length)} record${rows.length === 1 ? '' : 's'}</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Reservation ID</th>
+            <th>Type</th>
+            <th>Facility</th>
+            <th>Guest</th>
+            <th>Check-in</th>
+            <th>Check-out</th>
+            <th>Guests</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+
+      <section class="signature">
+        <div>Prepared by ${escapeHtml(generatedBy)}</div>
+        <div>Reviewed / Approved by</div>
+      </section>
+    </div>
 
     <footer class="footer">
-      This report was generated from the current Infinity Garden Resort database records.
+      This report was generated from current Infinity Garden Resort database records and is intended for internal administrative use.
     </footer>
   </main>
 </body>
@@ -245,6 +378,8 @@ const AdminReports = ({ role = 'admin' }) => {
   const [showModal, setShowModal] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeTrendIndex, setActiveTrendIndex] = useState(2);
+  const [activeRevenueIndex, setActiveRevenueIndex] = useState(2);
 
   const [filters, setFilters] = useState({
     reportType: 'reservations',
@@ -288,14 +423,83 @@ const AdminReports = ({ role = 'admin' }) => {
 
   const rows = reportData.reservations;
   const summary = reportData.summary;
+  const generatedAtLabel = useMemo(() => formatDateTime(), [showModal]);
 
-  const topFacilityType = useMemo(() => {
-    const top = [...(reportData.facility_breakdown || [])].sort(
-      (a, b) => (b.total_reservations || 0) - (a.total_reservations || 0)
-    )[0];
+  const facilityRankings = useMemo(
+    () =>
+      [...(reportData.facility_breakdown || [])].sort(
+        (a, b) => (b.total_reservations || 0) - (a.total_reservations || 0)
+      ),
+    [reportData.facility_breakdown]
+  );
 
-    return top ? `${top.facility_type} (${top.total_reservations})` : 'No records';
-  }, [reportData.facility_breakdown]);
+  const confirmedRate = summary.total_reservations
+    ? Math.round(((summary.confirmed_count || 0) / summary.total_reservations) * 100)
+    : 0;
+
+  const reservationTrend = useMemo(() => {
+    const counts = WEEKDAY_LABELS.map((day) => ({ day, count: 0 }));
+
+    rows.forEach((reservation) => {
+      const sourceDate = reservation.check_in || reservation.created_at;
+      const date = sourceDate ? new Date(sourceDate) : null;
+      if (!date || Number.isNaN(date.getTime())) return;
+
+      const dayIndex = (date.getDay() + 6) % 7;
+      counts[dayIndex].count += 1;
+    });
+
+    const maxCount = Math.max(...counts.map((item) => item.count), 1);
+
+    return counts.map((item, index) => {
+      const percent = item.count ? Math.max(Math.round((item.count / maxCount) * 92), 18) : 0;
+      const x = 46 + index * 102;
+      const y = 170 - (percent / 100) * 126;
+
+      return { ...item, percent, x, y };
+    });
+  }, [rows]);
+
+  const revenueTrend = useMemo(() => {
+    const totals = WEEKDAY_LABELS.map((day) => ({ day, amount: 0 }));
+
+    rows.forEach((reservation) => {
+      const sourceDate = reservation.check_in || reservation.created_at;
+      const date = sourceDate ? new Date(sourceDate) : null;
+      if (!date || Number.isNaN(date.getTime())) return;
+
+      const dayIndex = (date.getDay() + 6) % 7;
+      totals[dayIndex].amount += Number(reservation.total_amount || 0);
+    });
+
+    const maxAmount = Math.max(...totals.map((item) => item.amount), 1);
+
+    return totals.map((item, index) => {
+      const percent = item.amount ? Math.max(Math.round((item.amount / maxAmount) * 90), 16) : 0;
+      const x = 28 + index * 77;
+      const y = 126 - (percent / 100) * 96;
+
+      return { ...item, percent, x, y };
+    });
+  }, [rows]);
+
+  const chartPath = reservationTrend.reduce((path, point, index, points) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+
+    const previous = points[index - 1];
+    const controlX = (previous.x + point.x) / 2;
+    return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+  }, '');
+  const revenueChartPath = revenueTrend.reduce((path, point, index, points) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+
+    const previous = points[index - 1];
+    const controlX = (previous.x + point.x) / 2;
+    return `${path} C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+  }, '');
+  const revenueAreaPath = `${revenueChartPath} L ${revenueTrend[revenueTrend.length - 1]?.x || 520} 142 L ${revenueTrend[0]?.x || 0} 142 Z`;
+  const activeTrendPoint = reservationTrend[activeTrendIndex] || reservationTrend[2];
+  const activeRevenuePoint = revenueTrend[activeRevenueIndex] || revenueTrend[2];
 
   const closeModal = () => {
     setShowModal(null);
@@ -369,17 +573,103 @@ const AdminReports = ({ role = 'admin' }) => {
 
         <main className={styles.container}>
           <div className={styles.reportLayout}>
+            <section className={styles.reportFilters}>
+              <div className={styles.filterHeader}>
+                <div>
+                  <span className={styles.filterEyebrow}>
+                    <FaFilter /> Report Filters
+                  </span>
+                  <h2>Build a report</h2>
+                </div>
+                <p>
+                  Refine the report before previewing, printing, or downloading the current database records.
+                </p>
+              </div>
+
+              <div className={styles.filterGrid}>
+                <label className={styles.filterField}>
+                  <span>Report Type</span>
+                  <select
+                    className={styles.sidebarSelect}
+                    value={filters.reportType}
+                    onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}
+                  >
+                    {Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={styles.filterField}>
+                  <span>Facility Type</span>
+                  <select
+                    className={styles.sidebarSelect}
+                    value={filters.facilityType}
+                    onChange={(e) => setFilters({ ...filters, facilityType: e.target.value })}
+                  >
+                    {FACILITY_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type === 'All' ? 'All Facilities' : type}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <div className={`${styles.filterField} ${styles.dateFilterField}`}>
+                  <span>Date Range</span>
+                  <div className={styles.dateRangeFields}>
+                    <input
+                      aria-label="Start date"
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                    />
+                    <input
+                      aria-label="End date"
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.filterActions}>
+                  <button className={styles.generateMainBtn} onClick={() => setShowModal('generate')}>
+                    <FaDownload /> Generate Report
+                  </button>
+                  <button className={styles.printReportBtn} onClick={() => setShowModal('print')}>
+                    <FaPrint /> Print
+                  </button>
+                </div>
+              </div>
+            </section>
+
             <div className={styles.analyticsColumn}>
               {error && <div className={styles.reportAlert}>{error}</div>}
 
               <section className={styles.quickReportDashboard}>
-                <h3>Quick Report Dashboard</h3>
+                <div className={styles.dashboardHeader}>
+                  <div>
+                    <span className={styles.dashboardEyebrow}>Report Overview</span>
+                    <h3>Quick Report Dashboard</h3>
+                  </div>
+                  <span className={styles.dashboardMeta}>
+                    {formatDate(filters.startDate)} - {formatDate(filters.endDate)}
+                  </span>
+                </div>
 
                 <div className={styles.statCardsRow}>
                   <div className={styles.smallStatCard}>
-                    <p>Total Reservations</p>
+                    <div className={styles.statLabelRow}>
+                      <p>Total Reservations</p>
+                      <span className={styles.metricIcon}>
+                        <FaCalendarAlt />
+                      </span>
+                    </div>
                     <div className={styles.statMain}>
-                      <strong>{summary.total_reservations || 0}</strong> <FaCalendarAlt />
+                      <strong>{summary.total_reservations || 0}</strong>
                     </div>
                     <span className={styles.trendPos}>
                       {loading ? 'Loading database records...' : `${rows.length} matching records`}
@@ -387,36 +677,161 @@ const AdminReports = ({ role = 'admin' }) => {
                   </div>
 
                   <div className={styles.smallStatCard}>
-                    <p>Total Guests</p>
-                    <div className={styles.statMain}>
-                      <strong>{summary.total_guests || 0}</strong> <FaUsers />
+                    <div className={styles.statLabelRow}>
+                      <p>Total Guests</p>
+                      <span className={styles.metricIcon}>
+                        <FaUsers />
+                      </span>
                     </div>
+                    <div className={styles.statMain}>
+                      <strong>{summary.total_guests || 0}</strong>
+                    </div>
+                    <span className={styles.statNote}>Across selected reservations</span>
                   </div>
 
                   <div className={styles.smallStatCard}>
-                    <p>Facility Usage Breakdown</p>
-                    <div className={styles.statMain}>
-                      <strong>{topFacilityType}</strong> <FaChartPie />
+                    <div className={styles.statLabelRow}>
+                      <p>Facility Type Ranking</p>
+                      <span className={styles.metricIcon}>
+                        <FaChartPie />
+                      </span>
+                    </div>
+                    <div className={styles.facilityRankingList}>
+                      {facilityRankings.length > 0 ? (
+                        facilityRankings.map((facility, index) => (
+                          <div className={styles.facilityRankItem} key={facility.facility_type || index}>
+                            <span>
+                              {index + 1}. {facility.facility_type || 'Uncategorized'}
+                            </span>
+                            <strong>{facility.total_reservations || 0}</strong>
+                          </div>
+                        ))
+                      ) : (
+                        <span className={styles.statNote}>No facility records found</span>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className={styles.graphsRow}>
                   <div className={styles.graphCard}>
-                    <p>Confirmed Reservations</p>
-                    <h3>{summary.confirmed_count || 0}</h3>
-                    <div className={styles.miniGraph}>
+                    <div className={styles.graphCardHeader}>
+                      <div>
+                        <p>Confirmed Reservations</p>
+                        <h3>{summary.confirmed_count || 0}</h3>
+                        <span className={styles.statNote}>{confirmedRate}% of selected reservations</span>
+                      </div>
                       <FaChartLine />
                     </div>
+
+                    <div className={styles.miniLineChartWrap}>
+                      <svg className={styles.lineChart} viewBox="0 0 700 220" role="img" aria-label="Weekly occupancy line chart">
+                        <line className={styles.chartGridLine} x1="20" y1="36" x2="684" y2="36" />
+                        <line className={styles.chartGridLine} x1="20" y1="82" x2="684" y2="82" />
+                        <line className={styles.chartGridLine} x1="20" y1="128" x2="684" y2="128" />
+                        <line className={styles.chartGridLine} x1="20" y1="174" x2="684" y2="174" />
+                        <line
+                          className={styles.chartGuideLine}
+                          x1={activeTrendPoint.x}
+                          y1="18"
+                          x2={activeTrendPoint.x}
+                          y2="198"
+                        />
+                        <path className={styles.chartLine} d={chartPath} />
+                        {reservationTrend.map((point, index) => (
+                          <circle
+                            aria-label={`${point.day}: ${point.count} reservations`}
+                            className={index === activeTrendIndex ? styles.chartPointActive : styles.chartPoint}
+                            cx={point.x}
+                            cy={point.y}
+                            key={point.day}
+                            onClick={() => setActiveTrendIndex(index)}
+                            onFocus={() => setActiveTrendIndex(index)}
+                            onMouseEnter={() => setActiveTrendIndex(index)}
+                            r={index === activeTrendIndex ? 6 : 5}
+                            role="button"
+                            tabIndex="0"
+                          />
+                        ))}
+                      </svg>
+
+                      <div
+                        className={styles.chartTooltip}
+                        style={{ left: `${(activeTrendPoint.x / 700) * 100}%`, top: `${Math.max(activeTrendPoint.y - 4, 24)}px` }}
+                      >
+                        <strong>{activeTrendPoint.day}</strong>
+                        <span>
+                          <i /> {activeTrendPoint.count} reservation{activeTrendPoint.count === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                    </div>
+
                     <button className={styles.downloadBtn} onClick={() => setShowModal('generate')}>
                       <FaDownload /> Download
                     </button>
                   </div>
 
                   <div className={styles.graphCard}>
-                    <p>Revenue Over Time</p>
-                    <h3>{money(summary.total_revenue)}</h3>
-                    <div className={styles.barGraphPlaceholder}></div>
+                    <div className={styles.graphCardHeader}>
+                      <div>
+                        <p>Total Revenue</p>
+                        <h3>{money(summary.total_revenue)}</h3>
+                        <span className={styles.statNote}>Based on selected reservations</span>
+                      </div>
+                      <FaChartLine />
+                    </div>
+
+                    <div className={styles.revenueLinePanel}>
+                      <svg className={styles.revenueLineChart} viewBox="0 0 520 150" role="img" aria-label="Revenue trend line chart">
+                        <line className={styles.chartGridLine} x1="12" y1="32" x2="508" y2="32" />
+                        <line className={styles.chartGridLine} x1="12" y1="78" x2="508" y2="78" />
+                        <line className={styles.chartGridLine} x1="12" y1="124" x2="508" y2="124" />
+                        <line
+                          className={styles.chartGuideLine}
+                          x1={activeRevenuePoint.x}
+                          y1="18"
+                          x2={activeRevenuePoint.x}
+                          y2="138"
+                        />
+                        <path
+                          className={styles.chartArea}
+                          d={revenueAreaPath}
+                        />
+                        <path
+                          className={styles.chartLine}
+                          d={revenueChartPath}
+                        />
+                        {revenueTrend.map((point, index) => (
+                          <circle
+                            aria-label={`${point.day}: ${money(point.amount)}`}
+                            className={index === activeRevenueIndex ? styles.chartPointActive : styles.chartPoint}
+                            cx={point.x}
+                            cy={point.y}
+                            key={point.day}
+                            onClick={() => setActiveRevenueIndex(index)}
+                            onFocus={() => setActiveRevenueIndex(index)}
+                            onMouseEnter={() => setActiveRevenueIndex(index)}
+                            r={index === activeRevenueIndex ? 5.5 : 4.5}
+                            role="button"
+                            tabIndex="0"
+                          />
+                        ))}
+                      </svg>
+
+                      <div
+                        className={styles.chartTooltip}
+                        style={{
+                          left: `${(activeRevenuePoint.x / 520) * 100}%`,
+                          top: `${Math.max(activeRevenuePoint.y + 8, 24)}px`,
+                        }}
+                      >
+                        <strong>{activeRevenuePoint.day}</strong>
+                        <span>
+                          <i /> {money(activeRevenuePoint.amount)}
+                        </span>
+                      </div>
+                    </div>
+
                     <button className={styles.downloadBtn} onClick={() => setShowModal('generate')}>
                       <FaDownload /> Download
                     </button>
@@ -424,102 +839,7 @@ const AdminReports = ({ role = 'admin' }) => {
                 </div>
               </section>
 
-              <section className={styles.tableSection}>
-                <div className={styles.tableHeader}>
-                  <h3>Generated Reports</h3>
-
-                  <button className={styles.printReportBtn} onClick={() => setShowModal('print')}>
-                    <FaPlus /> Print Report
-                  </button>
-                </div>
-
-                <div className={styles.tableWrapper}>
-                  <table className={styles.reportTable}>
-                    <thead>
-                      <tr>
-                        <th>Report ID</th>
-                        <th>Type</th>
-                        <th>Date Generated</th>
-                        <th>Generated By</th>
-                        <th style={{ textAlign: 'center' }}>Actions</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {rows.length > 0 ? (
-                        rows.map((report, idx) => (
-                          <tr key={report.id || idx}>
-                            <td>{report.reservation_id || `REP-${String(idx + 1).padStart(4, '0')}`}</td>
-                            <td>{report.facility_type || report.facility_name || 'Reservations'}</td>
-                            <td>{formatDate(report.created_at)}</td>
-                            <td>{role === 'admin' ? 'Admin' : 'Staff'}</td>
-                            <td>
-                              <div className={styles.actionContainer}>
-                                <button className={styles.viewLink} onClick={() => setShowModal('print')}>
-                                  View
-                                </button>
-
-                                <button className={styles.downloadLink} onClick={() => setShowModal('generate')}>
-                                  Download
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5">{loading ? 'Loading report data...' : 'No records found.'}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </section>
             </div>
-
-            <aside className={styles.reportFilters}>
-              <h4>Report Type</h4>
-              <select
-                className={styles.sidebarSelect}
-                value={filters.reportType}
-                onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}
-              >
-                {Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-
-              <h4>Facility Type</h4>
-              <select
-                className={styles.sidebarSelect}
-                value={filters.facilityType}
-                onChange={(e) => setFilters({ ...filters, facilityType: e.target.value })}
-              >
-                {FACILITY_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type === 'All' ? 'All Facilities' : type}
-                  </option>
-                ))}
-              </select>
-
-              <h4>Date Range</h4>
-              <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-              />
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              />
-
-              <button className={styles.generateMainBtn} onClick={() => setShowModal('generate')}>
-                Generate Report
-              </button>
-            </aside>
           </div>
         </main>
 
@@ -579,15 +899,35 @@ const AdminReports = ({ role = 'admin' }) => {
 
               <div className={styles.reportPreviewPaper}>
                 <div className={styles.previewHeader}>
-                  <img src={logo} alt="Infinity Garden Resort Logo" />
+                  <div className={styles.previewBrand}>
+                    <img src={logo} alt="Infinity Garden Resort Logo" />
+                    <div>
+                      <span>Official Management Report</span>
+                      <h2>Infinity Garden Resort {REPORT_TYPE_LABELS[filters.reportType]} Report</h2>
+                      <p>Infinity Garden Resort Reservation Management System</p>
+                    </div>
+                  </div>
+                  <strong>Generated Report</strong>
+                </div>
+
+                <div className={styles.previewInfoGrid}>
                   <div>
-                    <h2>Infinity Garden Resort {REPORT_TYPE_LABELS[filters.reportType]} Report</h2>
-                    <p>Infinity Garden Resort Reservation Management System</p>
-                    <p>
-                      Generated by: {role === 'admin' ? 'Admin' : 'Staff'} | Date range:{' '}
+                    <span>Generated By</span>
+                    <strong>{role === 'admin' ? 'Admin' : 'Staff'}</strong>
+                  </div>
+                  <div>
+                    <span>Generated On</span>
+                    <strong>{generatedAtLabel}</strong>
+                  </div>
+                  <div>
+                    <span>Date Range</span>
+                    <strong>
                       {formatDate(filters.startDate)} to {formatDate(filters.endDate)}
-                    </p>
-                    <p>Facility type: {filters.facilityType === 'All' ? 'All Facilities' : filters.facilityType}</p>
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Facility Type</span>
+                    <strong>{filters.facilityType === 'All' ? 'All Facilities' : filters.facilityType}</strong>
                   </div>
                 </div>
 
@@ -608,6 +948,13 @@ const AdminReports = ({ role = 'admin' }) => {
                     <span>Confirmed</span>
                     <strong>{summary.confirmed_count || 0}</strong>
                   </div>
+                </div>
+
+                <div className={styles.previewSectionTitle}>
+                  <h4>Reservation Details</h4>
+                  <span>
+                    {rows.length} record{rows.length === 1 ? '' : 's'}
+                  </span>
                 </div>
 
                 <div className={styles.previewTableWrap}>
@@ -637,7 +984,11 @@ const AdminReports = ({ role = 'admin' }) => {
                             <td>{formatDate(report.check_out)}</td>
                             <td>{report.num_guests || 0}</td>
                             <td>{money(report.total_amount)}</td>
-                            <td>{report.status || 'N/A'}</td>
+                            <td>
+                              <span className={`${styles.previewStatus} ${styles[getStatusClass(report.status)]}`}>
+                                {report.status || 'N/A'}
+                              </span>
+                            </td>
                           </tr>
                         ))
                       ) : (
@@ -647,6 +998,11 @@ const AdminReports = ({ role = 'admin' }) => {
                       )}
                     </tbody>
                   </table>
+                </div>
+
+                <div className={styles.previewSignature}>
+                  <div>Prepared by {role === 'admin' ? 'Admin' : 'Staff'}</div>
+                  <div>Reviewed / Approved by</div>
                 </div>
               </div>
 
