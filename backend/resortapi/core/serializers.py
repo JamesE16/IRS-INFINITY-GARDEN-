@@ -109,7 +109,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
             'id', 'reservation_id', 'facility', 'facility_name', 'facility_type', 'facility_image',
             'first_name', 'last_name', 'guest_full_name', 'contact', 'email', 'address',
             'payment_method', 'payment_status', 'proof_of_payment',
-            'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status',
+            'check_in', 'check_out', 'num_guests', 'nights', 'special_requests', 'status', 'is_archived',
             'total_amount', 'review_notes', 'reviewed_at', 'created_at'
         ]
     
@@ -131,7 +131,7 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'reservation_id', 'facility', 'first_name', 'last_name', 'contact', 'email',
             'address', 'check_in', 'check_out', 'num_guests', 'special_requests',
-            'nights', 'total_amount', 'status', 'payment_method', 'payment_status', 'proof_of_payment',
+            'nights', 'total_amount', 'status', 'is_archived', 'payment_method', 'payment_status', 'proof_of_payment',
             'reviewed_by', 'reviewed_by_username', 'reviewed_at', 'review_notes',
             'has_feedback', 'created_at', 'updated_at'
         ]

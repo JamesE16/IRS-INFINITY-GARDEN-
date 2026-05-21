@@ -78,7 +78,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
         item.last_name,
         item.email,
         item.comment,
-        item.reservation_reference
+        item.reservation_reference,
+        item.facility_name
       ].some((value) => String(value || '').toLowerCase().includes(query));
       return matchesStatus && matchesSearch;
     });
@@ -190,7 +191,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
             <div className={styles.searchWrapper}>
               <input
                 type="search"
-                placeholder="Search feedback, guest, reservation..."
+                placeholder="Search feedback, guest, facility..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.searchInput}
@@ -249,10 +250,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                           <small>{item.email}</small>
                         </div>
                       </td>
-                      <td title={item.reservation_reference || 'No linked reservation'}>
-                        {item.reservation_reference
-                          ? shortenReference(item.reservation_reference)
-                          : 'No booking link'}
+                      <td title={item.facility_name || 'No linked facility'}>
+                        {item.facility_name || 'No facility link'}
                       </td>
                       <td>{item.rating} / 5</td>
                       <td title={item.comment}>{shortenText(item.comment)}</td>
@@ -301,7 +300,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 </div>
                 <div className={styles.modalRow}>
                   <span>Reservation Reference</span>
-                  <strong>{selectedFeedback.reservation_reference || 'None'}</strong>
+                  <strong>{selectedFeedback.facility_name || 'None'}</strong>
                 </div>
                 <div className={styles.modalRow}>
                   <span>Rating</span>

@@ -344,6 +344,14 @@ export const reservationsAPI = {
     return response.json();
   },
 
+  archive: async (id) => {
+    const response = await apiRequest(`/reservations/${id}/archive/`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to archive reservation');
+    return response.json();
+  },
+
   getByDateRange: async (startDate, endDate) => {
     const params = new URLSearchParams({
       start_date: startDate,

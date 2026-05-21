@@ -241,7 +241,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         """Allow unauthenticated users to create reservations"""
         if self.action in ['create', 'track']:
             permission_classes = [AllowAny]
-        elif self.action in ['approve', 'pending', 'by_date_range']:
+        elif self.action in ['approve', 'archive', 'pending', 'by_date_range']:
             permission_classes = [IsStaffOrAdminRole]
         else:
             permission_classes = [IsAuthenticated]
@@ -261,7 +261,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
         
         # Admin/Staff can see all reservations
         if self.is_staff_or_admin_user(user):
-            return Reservation.objects.all()
+            queryset = Reservation.objects.all()
+            if self.action in ['list', 'pending']:
+                queryset = queryset.filter(is_archived=False)
+            return queryset
         
         # Authenticated clients see their own reservations
         if user.is_authenticated:
@@ -394,6 +397,16 @@ class ReservationViewSet(viewsets.ModelViewSet):
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsStaffOrAdminRole])
+    def archive(self, request, pk=None):
+        """Hide a reservation from the reservation management list."""
+        reservation = self.get_object()
+        reservation.is_archived = True
+        reservation.save(update_fields=['is_archived', 'updated_at'])
+
+        response_serializer = ReservationDetailSerializer(reservation)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def cancel(self, request, pk=None):

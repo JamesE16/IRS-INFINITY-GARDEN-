@@ -42,6 +42,7 @@ const toReceiptSrc = (url) => {
 const isPdfReceipt = (url) => /\.pdf($|\?)/i.test(url || '');
 
 const reservationStatusLabels = {
+  confirmed: 'Approved',
   cancelled: 'Declined',
 };
 
@@ -141,8 +142,18 @@ export default function AdminReservations({ role = 'admin' }) {
     updateReservationStatus(rejectTarget.id, 'cancelled', rejectMessage.trim());
   };
 
-  const handleArchive = (id) => {
-    setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
+  const handleArchive = async (id) => {
+    setIsSavingStatus(true);
+    try {
+      await reservationsAPI.archive(id);
+      setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setError('Unable to archive reservation.');
+    } finally {
+      setIsSavingStatus(false);
+    }
   };
 
   const handleViewReservation = async (reservation) => {
