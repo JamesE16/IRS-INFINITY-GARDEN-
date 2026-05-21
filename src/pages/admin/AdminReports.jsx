@@ -130,7 +130,7 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
     .header {
       display: flex;
       align-items: flex-start;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 24px;
       padding: 30px 34px 24px;
       border-top: 7px solid #1a3c8f;
@@ -155,21 +155,6 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       color: #1a3c8f;
       font-size: 25px;
       letter-spacing: 0;
-    }
-    .subtle {
-      margin: 2px 0;
-      color: #5f6d83;
-      font-size: 13px;
-    }
-    .report-stamp {
-      border: 1px solid #cbd8ee;
-      color: #1a3c8f;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 9px 12px;
-      text-align: center;
-      text-transform: uppercase;
-      white-space: nowrap;
     }
     .info-grid {
       display: grid;
@@ -244,6 +229,7 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
+      table-layout: fixed;
     }
     th {
       background: #eff4fb;
@@ -254,11 +240,15 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       padding: 11px 10px;
       text-transform: uppercase;
       border-bottom: 2px solid #1a3c8f;
+      overflow-wrap: anywhere;
+      white-space: normal;
     }
     td {
       padding: 11px 10px;
       border-bottom: 1px solid #dbe4f0;
       vertical-align: top;
+      overflow-wrap: anywhere;
+      white-space: normal;
     }
     tbody tr:nth-child(even) { background: #f8fafc; }
     .status {
@@ -291,14 +281,8 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       font-size: 12px;
       padding-top: 8px;
     }
-    .footer {
-      background: #f8fafc;
-      border-top: 1px solid #dbe4f0;
-      color: #667085;
-      font-size: 12px;
-      padding: 14px 34px;
-    }
     @media print {
+      @page { margin: 0.5in; size: A4 landscape; }
       body { background: #fff; padding: 0; }
       .page { border: 0; box-shadow: none; }
     }
@@ -312,10 +296,8 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
         <div>
           <p class="document-label">Official Management Report</p>
           <h1>${escapeHtml(reportTitle)}</h1>
-          <p class="subtle">Infinity Garden Resort Reservation Management System</p>
         </div>
       </div>
-      <div class="report-stamp">Generated Report</div>
     </header>
 
     <section class="info-grid">
@@ -361,9 +343,6 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
       </section>
     </div>
 
-    <footer class="footer">
-      This report was generated from current Infinity Garden Resort database records and is intended for internal administrative use.
-    </footer>
   </main>
 </body>
 </html>`;
@@ -505,38 +484,7 @@ const AdminReports = ({ role = 'admin' }) => {
     setShowModal(null);
   };
 
-  const downloadReportFile = async () => {
-    const logoDataUrl = await imageToDataUrl(logo);
-    const html = buildReportHtml({
-      logoDataUrl,
-      rows,
-      summary,
-      filters,
-      role,
-    });
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const dateLabel = new Date().toISOString().slice(0, 10);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `infinity-garden-${filters.reportType}-report-${dateLabel}.html`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadReport = async () => {
-    setError('');
-
-    try {
-      await downloadReportFile();
-    } catch (err) {
-      setError(err.message || 'Failed to generate the report file.');
-    }
-  };
-
-  const handlePrint = async () => {
+  const openReportPrintWindow = async () => {
     setShowModal(null);
     const logoDataUrl = await imageToDataUrl(logo);
     const html = buildReportHtml({ logoDataUrl, rows, summary, filters, role });
@@ -550,7 +498,29 @@ const AdminReports = ({ role = 'admin' }) => {
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
+    window.setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  };
+
+  const handleDownloadReport = async () => {
+    setError('');
+
+    try {
+      await openReportPrintWindow();
+    } catch (err) {
+      setError(err.message || 'Failed to open the report for PDF download.');
+    }
+  };
+
+  const handlePrint = async () => {
+    setError('');
+
+    try {
+      await openReportPrintWindow();
+    } catch (err) {
+      setError(err.message || 'Failed to open the report for printing.');
+    }
   };
 
   return (
@@ -904,10 +874,8 @@ const AdminReports = ({ role = 'admin' }) => {
                     <div>
                       <span>Official Management Report</span>
                       <h2>Infinity Garden Resort {REPORT_TYPE_LABELS[filters.reportType]} Report</h2>
-                      <p>Infinity Garden Resort Reservation Management System</p>
                     </div>
                   </div>
-                  <strong>Generated Report</strong>
                 </div>
 
                 <div className={styles.previewInfoGrid}>
