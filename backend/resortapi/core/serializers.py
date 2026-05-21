@@ -38,9 +38,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new users (admin/staff registration)"""
+    """Serializer for creating new users (admin/staff/client registration)"""
     password = serializers.CharField(write_only=True, min_length=8)
-    role = serializers.ChoiceField(choices=['staff', 'client'], default='client')
+    role = serializers.ChoiceField(choices=['admin', 'staff', 'client'], default='client')
     phone = serializers.CharField(required=False, allow_blank=True)
     
     class Meta:

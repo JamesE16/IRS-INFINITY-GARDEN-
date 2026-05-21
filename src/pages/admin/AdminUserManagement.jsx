@@ -27,13 +27,14 @@ const statusTabs = [
 ];
 
 function normalizeUser(user) {
+  const profileRole = user.profile?.role || user.role;
   return {
     id: user.id ?? user.pk ?? Math.floor(Math.random() * 100000),
     firstName: user.first_name || user.firstName || '',
     lastName: user.last_name || user.lastName || '',
     email: user.email || '',
-    role: user.role
-      ? String(user.role).charAt(0).toUpperCase() + String(user.role).slice(1)
+    role: profileRole
+      ? String(profileRole).charAt(0).toUpperCase() + String(profileRole).slice(1)
       : user.is_superuser
       ? 'Admin'
       : user.is_staff
@@ -137,7 +138,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
       setError(null);
     } catch (err) {
       console.error('Create user failed', err);
-      setError('Could not create user right now. Please try again later.');
+      setError(err.message || 'Could not create user right now. Please try again later.');
     } finally {
       setIsSaving(false);
     }
