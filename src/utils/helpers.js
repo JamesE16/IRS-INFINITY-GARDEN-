@@ -1,7 +1,3 @@
-// ============================================================
-//  HELPERS — Date formatting, price calculations, ID generation
-// ============================================================
-
 export const formatDate = (dateStr) => {
   if (!dateStr) return '—';
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
@@ -19,8 +15,6 @@ export const calcNights = (checkin, checkout) => {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 };
 
-//Calculates the subtotal, tax (15%), and total
- 
 export const calcTotal = (pricePerNight, nights) => {
   const subtotal = pricePerNight * nights;
   const tax      = subtotal * 0.15;
@@ -31,11 +25,8 @@ export const calcTotal = (pricePerNight, nights) => {
 // Generates a unique booking ID
 export const generateBookingId = () => 'BK' + Date.now();
 
-// Get today's date as YYYY-MM-DD (for date input min)
- 
 export const todayStr = () => new Date().toISOString().split('T')[0];
 
-// Get minimum checkout date (day after checkin)
 export const minCheckout = (checkin) => {
   if (!checkin) return todayStr();
   const d = new Date(checkin + 'T00:00:00');

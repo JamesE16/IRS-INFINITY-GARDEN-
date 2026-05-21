@@ -74,7 +74,6 @@
   max-width: 480px;
 }
 
-/* ── AMENITIES ── */
 .amenitiesSection {
   padding: 72px 2rem;
 }
@@ -130,7 +129,6 @@
   line-height: 1.5;
 }
 
-/* ── WHY CHOOSE ── */
 .whyGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

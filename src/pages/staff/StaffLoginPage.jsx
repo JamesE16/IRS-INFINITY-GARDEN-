@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../context/BookingContext';
 import styles from '../../styles/AdminLoginPage.module.css';
-import logo from '../../assets/logo.png'; // ✅ added
+import logo from '../../assets/logo.png'; 
 
 export default function StaffLoginPage() {
   const navigate = useNavigate();
@@ -47,29 +47,7 @@ export default function StaffLoginPage() {
 
     setIsLoading(true);
     try {
-      let isAuthenticated = false;
-
-      try {
-        // For now, no backend, so skip fetch
-        // const response = await fetch('http://localhost:8000/api/users/login/', {
-        //   method: 'POST',
-        //   mode: 'cors',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(formData),
-        // });
-
-        // if (response.ok) {
-        //   const userData = await response.json();
-        //   isAuthenticated = true;
-
-        //   localStorage.setItem('staffEmail', formData.email);
-        //   localStorage.setItem('isStaffLoggedIn', 'true');
-        //   localStorage.setItem('staffRole', userData.profile?.role || 'staff');
-        // }
-      } catch {
-        // Demo login
+      let isAuthenticated = false; {
         if (
           formData.email === 'staffdemo@infinityresort.com' &&
           formData.password === 'Staff123!'
@@ -102,15 +80,12 @@ export default function StaffLoginPage() {
       <div className={styles.overlay} onClick={handleCancel} />
       
       <div className={styles.modal}>
-        {/* Close button */}
         <button className={styles.closeBtn} onClick={handleCancel}>
           ✕
         </button>
 
-        {/* Header */}
         <div className={styles.header}>
 
-          {/* ✅ ADDED (logo + title ONLY) */}
           <div className={styles.brand}>
             <img src={logo} alt="Infinity Garden Logo" />
             <div>

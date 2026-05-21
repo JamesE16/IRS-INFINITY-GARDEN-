@@ -15,7 +15,6 @@ export default function BookingConfirmedPage() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, []);
 
-  // Guard
   if (!confirmedBooking) {
     return (
       <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
@@ -39,7 +38,6 @@ export default function BookingConfirmedPage() {
     <div className="page">
       <div className={styles.wrapper}>
 
-        {/* ── SUCCESS CARD ── */}
         <div className={styles.successCard}>
           <div className={styles.checkIcon}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
@@ -56,11 +54,9 @@ export default function BookingConfirmedPage() {
           </div>
         </div>
 
-        {/* ── BOOKING DETAILS ── */}
         <div className={styles.detailCard}>
           <h2>Booking Details</h2>
 
-          {/* Room row */}
           <div className={styles.roomRow}>
             <img src={b.roomImg} alt={b.roomName} className={styles.roomThumb} />
             <div>
@@ -106,7 +102,6 @@ export default function BookingConfirmedPage() {
             )}
           </div>
 
-          {/* Price breakdown */}
           <div className={styles.priceBreakdown}>
             <div className={styles.priceRow}>
               <span>{b.nights} {unitLabel}{b.nights !== 1 ? 's' : ''}</span>
@@ -122,7 +117,6 @@ export default function BookingConfirmedPage() {
             </div>
           </div>
 
-          {/* Guest info */}
           <div className={styles.guestSection}>
             <h3>Guest Information</h3>
             <div className={styles.guestItem}>
@@ -156,7 +150,6 @@ export default function BookingConfirmedPage() {
             </div>
           </div>
 
-          {/* What's next */}
           <div className={styles.whatsNext}>
             <h4>What's Next?</h4>
             <ul>
@@ -168,7 +161,6 @@ export default function BookingConfirmedPage() {
           </div>
         </div>
 
-        {/* ── ACTIONS ── */}
         <div className={styles.actions}>
           <button className={styles.viewBtn} onClick={() => navigate('/track-reservation')}>
             Track Reservation
