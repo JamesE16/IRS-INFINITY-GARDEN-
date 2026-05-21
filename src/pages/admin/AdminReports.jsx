@@ -546,17 +546,7 @@ const AdminReports = ({ role = 'admin' }) => {
         <main className={styles.container}>
           <div className={styles.reportLayout}>
             <section className={styles.reportFilters}>
-              <div className={styles.filterHeader}>
-                <div>
-                  <span className={styles.filterEyebrow}>
-                    <FaFilter /> Report Filters
-                  </span>
-                  <h2>Build a report</h2>
-                </div>
-                <p>
-                  Refine the report before previewing, printing, or downloading the current database records.
-                </p>
-              </div>
+              <div className={styles.filterHeader} />
 
               <div className={styles.filterGrid}>
                 <label className={styles.filterField}>
@@ -625,7 +615,6 @@ const AdminReports = ({ role = 'admin' }) => {
                 <div className={styles.dashboardHeader}>
                   <div>
                     <span className={styles.dashboardEyebrow}>Report Overview</span>
-                    <h3>Quick Report Dashboard</h3>
                   </div>
                   <span className={styles.dashboardMeta}>
                     {formatDate(filters.startDate)} - {formatDate(filters.endDate)}
