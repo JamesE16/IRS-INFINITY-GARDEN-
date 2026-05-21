@@ -376,7 +376,9 @@ export const adminAPI = {
       method: 'POST',
       body: JSON.stringify(userData),
     });
-    if (!response.ok) throw new Error('Failed to create staff user');
+    if (!response.ok) {
+      throw new Error(await readErrorPayload(response, 'Failed to create staff user'));
+    }
     return response.json();
   },
 

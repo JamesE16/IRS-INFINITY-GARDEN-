@@ -106,9 +106,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def create_staff(self, request):
-        """Admin creating staff account"""
+        """Admin creating admin/staff accounts"""
         data = request.data.copy()
-        data['role'] = 'staff'
+        requested_role = (data.get('role') or 'staff').lower()
+        if requested_role not in ['admin', 'staff']:
+            return Response(
+                {'role': ['Role must be admin or staff.']},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        data['role'] = requested_role
         serializer = UserCreateSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
