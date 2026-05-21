@@ -39,6 +39,15 @@ This is a complete resort reservation system featuring:
 
 1. Keyboard Shortcut: Press `Ctrl + L` (Windows/Linux) or `Cmd + L` (Mac) anywhere on the website
 2. Hidden Login Page: You'll be redirected to `/admin/login` or `/staff/login`
+3. Admin/Staff Credentials:
+     ADMIN:
+     username/email: admin@infinitygarden.com
+     password: infinity123
+
+     STAFF:
+     username/email: staffdemo@infinityresort.com
+     password: Staff123!
+
 
 # Important: 
 - The admin/staff login link is NOT visible in the navbar (hidden from regular users)
@@ -88,6 +97,10 @@ python manage.py createsuperuser
 # Start server
 python manage.py runserver
 ```
+Django Admin credentials:
+username: Admin
+password: infinity123
+
 
 Backend runs at: http://localhost:8000 
 Django Admin: http://localhost:8000/admin/
