@@ -55,16 +55,16 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
-            return User.objects.all()
-        return User.objects.filter(id=user.id)
+            return User.objects.all().order_by('id')
+        return User.objects.filter(id=user.id).order_by('id')
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
         """Register a new client"""
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
@@ -118,8 +118,8 @@ class UserViewSet(viewsets.ModelViewSet):
         data['role'] = requested_role
         serializer = UserCreateSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])

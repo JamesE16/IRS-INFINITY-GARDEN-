@@ -29,7 +29,7 @@ const statusTabs = [
 function normalizeUser(user) {
   const profileRole = user.profile?.role || user.role;
   return {
-    id: user.id ?? user.pk ?? Math.floor(Math.random() * 100000),
+    id: user.id ?? user.pk ?? null,
     firstName: user.first_name || user.firstName || '',
     lastName: user.last_name || user.lastName || '',
     email: user.email || '',
@@ -46,7 +46,7 @@ function normalizeUser(user) {
 
 function normalizeGuest(guest) {
   return {
-    id: guest.id ?? guest.pk ?? Math.floor(Math.random() * 100000),
+    id: guest.id ?? guest.pk ?? null,
     firstName: guest.first_name || guest.firstName || '',
     lastName: guest.last_name || guest.lastName || '',
     email: guest.email || '',
@@ -86,7 +86,10 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
     try {
       const data = isGuestMode ? await adminAPI.getAllGuests() : await adminAPI.getAllUsers();
       if (Array.isArray(data) && data.length > 0) {
-        setUsers(data.map(isGuestMode ? normalizeGuest : normalizeUser));
+        const normalized = data
+          .map(isGuestMode ? normalizeGuest : normalizeUser)
+          .sort((a, b) => (a.id ?? Number.MAX_SAFE_INTEGER) - (b.id ?? Number.MAX_SAFE_INTEGER));
+        setUsers(normalized);
       } else {
         throw new Error('No data returned');
       }
@@ -131,8 +134,8 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
     };
 
     try {
-      const created = await adminAPI.createStaffUser(userPayload);
-      setUsers((prev) => [normalizeUser(created), ...prev]);
+      await adminAPI.createStaffUser(userPayload);
+      await fetchUsers();
       setShowModal(false);
       setForm({ firstName: '', lastName: '', email: '', password: '', role: 'Staff' });
       setError(null);
@@ -242,9 +245,9 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td>{String(user.id).padStart(2, '0')}</td>
+                  {filteredUsers.map((user, index) => (
+                    <tr key={user.id ?? user.email ?? index}>
+                      <td>{user.id == null ? String(index + 1).padStart(2, '0') : String(user.id).padStart(2, '0')}</td>
                       <td>
                         <div className={styles.userName}>{user.firstName} {user.lastName}</div>
                       </td>

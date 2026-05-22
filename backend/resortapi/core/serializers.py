@@ -58,11 +58,21 @@ class UserCreateSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),
             password=validated_data['password']
         )
-        
-        UserProfile.objects.create(
+
+        # Keep Django auth flags aligned with the app role so new staff/admin
+        # accounts can immediately access protected backend endpoints.
+        user.is_staff = role in ['staff', 'admin']
+        user.is_superuser = role == 'admin'
+        user.save(update_fields=['is_staff', 'is_superuser'])
+
+        # A post_save signal may already create the profile when the User is
+        # saved, so update_or_create prevents duplicate one-to-one inserts.
+        UserProfile.objects.update_or_create(
             user=user,
-            role=role,
-            phone=phone
+            defaults={
+                'role': role,
+                'phone': phone,
+            }
         )
         
         return user
