@@ -179,6 +179,23 @@
   outline: none;
 }
 
+.filterSelect {
+  border: 1px solid var(--border, #e2e8f4);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--text, #1e293b);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterSelect:focus {
+  border-color: var(--navy, #1a3c8f);
+  box-shadow: 0 0 0 3px rgba(26, 60, 143, 0.1);
+  outline: none;
+}
+
 .tab {
   background: #fff;
   border: 1px solid var(--border, #e2e8f4);

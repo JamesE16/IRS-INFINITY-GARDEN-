@@ -6,7 +6,10 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
 const statusTabs = [
-  { key: 'active', label: 'View' },
+  { key: 'active', label: 'All Active' },
+  { key: 'new', label: 'New' },
+  { key: 'reviewed', label: 'Reviewed' },
+  { key: 'resolved', label: 'Resolved' },
   { key: 'archived', label: 'Archived' }
 ];
 
@@ -39,7 +42,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
   const [feedbacks, setFeedbacks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('active');
+  const [ratingFilter, setRatingFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [statusUpdate, setStatusUpdate] = useState('new');
@@ -68,6 +72,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
   const filteredFeedback = useMemo(() => {
     return feedbacks.filter((item) => {
       const matchesStatus = filter === 'active' ? item.status !== 'archived' : item.status === filter;
+      const matchesRating = ratingFilter === 'all' || item.rating === parseInt(ratingFilter);
       const query = searchQuery.trim().toLowerCase();
       const matchesSearch = !query || [
         item.feedback_id,
@@ -78,13 +83,16 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
         item.reservation_reference,
         item.facility_name
       ].some((value) => String(value || '').toLowerCase().includes(query));
-      return matchesStatus && matchesSearch;
+      return matchesStatus && matchesRating && matchesSearch;
     });
-  }, [feedbacks, filter, searchQuery]);
+  }, [feedbacks, filter, ratingFilter, searchQuery]);
 
   const counts = useMemo(() => {
     return {
       active: feedbacks.filter((item) => item.status !== 'archived').length,
+      new: feedbacks.filter((item) => item.status === 'new').length,
+      reviewed: feedbacks.filter((item) => item.status === 'reviewed').length,
+      resolved: feedbacks.filter((item) => item.status === 'resolved').length,
       archived: feedbacks.filter((item) => item.status === 'archived').length
     };
   }, [feedbacks]);
@@ -93,13 +101,13 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
     if (!selectedFeedback) return;
     setIsSaving(true);
     try {
-      const updated = await adminAPI.updateFeedbackStatus(selectedFeedback.id, statusUpdate);
+      const updated = await adminAPI.updateFeedbackStatus(selectedFeedback.id, 'archived');
       setFeedbacks((prev) => prev.map((item) => item.id === updated.id ? updated : item));
-      setSelectedFeedback(updated);
+      setSelectedFeedback(null);
       setError(null);
     } catch (err) {
       console.error('Failed to update feedback status', err);
-      setError('Could not update status. Please try again.');
+      setError('Could not archive feedback. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -107,7 +115,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
 
   const handleOpenFeedback = (feedback) => {
     setSelectedFeedback(feedback);
-    setStatusUpdate(feedback.status || 'new');
+    setStatusUpdate('archived');
     setError(null);
   };
 
@@ -168,6 +176,19 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 className={styles.searchInput}
               />
             </div>
+            <select
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value)}
+              className={styles.filterSelect}
+              title="Filter by rating"
+            >
+              <option value="all">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
             <p className={styles.summaryText}>
               Showing {filteredFeedback.length} of {feedbacks.length} entries.
             </p>
@@ -281,18 +302,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                   <span>Submitted</span>
                   <strong>{new Date(selectedFeedback.submitted_at).toLocaleString()}</strong>
                 </div>
-                {isAdmin ? (
-                  <div className={styles.formGroup}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={statusUpdate === 'archived'}
-                        onChange={(e) => setStatusUpdate(e.target.checked ? 'archived' : 'new')}
-                      />
-                      {' '}Archive this feedback
-                    </label>
-                  </div>
-                ) : (
+                {!isAdmin && (
                   <div className={styles.modalRow}>
                     <span>Status</span>
                     <strong>{statusLabel[selectedFeedback.status] || selectedFeedback.status}</strong>
@@ -316,10 +326,10 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 {isAdmin && (
                   <button
                     className={styles.submitBtn}
-                    disabled={isSaving || selectedFeedback.status === statusUpdate}
+                    disabled={isSaving}
                     onClick={handleStatusSave}
                   >
-                    {isSaving ? 'Saving...' : 'Save Status'}
+                    {isSaving ? 'Archiving...' : 'Archive'}
                   </button>
                 )}
               </div>
