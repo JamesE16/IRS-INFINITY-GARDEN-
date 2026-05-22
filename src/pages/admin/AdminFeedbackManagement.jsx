@@ -6,10 +6,7 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
 const statusTabs = [
-  { key: 'all', label: 'All Feedback' },
-  { key: 'new', label: 'New' },
-  { key: 'reviewed', label: 'Reviewed' },
-  { key: 'resolved', label: 'Resolved' },
+  { key: 'active', label: 'View' },
   { key: 'archived', label: 'Archived' }
 ];
 
@@ -70,7 +67,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
 
   const filteredFeedback = useMemo(() => {
     return feedbacks.filter((item) => {
-      const matchesStatus = filter === 'all' ? true : item.status === filter;
+      const matchesStatus = filter === 'active' ? item.status !== 'archived' : item.status === filter;
       const query = searchQuery.trim().toLowerCase();
       const matchesSearch = !query || [
         item.feedback_id,
@@ -87,10 +84,7 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
 
   const counts = useMemo(() => {
     return {
-      all: feedbacks.length,
-      new: feedbacks.filter((item) => item.status === 'new').length,
-      reviewed: feedbacks.filter((item) => item.status === 'reviewed').length,
-      resolved: feedbacks.filter((item) => item.status === 'resolved').length,
+      active: feedbacks.filter((item) => item.status !== 'archived').length,
       archived: feedbacks.filter((item) => item.status === 'archived').length
     };
   }, [feedbacks]);
@@ -146,31 +140,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 </svg>
               </div>
               <div className={styles.statContent}>
-                <p className={styles.statLabel}>Total Feedback</p>
-                <p className={styles.statValue}>{counts.all}</p>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#d1fae5' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2">
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div className={styles.statContent}>
-                <p className={styles.statLabel}>New Feedback</p>
-                <p className={styles.statValue}>{counts.new}</p>
-              </div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#fef3c7' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 8v4l2 2" />
-                </svg>
-              </div>
-              <div className={styles.statContent}>
-                <p className={styles.statLabel}>Reviewed</p>
-                <p className={styles.statValue}>{counts.reviewed}</p>
+                <p className={styles.statLabel}>Active Feedback</p>
+                <p className={styles.statValue}>{counts.active}</p>
               </div>
             </div>
             <div className={styles.statCard}>
@@ -181,8 +152,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 </svg>
               </div>
               <div className={styles.statContent}>
-                <p className={styles.statLabel}>Resolved</p>
-                <p className={styles.statValue}>{counts.resolved}</p>
+                <p className={styles.statLabel}>Archived</p>
+                <p className={styles.statValue}>{counts.archived}</p>
               </div>
             </div>
           </div>
@@ -312,17 +283,14 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 </div>
                 {isAdmin ? (
                   <div className={styles.formGroup}>
-                    <label>Status</label>
-                    <select
-                      className={styles.select}
-                      value={statusUpdate}
-                      onChange={(e) => setStatusUpdate(e.target.value)}
-                    >
-                      <option value="new">New</option>
-                      <option value="reviewed">Reviewed</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="archived">Archived</option>
-                    </select>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={statusUpdate === 'archived'}
+                        onChange={(e) => setStatusUpdate(e.target.checked ? 'archived' : 'new')}
+                      />
+                      {' '}Archive this feedback
+                    </label>
                   </div>
                 ) : (
                   <div className={styles.modalRow}>
