@@ -182,7 +182,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
               <p>
                 {isAdmin
                   ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort - Staff View'}
+                  : 'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
             {isAdmin && !isGuestMode && (

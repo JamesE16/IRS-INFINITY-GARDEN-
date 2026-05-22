@@ -537,7 +537,7 @@ const AdminReports = ({ role = 'admin' }) => {
               <p>
                 {role === 'admin'
                   ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort - Staff View'}
+                  : 'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
           </div>

@@ -191,7 +191,7 @@ export default function AdminDashboard({ role = 'admin' }) {
               <p>
                 {isAdmin
                   ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort - Staff View'}
+                  : 'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
             <div className={styles.headerActions}>
