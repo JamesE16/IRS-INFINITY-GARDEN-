@@ -31,12 +31,6 @@ const ALL_MODULES = [
     roles: ['admin'],
   },
   {
-    to: '/staff/guests',
-    label: 'Guest Management',
-    icon: <FaUsers />,
-    roles: ['staff'],
-  },
-  {
     to: '/admin/reservations',
     staffTo: '/staff/reservations',
     label: 'Reservation Management',
