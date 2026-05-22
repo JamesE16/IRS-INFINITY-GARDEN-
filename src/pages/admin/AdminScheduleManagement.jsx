@@ -438,7 +438,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     const payload = {
       facility:         selectedFacility.id,
       start_date:       form.startDate,
-      end_date:         form.endDate,
+      end_date:         form.startDate,
       maintenance_type: form.maintenanceType.toLowerCase().replace(/\s+/g, "_"),
       status:           form.status.toLowerCase().replace(/\s+/g, "_"),
       reason:           form.notes || form.maintenanceType || "Maintenance",
@@ -447,7 +447,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     const legacyPayload = {
       facility:   selectedFacility.id,
       start_date: form.startDate,
-      end_date:   form.endDate,
+      end_date:   form.startDate,
       reason:     form.notes || form.maintenanceType || "Maintenance",
     };
 
@@ -909,26 +909,18 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                   )}
                 </div>
 
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>Start Date</label>
+                <div className={styles.formFieldWide}>
+                  <label className={styles.formLabel}>Maintenance Date</label>
                   <input
                     className={styles.formInput}
                     type="date"
                     required
                     value={form.startDate}
-                    onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>End Date</label>
-                  <input
-                    className={styles.formInput}
-                    type="date"
-                    required
-                    value={form.endDate}
-                    min={form.startDate}
-                    onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
+                    onChange={(e) => setForm((p) => ({
+                      ...p,
+                      startDate: e.target.value,
+                      endDate: e.target.value,
+                    }))}
                   />
                 </div>
 
