@@ -22,7 +22,6 @@ import AdminPaymentManagement from './pages/admin/AdminPaymentManagement';
 import AdminReports from './pages/admin/AdminReports';
 import AdminScheduleManagement from "./pages/admin/AdminScheduleManagement";
 import StaffDashboard from './pages/staff/StaffDashboard';
-import StaffGuestManagement from './pages/staff/StaffGuestManagement';
 import StaffReservations from './pages/staff/StaffReservations';
 import StaffPaymentManagement from './pages/staff/StaffPaymentManagement';
 import StaffFeedbackManagement from './pages/staff/StaffFeedbackManagement';
@@ -81,7 +80,6 @@ function AppRoutes() {
 
         {/* Protected staff routes */}
         <Route path="/staff/dashboard" element={<StaffProtectedRoute><StaffDashboard /></StaffProtectedRoute>} />
-        <Route path="/staff/guests" element={<StaffProtectedRoute><StaffGuestManagement /></StaffProtectedRoute>} />
         <Route path="/staff/reservations" element={<StaffProtectedRoute><StaffReservations /></StaffProtectedRoute>} />
         <Route path="/staff/payments" element={<StaffProtectedRoute><StaffPaymentManagement /></StaffProtectedRoute>} />
         <Route path="/staff/feedbacks" element={<StaffProtectedRoute><StaffFeedbackManagement /></StaffProtectedRoute>} />
