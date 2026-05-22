@@ -228,6 +228,20 @@ class BlackoutDateViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    @action(detail=False, methods=['get'])
+    def maintenance_types(self, request):
+        return Response([
+            {'value': value, 'label': label}
+            for value, label in BlackoutDate.MAINTENANCE_TYPE_CHOICES
+        ])
+
+    @action(detail=False, methods=['get'])
+    def status_options(self, request):
+        return Response([
+            {'value': value, 'label': label}
+            for value, label in BlackoutDate.STATUS_CHOICES
+        ])
+
 
 # ============================================================
 # RESERVATION MANAGEMENT

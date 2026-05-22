@@ -125,9 +125,26 @@ class Facility(models.Model):
 
 class BlackoutDate(models.Model):
     """Dates when a facility is unavailable (maintenance, etc)"""
+    MAINTENANCE_TYPE_CHOICES = [
+        ('maintenance', 'Maintenance'),
+        ('deep_cleaning', 'Deep Cleaning'),
+        ('general_cleaning', 'General Cleaning'),
+        ('repair', 'Repair'),
+        ('inspection', 'Inspection'),
+        ('renovation', 'Renovation'),
+    ]
+
+    STATUS_CHOICES = [
+        ('scheduled', 'Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('finished', 'Finished'),
+    ]
+
     facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name='blackout_dates')
     start_date = models.DateField()
     end_date = models.DateField()
+    maintenance_type = models.CharField(max_length=40, choices=MAINTENANCE_TYPE_CHOICES, default='maintenance')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
     reason = models.CharField(max_length=200, default="Maintenance")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

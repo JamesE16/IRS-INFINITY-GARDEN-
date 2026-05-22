@@ -41,6 +41,25 @@ function expandBlackout(raw) {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
+function humanizeOptionValue(value) {
+  const text = (value || "").toString().trim();
+  if (!text) return "";
+  if (!text.includes("_") && text[0] === text[0]?.toUpperCase()) return text;
+  return text
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function normalizeStatusKey(value) {
+  return (value || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+}
+
 function authHeaders() {
   return {
     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -54,12 +73,12 @@ function normalizeBlackout(b) {
     ...b,
     facilityId:      b.facilityId      || b.facility_id || b.facility?.id || (typeof b.facility === "number" ? b.facility : ""),
     facility:        b.facility_name   || b.facilityLabel || b.facility?.name || (typeof b.facility === "string" ? b.facility : ""),
-    maintenanceType: b.maintenanceType || b.maintenance_type || b.reason || "",
+    maintenanceType: b.maintenanceType || b.maintenance_type_display || humanizeOptionValue(b.maintenance_type) || b.reason || "",
     startDate:       b.startDate       || b.start_date       || "",
     endDate:         b.endDate         || b.end_date         || b.startDate || b.start_date || "",
     startTime:       b.startTime       || b.start_time       || "",
     endTime:         b.endTime         || b.end_time         || "",
-    status:          b.status          || "Scheduled",
+    status:          b.statusDisplay || b.status_display || humanizeOptionValue(b.status) || "Scheduled",
     notes:           b.notes           || "",
   };
 }
@@ -88,11 +107,37 @@ async function fetchFacilities() {
 }
 
 async function fetchMaintenanceTypes() {
-  return ["Maintenance"];
+  try {
+    const res = await fetch(`${API_BASE}/blackout-dates/maintenance_types/`, {
+      credentials: "include",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch maintenance types");
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : data.results ?? [];
+    return list.map((item) =>
+      typeof item === "string" ? item : item.label || item.name || item.value || ""
+    ).filter(Boolean);
+  } catch {
+    return ["Maintenance"];
+  }
 }
 
 async function fetchStatusOptions() {
-  return ["Scheduled"];
+  try {
+    const res = await fetch(`${API_BASE}/blackout-dates/status_options/`, {
+      credentials: "include",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch status options");
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : data.results ?? [];
+    return list.map((item) =>
+      typeof item === "string" ? item : item.label || item.name || item.value || ""
+    ).filter(Boolean);
+  } catch {
+    return ["Scheduled"];
+  }
 }
 
 async function fetchAllReservations() {
@@ -174,7 +219,10 @@ async function createBlackout(payload) {
     headers: authHeaders(),
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to create blackout");
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(detail || "Failed to create blackout");
+  }
   return res.json();
 }
 
@@ -185,7 +233,10 @@ async function updateBlackout(id, payload) {
     headers: authHeaders(),
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to update blackout");
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(detail || "Failed to update blackout");
+  }
   return res.json();
 }
 
@@ -323,12 +374,12 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     setEditTarget(b);
     setForm({
       facility:        b.facilityId      || facilityOptions[0]?.id || "",
-      maintenanceType: b.maintenanceType || b.maintenance_type || maintenanceTypes[0]  || "",
+      maintenanceType: b.maintenanceType || humanizeOptionValue(b.maintenance_type) || maintenanceTypes[0]  || "",
       startDate: b.startDate || b.start_date || "",
       endDate:   b.endDate   || b.end_date   || "",
       startTime: b.startTime || b.start_time || "08:00",
       endTime:   b.endTime   || b.end_time   || "17:00",
-      status:    b.status    || statusOptions[0] || "",
+      status:    b.statusDisplay || humanizeOptionValue(b.status) || statusOptions[0] || "",
       notes:     b.notes     || "",
     });
     setSelectedDay(null);
@@ -351,12 +402,33 @@ export default function AdminScheduleManagement({ role = "admin" }) {
       facility:         selectedFacility.id,
       start_date:       form.startDate,
       end_date:         form.endDate,
+      maintenance_type: form.maintenanceType.toLowerCase().replace(/\s+/g, "_"),
+      status:           form.status.toLowerCase().replace(/\s+/g, "_"),
       reason:           form.notes || form.maintenanceType || "Maintenance",
     };
 
+    const legacyPayload = {
+      facility:   selectedFacility.id,
+      start_date: form.startDate,
+      end_date:   form.endDate,
+      reason:     form.notes || form.maintenanceType || "Maintenance",
+    };
+
     try {
+      let saved;
+
+      try {
+        saved = editTarget
+          ? await updateBlackout(editTarget.id, payload)
+          : await createBlackout(payload);
+      } catch (primaryError) {
+        console.warn("Blackout save with dynamic fields failed, retrying with legacy payload.", primaryError);
+        saved = editTarget
+          ? await updateBlackout(editTarget.id, legacyPayload)
+          : await createBlackout(legacyPayload);
+      }
+
       if (editTarget) {
-        const saved = await updateBlackout(editTarget.id, payload);
         setBlackouts((prev) =>
           prev.map((b) => (b.id === editTarget.id ? normalizeBlackout({
             ...saved,
@@ -367,7 +439,6 @@ export default function AdminScheduleManagement({ role = "admin" }) {
           }) : b))
         );
       } else {
-        const saved = await createBlackout(payload);
         setBlackouts((prev) => [normalizeBlackout({
           ...saved,
           facility_name: selectedFacility.name,
@@ -380,7 +451,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
       resetForm();
     } catch (err) {
       console.error(err);
-      setFormError("Unable to save blackout date.");
+      setFormError(err?.message || "Unable to save blackout date.");
     } finally {
       setIsSaving(false);
     }
@@ -436,6 +507,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
         const hasEvent    = dayRes.length > 0;
         const hasBlackout = dayBlk.length > 0;
         const hasAny      = hasEvent || hasBlackout;
+        const hasFinishedBlackout = hasBlackout && dayBlk.every((b) => normalizeStatusKey(b.status) === "finished");
 
         days.push(
           <div
@@ -444,8 +516,8 @@ export default function AdminScheduleManagement({ role = "admin" }) {
               styles.cell,
               isDisabled ? styles.disabled : "",
               hasEvent && !hasBlackout ? styles.hasEvent : "",
-              hasBlackout && !hasEvent ? styles.hasBlackout : "",
-              hasEvent && hasBlackout ? styles.hasBoth : "",
+              hasBlackout && !hasEvent ? (hasFinishedBlackout ? styles.hasBlackoutFinished : styles.hasBlackout) : "",
+              hasEvent && hasBlackout ? (hasFinishedBlackout ? styles.hasBothFinished : styles.hasBoth) : "",
             ].join(" ")}
             onClick={() => hasAny && setSelectedDay({ date: day, reservations: dayRes, blackouts: dayBlk })}
           >
@@ -459,7 +531,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             ))}
 
             {hasBlackout && (
-              <div className={styles.blackoutChip}>
+              <div className={`${styles.blackoutChip} ${hasFinishedBlackout ? styles.blackoutChipFinished : ""}`}>
                 <span className={styles.blackoutDot}></span>
                 {dayBlk[0].facility || dayBlk[0].facility_name}
               </div>
@@ -819,28 +891,6 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                     value={form.endDate}
                     min={form.startDate}
                     onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>Start Time</label>
-                  <input
-                    className={styles.formInput}
-                    type="time"
-                    required
-                    value={form.startTime}
-                    onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
-                  />
-                </div>
-
-                <div className={styles.formField}>
-                  <label className={styles.formLabel}>End Time</label>
-                  <input
-                    className={styles.formInput}
-                    type="time"
-                    required
-                    value={form.endTime}
-                    onChange={(e) => setForm((p) => ({ ...p, endTime: e.target.value }))}
                   />
                 </div>
 

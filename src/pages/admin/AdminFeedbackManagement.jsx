@@ -6,11 +6,8 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
 const statusTabs = [
-  { key: 'active', label: 'All Active' },
-  { key: 'new', label: 'New' },
-  { key: 'reviewed', label: 'Reviewed' },
-  { key: 'resolved', label: 'Resolved' },
-  { key: 'archived', label: 'Archived' }
+  { key: 'active', label: 'All' },
+  { key: 'archived', label: 'Archive' }
 ];
 
 const statusLabel = {
