@@ -674,18 +674,20 @@ class ReportViewSet(viewsets.ViewSet):
         query = self.get_filtered_reservations(request)
         
         total_reservations = query.count()
+        approved_count = query.filter(status__in=['approved', 'confirmed']).count()
         confirmed_count = query.filter(status='confirmed').count()
         pending_count = query.filter(status='pending').count()
         cancelled_count = query.filter(status='cancelled').count()
         
         total_revenue = query.filter(
-            status__in=['confirmed', 'checked_in', 'checked_out']
+            status__in=['approved', 'confirmed', 'checked_in', 'checked_out']
         ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         
         avg_value = total_revenue / total_reservations if total_reservations > 0 else 0
         
         data = {
             'total_reservations': total_reservations,
+            'approved_count': approved_count,
             'confirmed_count': confirmed_count,
             'pending_count': pending_count,
             'cancelled_count': cancelled_count,

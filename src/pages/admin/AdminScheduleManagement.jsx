@@ -16,12 +16,6 @@ import {
   parseISO,
 } from "date-fns";
 
-function formatTime(t) {
-  if (!t) return "—";
-  const [h, m] = t.split(":");
-  const hour = parseInt(h, 10);
-  return `${hour % 12 || 12}:${m} ${hour < 12 ? "AM" : "PM"}`;
-}
 
 function fmtDate(dateStr) {
   if (!dateStr) return "—";
@@ -58,8 +52,9 @@ function authHeaders() {
 function normalizeBlackout(b) {
   return {
     ...b,
-    facility:        b.facility        || b.facility_name    || "",
-    maintenanceType: b.maintenanceType || b.maintenance_type || "",
+    facilityId:      b.facilityId      || b.facility_id || b.facility?.id || (typeof b.facility === "number" ? b.facility : ""),
+    facility:        b.facility_name   || b.facilityLabel || b.facility?.name || (typeof b.facility === "string" ? b.facility : ""),
+    maintenanceType: b.maintenanceType || b.maintenance_type || b.reason || "",
     startDate:       b.startDate       || b.start_date       || "",
     endDate:         b.endDate         || b.end_date         || b.startDate || b.start_date || "",
     startTime:       b.startTime       || b.start_time       || "",
@@ -78,46 +73,26 @@ async function fetchFacilities() {
     if (!res.ok) throw new Error("Failed to fetch facilities");
     const data = await res.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
-    return list.map((f) =>
-      typeof f === "string" ? f : f.name || f.facility_name || f.label || ""
-    ).filter(Boolean);
+    return list
+      .map((f) => {
+        if (typeof f === "string") return { id: f, name: f };
+        const id = f.id ?? f.value ?? f.facility_id;
+        const name = f.name || f.facility_name || f.label || "";
+        if (id == null || !name) return null;
+        return { id, name };
+      })
+      .filter(Boolean);
   } catch {
     return [];
   }
 }
 
 async function fetchMaintenanceTypes() {
-  try {
-    const res = await fetch(`${API_BASE}/maintenance-types/`, {
-      credentials: "include",
-      headers: authHeaders(),
-    });
-    if (!res.ok) throw new Error("Failed to fetch maintenance types");
-    const data = await res.json();
-    const list = Array.isArray(data) ? data : data.results ?? [];
-    return list.map((t) =>
-      typeof t === "string" ? t : t.name || t.label || t.type_name || ""
-    ).filter(Boolean);
-  } catch {
-    return [];
-  }
+  return ["Maintenance"];
 }
 
 async function fetchStatusOptions() {
-  try {
-    const res = await fetch(`${API_BASE}/blackout-statuses/`, {
-      credentials: "include",
-      headers: authHeaders(),
-    });
-    if (!res.ok) throw new Error("Failed to fetch statuses");
-    const data = await res.json();
-    const list = Array.isArray(data) ? data : data.results ?? [];
-    return list.map((s) =>
-      typeof s === "string" ? s : s.name || s.label || s.status || ""
-    ).filter(Boolean);
-  } catch {
-    return [];
-  }
+  return ["Scheduled"];
 }
 
 async function fetchAllReservations() {
@@ -167,7 +142,7 @@ async function fetchAllReservations() {
 
 async function fetchBlackoutSchedules() {
   try {
-    const response = await fetch(`${API_BASE}/blackout-schedules/`, {
+    const response = await fetch(`${API_BASE}/blackout-dates/`, {
       credentials: "include",
       headers: authHeaders(),
     });
@@ -193,7 +168,7 @@ async function fetchBlackoutSchedules() {
 }
 
 async function createBlackout(payload) {
-  const res = await fetch(`${API_BASE}/blackout-schedules/`, {
+  const res = await fetch(`${API_BASE}/blackout-dates/`, {
     method: "POST",
     credentials: "include",
     headers: authHeaders(),
@@ -204,8 +179,8 @@ async function createBlackout(payload) {
 }
 
 async function updateBlackout(id, payload) {
-  const res = await fetch(`${API_BASE}/blackout-schedules/${id}/`, {
-    method: "PATCH",
+  const res = await fetch(`${API_BASE}/blackout-dates/${id}/`, {
+    method: "PUT",
     credentials: "include",
     headers: authHeaders(),
     body: JSON.stringify(payload),
@@ -215,7 +190,7 @@ async function updateBlackout(id, payload) {
 }
 
 async function deleteBlackout(id) {
-  const res = await fetch(`${API_BASE}/blackout-schedules/${id}/`, {
+  const res = await fetch(`${API_BASE}/blackout-dates/${id}/`, {
     method: "DELETE",
     credentials: "include",
     headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
@@ -252,10 +227,8 @@ export default function AdminScheduleManagement({ role = "admin" }) {
 
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const [showBlackoutList, setShowBlackoutList] = useState(false);
-
   const makeEmptyForm = (facilities, types, statuses) => ({
-    facility:        facilities[0] ?? "",
+    facility:        facilities[0]?.id ?? "",
     maintenanceType: types[0]      ?? "",
     startDate:  "",
     endDate:    "",
@@ -296,16 +269,22 @@ export default function AdminScheduleManagement({ role = "admin" }) {
 
   const expandedBlackouts = blackouts.flatMap(expandBlackout);
 
+  const matchesTabStatus = (status, tab) => {
+    if (tab === "all") return true;
+    if (tab === "approved") return ["approved", "confirmed", "paid"].includes(status);
+    return status === tab;
+  };
+
   const filteredReservations = reservations.filter((r) => {
     const sameMonth  = isSameMonth(new Date(r.date), currentDate);
-    const statusMatch = activeTab === "all" ? true : r.status === activeTab;
+    const statusMatch = matchesTabStatus(r.status, activeTab);
     return sameMonth && statusMatch;
   });
 
   const getCount = (type) =>
     reservations.filter((r) => {
       const sameMonth = isSameMonth(new Date(r.date), currentDate);
-      return type === "all" ? sameMonth : sameMonth && r.status === type;
+      return sameMonth && matchesTabStatus(r.status, type);
     }).length;
 
   // ── Status helpers ──
@@ -343,7 +322,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
   const openEdit = (b) => {
     setEditTarget(b);
     setForm({
-      facility:        b.facility        || b.facility_name    || facilityOptions[0]   || "",
+      facility:        b.facilityId      || facilityOptions[0]?.id || "",
       maintenanceType: b.maintenanceType || b.maintenance_type || maintenanceTypes[0]  || "",
       startDate: b.startDate || b.start_date || "",
       endDate:   b.endDate   || b.end_date   || "",
@@ -353,7 +332,6 @@ export default function AdminScheduleManagement({ role = "admin" }) {
       notes:     b.notes     || "",
     });
     setSelectedDay(null);
-    setShowBlackoutList(false);
     setShowForm(true);
   };
 
@@ -362,48 +340,47 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     setIsSaving(true);
     setFormError(null);
 
+    const selectedFacility = facilityOptions.find((option) => String(option.id) === String(form.facility));
+    if (!selectedFacility) {
+      setFormError("Please select a valid facility.");
+      setIsSaving(false);
+      return;
+    }
+
     const payload = {
-      facility:         form.facility,
-      maintenance_type: form.maintenanceType,
+      facility:         selectedFacility.id,
       start_date:       form.startDate,
       end_date:         form.endDate,
-      start_time:       form.startTime,
-      end_time:         form.endTime,
-      status:           form.status,
-      notes:            form.notes,
-      maintenanceType: form.maintenanceType,
-      startDate:       form.startDate,
-      endDate:         form.endDate,
-      startTime:       form.startTime,
-      endTime:         form.endTime,
+      reason:           form.notes || form.maintenanceType || "Maintenance",
     };
 
     try {
       if (editTarget) {
         const saved = await updateBlackout(editTarget.id, payload);
         setBlackouts((prev) =>
-          prev.map((b) => (b.id === editTarget.id ? normalizeBlackout({ ...saved, ...payload, id: editTarget.id }) : b))
+          prev.map((b) => (b.id === editTarget.id ? normalizeBlackout({
+            ...saved,
+            facility_name: selectedFacility.name,
+            maintenanceType: form.maintenanceType,
+            status: form.status,
+            notes: form.notes,
+          }) : b))
         );
       } else {
         const saved = await createBlackout(payload);
-        setBlackouts((prev) => [normalizeBlackout({ ...saved, ...payload }), ...prev]);
+        setBlackouts((prev) => [normalizeBlackout({
+          ...saved,
+          facility_name: selectedFacility.name,
+          maintenanceType: form.maintenanceType,
+          status: form.status,
+          notes: form.notes,
+        }), ...prev]);
       }
       setShowForm(false);
       resetForm();
     } catch (err) {
       console.error(err);
-      if (editTarget) {
-        setBlackouts((prev) =>
-          prev.map((b) => (b.id === editTarget.id ? normalizeBlackout({ ...b, ...payload }) : b))
-        );
-        setShowForm(false);
-        resetForm();
-      } else {
-        const tempId = Date.now();
-        setBlackouts((prev) => [normalizeBlackout({ ...payload, id: tempId, createdBy: "Admin" }), ...prev]);
-        setShowForm(false);
-        resetForm();
-      }
+      setFormError("Unable to save blackout date.");
     } finally {
       setIsSaving(false);
     }
@@ -533,14 +510,6 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             </div>
             {isAdmin && (
               <div style={{ display: "flex", gap: 10 }}>
-                <button className={styles.headerBtn} onClick={() => setShowBlackoutList((v) => !v)}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
-                    <line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  {showBlackoutList ? "Hide Blackouts" : "Blackout List"}
-                </button>
                 <button className={styles.headerBtn} onClick={openAdd}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -597,7 +566,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             )}
           </div>
 
-          {isAdmin && showBlackoutList && (
+          {isAdmin && (
             <div className={styles.blackoutPanel}>
               <div className={styles.blackoutPanelHeader}>
                 <h3>
@@ -619,7 +588,6 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                         <th>Type</th>
                         <th>Start</th>
                         <th>End</th>
-                        <th>Time</th>
                         <th>Status</th>
                         <th>Actions</th>
                       </tr>
@@ -631,9 +599,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                           <td>{b.maintenanceType || b.maintenance_type}</td>
                           <td>{fmtDate(b.startDate || b.start_date)}</td>
                           <td>{fmtDate(b.endDate   || b.end_date)}</td>
-                          <td style={{ whiteSpace: "nowrap" }}>
-                            {formatTime(b.startTime || b.start_time)} – {formatTime(b.endTime || b.end_time)}
-                          </td>
+
                           <td>
                             <span className={`${styles.blkBadge} ${styles["blkStatus_" + (b.status || "Scheduled").replace(/ /g, "")]}`}>
                               {b.status || "Scheduled"}
@@ -697,12 +663,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                         <span>Type</span>
                         <strong>{b.maintenanceType || b.maintenance_type}</strong>
                       </div>
-                      <div className={styles.modalRow}>
-                        <span>Time</span>
-                        <strong>
-                          {formatTime(b.startTime || b.start_time)} – {formatTime(b.endTime || b.end_time)}
-                        </strong>
-                      </div>
+
                       <div className={styles.modalRow}>
                         <span>Status</span>
                         <strong>
@@ -794,10 +755,10 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                     <input
                       className={styles.formInput}
                       type="text"
-                      placeholder="Enter facility name"
+                      placeholder="No facilities available"
                       value={form.facility}
-                      onChange={(e) => setForm((p) => ({ ...p, facility: e.target.value }))}
-                      required
+                      disabled
+                      readOnly
                     />
                   ) : (
                     <select
@@ -806,7 +767,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                       onChange={(e) => setForm((p) => ({ ...p, facility: e.target.value }))}
                       required
                     >
-                      {facilityOptions.map((f) => <option key={f} value={f}>{f}</option>)}
+                      {facilityOptions.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                     </select>
                   )}
                 </div>
@@ -976,3 +937,4 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     </div>
   );
 }
+
