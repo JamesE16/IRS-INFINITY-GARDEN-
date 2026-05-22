@@ -84,9 +84,11 @@ class FacilitySerializer(serializers.ModelSerializer):
 
 
 class BlackoutDateSerializer(serializers.ModelSerializer):
+    facility_name = serializers.CharField(source='facility.name', read_only=True)
+
     class Meta:
         model = BlackoutDate
-        fields = ['id', 'facility', 'start_date', 'end_date', 'reason', 'created_at']
+        fields = ['id', 'facility', 'facility_name', 'start_date', 'end_date', 'reason', 'created_at']
 
 
 # ============================================================

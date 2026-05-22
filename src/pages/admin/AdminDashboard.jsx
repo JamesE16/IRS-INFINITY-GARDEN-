@@ -95,6 +95,7 @@ export default function AdminDashboard({ role = 'admin' }) {
   }, []);
 
   const isAdmin = role === 'admin';
+  const approvedCount = stats?.approved_count ?? stats?.confirmed_count ?? 0;
   const reservationPath = isAdmin ? '/admin/reservations' : '/staff/reservations';
   const handleNotifications = () => setShowNotifications(true);
   const proceedToReservations = () => navigate(reservationPath);
@@ -238,7 +239,7 @@ export default function AdminDashboard({ role = 'admin' }) {
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </StatCard>
 
-            <StatCard label="Approved" value={stats?.approved_count ?? 0}
+            <StatCard label="Approved" value={approvedCount}
               iconBg="#dcfce7" iconStroke="#16a34a">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
               <polyline points="22 4 12 14.01 9 11.01"/>
@@ -284,7 +285,7 @@ export default function AdminDashboard({ role = 'admin' }) {
                 <p className={styles.summarySectionTitle}>Reservation Summary</p>
                 <div className={styles.summaryRow}>
                   <span>Current Stays</span>
-                  <strong>{stats?.approved_count ?? 0}</strong>
+                  <strong>{approvedCount}</strong>
                 </div>
                 <div className={styles.summaryRow}>
                   <span>Upcoming Reservations</span>

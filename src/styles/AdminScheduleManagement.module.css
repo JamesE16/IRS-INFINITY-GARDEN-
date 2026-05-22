@@ -347,6 +347,26 @@
 
 .blackoutTable {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.blackoutTable::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.blackoutTable::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.blackoutTable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.blackoutTable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .blackoutTable table {
