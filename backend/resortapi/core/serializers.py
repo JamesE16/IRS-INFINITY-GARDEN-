@@ -1,7 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.utils.text import slugify
+import json
+import uuid
 from .models import (
-    UserProfile, Facility, BlackoutDate,
+    UserProfile, RoomType, Facility, BlackoutDate,
     Reservation, Payment, Notification, Schedule, TransactionLog,
     Feedback
 )
@@ -83,14 +86,99 @@ class UserCreateSerializer(serializers.ModelSerializer):
 # ============================================================
 
 class FacilitySerializer(serializers.ModelSerializer):
-    type = serializers.CharField(source='room_type.name', read_only=True)
+    type = serializers.CharField(required=False, allow_blank=True)
+    capacity = serializers.IntegerField(read_only=True)
+    guests = serializers.IntegerField(source='capacity', required=False, min_value=1)
+    available = serializers.BooleanField(source='is_active', required=False)
+    subtype = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    size = serializers.IntegerField(required=False, min_value=0, write_only=True)
+    beds = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    features = serializers.JSONField(required=False, write_only=True)
+    img = serializers.CharField(source='image_url', required=False, allow_blank=True, write_only=True)
+    image = serializers.FileField(required=False, allow_null=True, use_url=True)
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Facility
         fields = [
-            'id', 'external_id', 'name', 'type', 'capacity', 'price', 'availability_status',
-            'description', 'amenities', 'image_url', 'created_at', 'updated_at'
+            'id', 'external_id', 'name', 'type', 'capacity', 'guests', 'price',
+            'available', 'availability_status', 'description', 'amenities',
+            'subtype', 'size', 'beds', 'features', 'img',
+            'image', 'image_url', 'created_at', 'updated_at'
         ]
+        read_only_fields = ['id', 'availability_status', 'image_url', 'created_at', 'updated_at']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['type'] = instance.room_type.name if instance.room_type else ''
+        data['available'] = instance.is_active
+        data['guests'] = instance.capacity
+        return data
+
+    def validate_amenities(self, value):
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return []
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                parsed = [item.strip() for item in stripped.split(',') if item.strip()]
+            return parsed if isinstance(parsed, list) else []
+        return value
+
+    def validate_features(self, value):
+        if isinstance(value, str):
+            stripped = value.strip()
+            if not stripped:
+                return []
+            try:
+                parsed = json.loads(stripped)
+            except json.JSONDecodeError:
+                parsed = [item.strip() for item in stripped.split(',') if item.strip()]
+            return parsed if isinstance(parsed, list) else []
+        return value
+
+    def _normalize_facility_type(self, validated_data):
+        facility_type = (validated_data.pop('type', '') or '').strip()
+        if not facility_type:
+            return None
+        room_type, _ = RoomType.objects.get_or_create(name=facility_type)
+        return room_type
+
+    def _discard_display_only_fields(self, validated_data):
+        validated_data.pop('subtype', None)
+        validated_data.pop('size', None)
+        validated_data.pop('beds', None)
+        validated_data.pop('features', None)
+
+    def create(self, validated_data):
+        room_type = self._normalize_facility_type(validated_data)
+        self._discard_display_only_fields(validated_data)
+        if room_type:
+            validated_data['room_type'] = room_type
+        if not validated_data.get('external_id'):
+            base_id = slugify(validated_data.get('name') or 'facility') or 'facility'
+            validated_data['external_id'] = f"{base_id}-{uuid.uuid4().hex[:8]}"
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        room_type = self._normalize_facility_type(validated_data)
+        self._discard_display_only_fields(validated_data)
+        if room_type:
+            validated_data['room_type'] = room_type
+        return super().update(instance, validated_data)
+
+    def get_image_url(self, obj):
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        if getattr(obj, 'image', None):
+            try:
+                url = obj.image.url
+            except Exception:
+                url = None
+            if url:
+                return request.build_absolute_uri(url) if request else url
+        return obj.image_url or ''
 
 
 class BlackoutDateSerializer(serializers.ModelSerializer):
@@ -117,7 +205,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
     """Simplified serializer for listing"""
     facility_name = serializers.CharField(source='facility.name', read_only=True)
     facility_type = serializers.CharField(source='facility.room_type.name', read_only=True)
-    facility_image = serializers.CharField(source='facility.image_url', read_only=True)
+    facility_image = serializers.SerializerMethodField()
     guest_full_name = serializers.SerializerMethodField()
     payment_method = serializers.CharField(source='payment.payment_method', read_only=True, allow_null=True)
     payment_status = serializers.CharField(source='payment.verification_status', read_only=True, allow_null=True)
@@ -135,6 +223,20 @@ class ReservationListSerializer(serializers.ModelSerializer):
     
     def get_guest_full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
+
+    def get_facility_image(self, obj):
+        facility = getattr(obj, 'facility', None)
+        if not facility:
+            return ''
+        request = self.context.get('request') if hasattr(self, 'context') else None
+        if getattr(facility, 'image', None):
+            try:
+                url = facility.image.url
+            except Exception:
+                url = None
+            if url:
+                return request.build_absolute_uri(url) if request else url
+        return facility.image_url or ''
 
 
 class ReservationDetailSerializer(serializers.ModelSerializer):

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 
 import { facilitiesAPI } from '../../utils/api';
@@ -17,6 +17,7 @@ export default function AdminFacilities({ role = 'admin' }) {
   const [showForm, setShowForm] = useState(false);
   const [filterType, setFilterType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const fileInputRef = useRef(null);
   const isAdmin = role === 'admin';
 
   const [form, setForm] = useState({
@@ -31,7 +32,9 @@ export default function AdminFacilities({ role = 'admin' }) {
     available: true,
     amenities: '',
     features: '',
-    img: ''
+    img: '',
+    imageFile: null,
+    imagePreview: ''
   });
 
   useEffect(() => {
@@ -69,8 +72,13 @@ export default function AdminFacilities({ role = 'admin' }) {
       available: true,
       amenities: '',
       features: '',
-      img: ''
+      img: '',
+      imageFile: null,
+      imagePreview: ''
     });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleInput = (field, value) => {
@@ -97,8 +105,57 @@ export default function AdminFacilities({ role = 'admin' }) {
       available: facility.available,
       amenities: facility.amenities.join(', '),
       features: facility.features.join(', '),
-      img: facility.img
+      img: facility.img,
+      imageFile: null,
+      imagePreview: facility.img || ''
     });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImageFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((prev) => ({
+        ...prev,
+        img: '',
+        imageFile: file,
+        imagePreview: reader.result || ''
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImagePaste = (event) => {
+    const item = Array.from(event.clipboardData?.items || [])
+      .find((clipboardItem) => clipboardItem.type.startsWith('image/'));
+    const file = item?.getAsFile();
+
+    if (file) {
+      event.preventDefault();
+      handleImageFile(file);
+    }
+  };
+
+  const handleImageDrop = (event) => {
+    event.preventDefault();
+    const file = Array.from(event.dataTransfer?.files || [])
+      .find((droppedFile) => droppedFile.type.startsWith('image/'));
+    handleImageFile(file);
+  };
+
+  const clearImageFile = () => {
+    setForm((prev) => ({
+      ...prev,
+      imageFile: null,
+      imagePreview: editedFacility?.img || ''
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleClosePreview = () => {
@@ -120,20 +177,46 @@ export default function AdminFacilities({ role = 'admin' }) {
       price: Number(form.price),
       available: Boolean(form.available),
       amenities: form.amenities.split(',').map((item) => item.trim()).filter(Boolean),
-      features: form.features.split(',').map((item) => item.trim()).filter(Boolean),
-      img: form.img
+      features: form.features.split(',').map((item) => item.trim()).filter(Boolean)
     };
 
     try {
       let saved;
+      const hasFile = !!form.imageFile;
+      if (hasFile) {
+        const fd = new FormData();
+        fd.append('name', payload.name);
+        fd.append('type', payload.type);
+        fd.append('subtype', payload.subtype);
+        fd.append('description', payload.description);
+        fd.append('guests', String(payload.guests));
+        fd.append('size', String(payload.size));
+        fd.append('beds', payload.beds || '');
+        fd.append('price', String(payload.price));
+        fd.append('available', String(payload.available));
+        fd.append('amenities', JSON.stringify(payload.amenities));
+        fd.append('features', JSON.stringify(payload.features));
+        fd.append('image', form.imageFile);
+
+        if (editedFacility) {
+          saved = await facilitiesAPI.update(editedFacility.id, fd);
+        } else {
+          saved = await facilitiesAPI.create(fd);
+        }
+      } else {
+        if (editedFacility) {
+          saved = await facilitiesAPI.update(editedFacility.id, payload);
+        } else {
+          saved = await facilitiesAPI.create(payload);
+        }
+      }
+
       if (editedFacility) {
-        saved = await facilitiesAPI.update(editedFacility.id, payload);
         setFacilities((prev) => prev.map((facility) =>
           facility.id === editedFacility.id ? normalizeFacility(saved) : facility
         ));
         setSelectedFacility(normalizeFacility(saved));
       } else {
-        saved = await facilitiesAPI.create(payload);
         setFacilities((prev) => [normalizeFacility(saved), ...prev]);
       }
       setError(null);
@@ -141,7 +224,7 @@ export default function AdminFacilities({ role = 'admin' }) {
       resetForm();
     } catch (err) {
       console.error(err);
-      setError('Unable to save facility. Please check your backend connection or try again later.');
+      setError(err.message || 'Unable to save facility. Please check your backend connection or try again later.');
     } finally {
       setIsSaving(false);
     }
@@ -382,8 +465,38 @@ export default function AdminFacilities({ role = 'admin' }) {
                       <input value={form.features} onChange={(event) => handleInput('features', event.target.value)} />
                     </div>
                     <div className={styles.fieldWide}>
-                      <label>Image URL</label>
-                      <input value={form.img} onChange={(event) => handleInput('img', event.target.value)} />
+                      <label>Facility Image</label>
+                      <div
+                        className={styles.imagePasteBox}
+                        tabIndex="0"
+                        role="button"
+                        onPaste={handleImagePaste}
+                        onDrop={handleImageDrop}
+                        onDragOver={(event) => event.preventDefault()}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        {form.imagePreview ? (
+                          <img className={styles.imagePreview} src={form.imagePreview} alt="Facility preview" />
+                        ) : (
+                          <div className={styles.imagePlaceholder}>
+                            <strong>Paste or upload an image</strong>
+                            <span>Click to choose a file, or focus this area and paste a copied image.</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={styles.imageActions}>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(event) => handleImageFile(event.target.files?.[0])}
+                        />
+                        {form.imagePreview && (
+                          <button type="button" className={styles.cancelBtn} onClick={clearImageFile}>
+                            Clear
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className={styles.formActions}>
                       <button type="button" className={styles.cancelBtn} onClick={() => { setShowForm(false); resetForm(); }}>

@@ -641,6 +641,68 @@
   margin-bottom: 0.25rem;
 }
 
+.imagePasteBox {
+  min-height: 190px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imagePasteBox:hover,
+.imagePasteBox:focus {
+  border-color: #2563eb;
+  background: #eff6ff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.imagePreview {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.imagePlaceholder {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  text-align: center;
+  color: #475569;
+}
+
+.imagePlaceholder strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.imagePlaceholder span {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.imageActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.imageActions input {
+  display: none;
+}
+
+.imageActions .cancelBtn {
+  border: 1px solid #cbd5e1;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+}
+
 .formActions {
   grid-column: span 2;
   display: flex;

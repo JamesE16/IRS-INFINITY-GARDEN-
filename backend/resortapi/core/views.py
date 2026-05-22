@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, BasePermission
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -173,6 +174,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
     """Manage facilities (rooms, cottages, pavilions, gazebos)"""
     queryset = Facility.objects.filter(is_active=True)
     serializer_class = FacilitySerializer
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

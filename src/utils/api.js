@@ -229,20 +229,26 @@ export const facilitiesAPI = {
   },
 
   create: async (facilityData) => {
+    const isFormData = typeof FormData !== 'undefined' && facilityData instanceof FormData;
     const response = await apiRequest('/facilities/', {
       method: 'POST',
-      body: JSON.stringify(facilityData),
+      body: isFormData ? facilityData : JSON.stringify(facilityData),
     });
-    if (!response.ok) throw new Error('Failed to create facility');
+    if (!response.ok) {
+      throw new Error(await readErrorPayload(response, 'Failed to create facility.'));
+    }
     return response.json();
   },
 
   update: async (id, facilityData) => {
+    const isFormData = typeof FormData !== 'undefined' && facilityData instanceof FormData;
     const response = await apiRequest(`/facilities/${id}/`, {
       method: 'PUT',
-      body: JSON.stringify(facilityData),
+      body: isFormData ? facilityData : JSON.stringify(facilityData),
     });
-    if (!response.ok) throw new Error('Failed to update facility');
+    if (!response.ok) {
+      throw new Error(await readErrorPayload(response, 'Failed to update facility.'));
+    }
     return response.json();
   },
 

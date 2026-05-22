@@ -62,6 +62,7 @@ class Facility(models.Model):
     description = models.TextField(blank=True)
     amenities = models.JSONField(default=list)  # ["WiFi", "AC", "Kitchen"]
     image_url = models.URLField(blank=True)
+    image = models.FileField(upload_to='facilities/', blank=True, null=True)
     
     is_active = models.BooleanField(default=True)  # Can be booked or not
     created_at = models.DateTimeField(auto_now_add=True)
