@@ -234,10 +234,31 @@
 
 .tableWrapper {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 420px;
+  position: relative;
   border-radius: var(--radius-lg);
   background: #fff;
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+}
+
+.tableWrapper::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .table {
@@ -245,6 +266,12 @@
   border-collapse: collapse;
   min-width: 900px;
   background: #fff;
+}
+
+.table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .table thead,
@@ -265,6 +292,9 @@
   font-weight: 700;
   font-size: 0.9rem;
   color: var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 
 .table tbody tr:nth-child(even) {

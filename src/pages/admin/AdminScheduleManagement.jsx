@@ -289,33 +289,70 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     notes:      "",
   });
 
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
+  const loadScheduleData = async (refreshOptions = false) => {
+    if (refreshOptions) {
       setOptionsLoading(true);
-      try {
-        const [resData, blkData, facilities, types, statuses] = await Promise.all([
-          fetchAllReservations(),
-          fetchBlackoutSchedules(),
-          fetchFacilities(),
-          fetchMaintenanceTypes(),
-          fetchStatusOptions(),
-        ]);
-        setReservations(resData);
-        setBlackouts(blkData);
-        setFacilityOptions(facilities);
-        setMaintenanceTypes(types);
-        setStatusOptions(statuses);
-        setForm(makeEmptyForm(facilities, types, statuses));
-        setError(null);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load schedule data.");
-      } finally {
-        setIsLoading(false);
-        setOptionsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+
+    try {
+      const requests = [
+        fetchAllReservations(),
+        fetchBlackoutSchedules(),
+      ];
+
+      if (refreshOptions) {
+        requests.push(fetchFacilities(), fetchMaintenanceTypes(), fetchStatusOptions());
       }
-    })();
+
+      const [resData, blkData, facilities, types, statuses] = await Promise.all(requests);
+      setReservations(resData);
+      setBlackouts(blkData);
+
+      if (refreshOptions) {
+        const nextFacilities = facilities ?? [];
+        const nextTypes = types ?? [];
+        const nextStatuses = statuses ?? [];
+        setFacilityOptions(nextFacilities);
+        setMaintenanceTypes(nextTypes);
+        setStatusOptions(nextStatuses);
+        setForm((prev) => ({
+          ...makeEmptyForm(nextFacilities, nextTypes, nextStatuses),
+          ...prev,
+        }));
+      }
+
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to load schedule data.");
+    } finally {
+      setIsLoading(false);
+      setOptionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadScheduleData(true);
+
+    const handleFocus = () => {
+      loadScheduleData(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadScheduleData(false);
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const expandedBlackouts = blackouts.flatMap(expandBlackout);
@@ -449,6 +486,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
       }
       setShowForm(false);
       resetForm();
+      await loadScheduleData(false);
     } catch (err) {
       console.error(err);
       setFormError(err?.message || "Unable to save blackout date.");
@@ -460,10 +498,10 @@ export default function AdminScheduleManagement({ role = "admin" }) {
   const handleDelete = async (id) => {
     try {
       await deleteBlackout(id);
+      await loadScheduleData(false);
     } catch (err) {
       console.warn("deleteBlackout failed:", err);
     }
-    setBlackouts((prev) => prev.filter((b) => b.id !== id));
     setDeleteConfirm(null);
     setSelectedDay(null);
   };
