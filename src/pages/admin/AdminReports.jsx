@@ -10,45 +10,45 @@ import {
   FaChartLine,
   FaDownload,
   FaFilter,
-  FaPrint,
-} from 'react-icons/fa';
+  FaPrint } from
+'react-icons/fa';
 
 const REPORT_TYPE_LABELS = {
   reservations: 'Reservations',
   payments: 'Payments',
   facilities: 'Facilities',
-  guests: 'Guests',
+  guests: 'Guests'
 };
 
 const FACILITY_TYPES = ['All', 'Room', 'Cottage', 'Gazebo', 'Pavilion'];
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const money = (value) =>
-  `PHP ${Number(value || 0).toLocaleString('en-PH', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+`PHP ${Number(value || 0).toLocaleString('en-PH', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})}`;
 
 const formatDate = (value) => {
   if (!value) return 'All dates';
   const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? value
-    : date.toLocaleDateString('en-PH', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit',
-      });
+  return Number.isNaN(date.getTime()) ?
+  value :
+  date.toLocaleDateString('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit'
+  });
 };
 
 const formatDateTime = (value = new Date()) =>
-  new Date(value).toLocaleString('en-PH', {
-    year: 'numeric',
-    month: 'long',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+new Date(value).toLocaleString('en-PH', {
+  year: 'numeric',
+  month: 'long',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit'
+});
 
 const getStatusClass = (status) => {
   const normalized = String(status || '').toLowerCase();
@@ -61,12 +61,12 @@ const getStatusClass = (status) => {
 };
 
 const escapeHtml = (value) =>
-  String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+String(value ?? '').
+replace(/&/g, '&amp;').
+replace(/</g, '&lt;').
+replace(/>/g, '&gt;').
+replace(/"/g, '&quot;').
+replace(/'/g, '&#039;');
 
 const imageToDataUrl = async (src) => {
   const response = await fetch(src);
@@ -86,10 +86,10 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
   const generatedBy = role === 'admin' ? 'Admin' : 'Staff';
   const facilityLabel = filters.facilityType === 'All' ? 'All Facilities' : filters.facilityType;
 
-  const tableRows = rows.length
-    ? rows
-        .map(
-          (report, index) => `
+  const tableRows = rows.length ?
+  rows.
+  map(
+    (report, index) => `
             <tr>
               <td>${escapeHtml(report.reservation_id || `REP-${String(index + 1).padStart(4, '0')}`)}</td>
               <td>${escapeHtml(report.facility_type || 'N/A')}</td>
@@ -102,9 +102,9 @@ const buildReportHtml = ({ logoDataUrl, rows, summary, filters, role }) => {
               <td><span class="status ${getStatusClass(report.status)}">${escapeHtml(report.status || 'N/A')}</span></td>
             </tr>
           `
-        )
-        .join('')
-    : '<tr><td colspan="9" class="empty">No records found for the selected filters.</td></tr>';
+  ).
+  join('') :
+  '<tr><td colspan="9" class="empty">No records found for the selected filters.</td></tr>';
 
   return `<!doctype html>
 <html>
@@ -352,7 +352,7 @@ const AdminReports = ({ role = 'admin' }) => {
   const [reportData, setReportData] = useState({
     summary: {},
     reservations: [],
-    facility_breakdown: [],
+    facility_breakdown: []
   });
   const [showModal, setShowModal] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -364,7 +364,7 @@ const AdminReports = ({ role = 'admin' }) => {
     reportType: 'reservations',
     facilityType: 'All',
     startDate: '',
-    endDate: '',
+    endDate: ''
   });
 
   useEffect(() => {
@@ -380,7 +380,7 @@ const AdminReports = ({ role = 'admin' }) => {
           setReportData({
             summary: response.summary || {},
             reservations: response.reservations || [],
-            facility_breakdown: response.facility_breakdown || [],
+            facility_breakdown: response.facility_breakdown || []
           });
         }
       } catch (err) {
@@ -406,15 +406,15 @@ const AdminReports = ({ role = 'admin' }) => {
 
   const facilityRankings = useMemo(
     () =>
-      [...(reportData.facility_breakdown || [])].sort(
-        (a, b) => (b.total_reservations || 0) - (a.total_reservations || 0)
-      ),
+    [...(reportData.facility_breakdown || [])].sort(
+      (a, b) => (b.total_reservations || 0) - (a.total_reservations || 0)
+    ),
     [reportData.facility_breakdown]
   );
 
-  const confirmedRate = summary.total_reservations
-    ? Math.round(((summary.confirmed_count || 0) / summary.total_reservations) * 100)
-    : 0;
+  const confirmedRate = summary.total_reservations ?
+  Math.round((summary.confirmed_count || 0) / summary.total_reservations * 100) :
+  0;
 
   const reservationTrend = useMemo(() => {
     const counts = WEEKDAY_LABELS.map((day) => ({ day, count: 0 }));
@@ -431,9 +431,9 @@ const AdminReports = ({ role = 'admin' }) => {
     const maxCount = Math.max(...counts.map((item) => item.count), 1);
 
     return counts.map((item, index) => {
-      const percent = item.count ? Math.max(Math.round((item.count / maxCount) * 92), 18) : 0;
+      const percent = item.count ? Math.max(Math.round(item.count / maxCount * 92), 18) : 0;
       const x = 46 + index * 102;
-      const y = 170 - (percent / 100) * 126;
+      const y = 170 - percent / 100 * 126;
 
       return { ...item, percent, x, y };
     });
@@ -454,9 +454,9 @@ const AdminReports = ({ role = 'admin' }) => {
     const maxAmount = Math.max(...totals.map((item) => item.amount), 1);
 
     return totals.map((item, index) => {
-      const percent = item.amount ? Math.max(Math.round((item.amount / maxAmount) * 90), 16) : 0;
+      const percent = item.amount ? Math.max(Math.round(item.amount / maxAmount * 90), 16) : 0;
       const x = 28 + index * 77;
-      const y = 126 - (percent / 100) * 96;
+      const y = 126 - percent / 100 * 96;
 
       return { ...item, percent, x, y };
     });
@@ -479,8 +479,8 @@ const AdminReports = ({ role = 'admin' }) => {
   const revenueAreaPath = `${revenueChartPath} L ${revenueTrend[revenueTrend.length - 1]?.x || 520} 142 L ${revenueTrend[0]?.x || 0} 142 Z`;
   const activeTrendPoint = reservationTrend[activeTrendIndex] || reservationTrend[2];
   const activeRevenuePoint = revenueTrend[activeRevenueIndex] || revenueTrend[2];
-  const trendTooltipLeft = (activeTrendPoint.x / 700) * 100;
-  const revenueTooltipLeft = (activeRevenuePoint.x / 520) * 100;
+  const trendTooltipLeft = activeTrendPoint.x / 700 * 100;
+  const revenueTooltipLeft = activeRevenuePoint.x / 520 * 100;
 
   const closeModal = () => {
     setShowModal(null);
@@ -535,9 +535,9 @@ const AdminReports = ({ role = 'admin' }) => {
             <div className={styles.title}>
               <h1>Reports</h1>
               <p>
-                {role === 'admin'
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort Management System - Staff View'}
+                {role === 'admin' ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
           </div>
@@ -554,13 +554,13 @@ const AdminReports = ({ role = 'admin' }) => {
                   <select
                     className={styles.sidebarSelect}
                     value={filters.reportType}
-                    onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}
-                  >
-                    {Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => (
-                      <option key={value} value={value}>
+                    onChange={(e) => setFilters({ ...filters, reportType: e.target.value })}>
+                    
+                    {Object.entries(REPORT_TYPE_LABELS).map(([value, label]) =>
+                    <option key={value} value={value}>
                         {label}
                       </option>
-                    ))}
+                    )}
                   </select>
                 </label>
 
@@ -569,13 +569,13 @@ const AdminReports = ({ role = 'admin' }) => {
                   <select
                     className={styles.sidebarSelect}
                     value={filters.facilityType}
-                    onChange={(e) => setFilters({ ...filters, facilityType: e.target.value })}
-                  >
-                    {FACILITY_TYPES.map((type) => (
-                      <option key={type} value={type}>
+                    onChange={(e) => setFilters({ ...filters, facilityType: e.target.value })}>
+                    
+                    {FACILITY_TYPES.map((type) =>
+                    <option key={type} value={type}>
                         {type === 'All' ? 'All Facilities' : type}
                       </option>
-                    ))}
+                    )}
                   </select>
                 </label>
 
@@ -586,14 +586,14 @@ const AdminReports = ({ role = 'admin' }) => {
                       aria-label="Start date"
                       type="date"
                       value={filters.startDate}
-                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                    />
+                      onChange={(e) => setFilters({ ...filters, startDate: e.target.value })} />
+                    
                     <input
                       aria-label="End date"
                       type="date"
                       value={filters.endDate}
-                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                    />
+                      onChange={(e) => setFilters({ ...filters, endDate: e.target.value })} />
+                    
                   </div>
                 </div>
 
@@ -658,18 +658,18 @@ const AdminReports = ({ role = 'admin' }) => {
                       </span>
                     </div>
                     <div className={styles.facilityRankingList}>
-                      {facilityRankings.length > 0 ? (
-                        facilityRankings.map((facility, index) => (
-                          <div className={styles.facilityRankItem} key={facility.facility_type || index}>
+                      {facilityRankings.length > 0 ?
+                      facilityRankings.map((facility, index) =>
+                      <div className={styles.facilityRankItem} key={facility.facility_type || index}>
                             <span>
                               {index + 1}. {facility.facility_type || 'Uncategorized'}
                             </span>
                             <strong>{facility.total_reservations || 0}</strong>
                           </div>
-                        ))
-                      ) : (
-                        <span className={styles.statNote}>No facility records found</span>
-                      )}
+                      ) :
+
+                      <span className={styles.statNote}>No facility records found</span>
+                      }
                     </div>
                   </div>
                 </div>
@@ -696,31 +696,31 @@ const AdminReports = ({ role = 'admin' }) => {
                           x1={activeTrendPoint.x}
                           y1="18"
                           x2={activeTrendPoint.x}
-                          y2="198"
-                        />
+                          y2="198" />
+                        
                         <path className={styles.chartLine} d={chartPath} />
-                        {reservationTrend.map((point, index) => (
-                          <circle
-                            aria-label={`${point.day}: ${point.count} reservations`}
-                            className={index === activeTrendIndex ? styles.chartPointActive : styles.chartPoint}
-                            cx={point.x}
-                            cy={point.y}
-                            key={point.day}
-                            onClick={() => setActiveTrendIndex(index)}
-                            onFocus={() => setActiveTrendIndex(index)}
-                            onMouseEnter={() => setActiveTrendIndex(index)}
-                            r={index === activeTrendIndex ? 6 : 5}
-                            role="button"
-                            tabIndex="0"
-                          />
-                        ))}
+                        {reservationTrend.map((point, index) =>
+                        <circle
+                          aria-label={`${point.day}: ${point.count} reservations`}
+                          className={index === activeTrendIndex ? styles.chartPointActive : styles.chartPoint}
+                          cx={point.x}
+                          cy={point.y}
+                          key={point.day}
+                          onClick={() => setActiveTrendIndex(index)}
+                          onFocus={() => setActiveTrendIndex(index)}
+                          onMouseEnter={() => setActiveTrendIndex(index)}
+                          r={index === activeTrendIndex ? 6 : 5}
+                          role="button"
+                          tabIndex="0" />
+
+                        )}
                       </svg>
 
                       <div
                         className={styles.chartTooltip}
                         data-align={trendTooltipLeft > 72 ? 'left' : 'right'}
-                        style={{ left: `${trendTooltipLeft}%`, top: `${Math.max(activeTrendPoint.y - 4, 24)}px` }}
-                      >
+                        style={{ left: `${trendTooltipLeft}%`, top: `${Math.max(activeTrendPoint.y - 4, 24)}px` }}>
+                        
                         <strong>{activeTrendPoint.day}</strong>
                         <span>
                           <i /> {activeTrendPoint.count} reservation{activeTrendPoint.count === 1 ? '' : 's'}
@@ -753,31 +753,31 @@ const AdminReports = ({ role = 'admin' }) => {
                           x1={activeRevenuePoint.x}
                           y1="18"
                           x2={activeRevenuePoint.x}
-                          y2="138"
-                        />
+                          y2="138" />
+                        
                         <path
                           className={styles.chartArea}
-                          d={revenueAreaPath}
-                        />
+                          d={revenueAreaPath} />
+                        
                         <path
                           className={styles.chartLine}
-                          d={revenueChartPath}
-                        />
-                        {revenueTrend.map((point, index) => (
-                          <circle
-                            aria-label={`${point.day}: ${money(point.amount)}`}
-                            className={index === activeRevenueIndex ? styles.chartPointActive : styles.chartPoint}
-                            cx={point.x}
-                            cy={point.y}
-                            key={point.day}
-                            onClick={() => setActiveRevenueIndex(index)}
-                            onFocus={() => setActiveRevenueIndex(index)}
-                            onMouseEnter={() => setActiveRevenueIndex(index)}
-                            r={index === activeRevenueIndex ? 5.5 : 4.5}
-                            role="button"
-                            tabIndex="0"
-                          />
-                        ))}
+                          d={revenueChartPath} />
+                        
+                        {revenueTrend.map((point, index) =>
+                        <circle
+                          aria-label={`${point.day}: ${money(point.amount)}`}
+                          className={index === activeRevenueIndex ? styles.chartPointActive : styles.chartPoint}
+                          cx={point.x}
+                          cy={point.y}
+                          key={point.day}
+                          onClick={() => setActiveRevenueIndex(index)}
+                          onFocus={() => setActiveRevenueIndex(index)}
+                          onMouseEnter={() => setActiveRevenueIndex(index)}
+                          r={index === activeRevenueIndex ? 5.5 : 4.5}
+                          role="button"
+                          tabIndex="0" />
+
+                        )}
                       </svg>
 
                       <div
@@ -785,9 +785,9 @@ const AdminReports = ({ role = 'admin' }) => {
                         data-align={revenueTooltipLeft > 72 ? 'left' : 'right'}
                         style={{
                           left: `${revenueTooltipLeft}%`,
-                          top: `${Math.max(activeRevenuePoint.y + 8, 24)}px`,
-                        }}
-                      >
+                          top: `${Math.max(activeRevenuePoint.y + 8, 24)}px`
+                        }}>
+                        
                         <strong>{activeRevenuePoint.day}</strong>
                         <span>
                           <i /> {money(activeRevenuePoint.amount)}
@@ -806,8 +806,8 @@ const AdminReports = ({ role = 'admin' }) => {
           </div>
         </main>
 
-        {showModal === 'print' && (
-          <div className={styles.modalOverlay}>
+        {showModal === 'print' &&
+        <div className={styles.modalOverlay}>
             <div className={styles.modal} style={{ maxWidth: '520px' }}>
               <div className={styles.modalHeader}>
                 <h3>Print Report</h3>
@@ -827,14 +827,14 @@ const AdminReports = ({ role = 'admin' }) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.slice(0, 4).map((r, i) => (
-                      <tr key={r.id || i}>
+                    {rows.slice(0, 4).map((r, i) =>
+                  <tr key={r.id || i}>
                         <td>{r.reservation_id}</td>
                         <td>{REPORT_TYPE_LABELS[filters.reportType]}</td>
                         <td>{formatDate(r.created_at)}</td>
                         <td>{role === 'admin' ? 'Admin' : 'Staff'}</td>
                       </tr>
-                    ))}
+                  )}
                   </tbody>
                 </table>
               </div>
@@ -850,10 +850,10 @@ const AdminReports = ({ role = 'admin' }) => {
               </div>
             </div>
           </div>
-        )}
+        }
 
-        {showModal === 'generate' && (
-          <div className={styles.modalOverlay}>
+        {showModal === 'generate' &&
+        <div className={styles.modalOverlay}>
             <div className={`${styles.modal} ${styles.reportPreviewModal}`}>
               <div className={styles.modalHeader}>
                 <h3>Report Preview</h3>
@@ -936,9 +936,9 @@ const AdminReports = ({ role = 'admin' }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {rows.length > 0 ? (
-                        rows.map((report, index) => (
-                          <tr key={report.id || index}>
+                      {rows.length > 0 ?
+                    rows.map((report, index) =>
+                    <tr key={report.id || index}>
                             <td>{report.reservation_id || `REP-${String(index + 1).padStart(4, '0')}`}</td>
                             <td>{report.facility_type || 'N/A'}</td>
                             <td>{report.facility_name || 'N/A'}</td>
@@ -953,12 +953,12 @@ const AdminReports = ({ role = 'admin' }) => {
                               </span>
                             </td>
                           </tr>
-                        ))
-                      ) : (
-                        <tr>
+                    ) :
+
+                    <tr>
                           <td colSpan="9">No records found for the selected filters.</td>
                         </tr>
-                      )}
+                    }
                     </tbody>
                   </table>
                 </div>
@@ -984,10 +984,10 @@ const AdminReports = ({ role = 'admin' }) => {
               </div>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default AdminReports;

@@ -1,7 +1,3 @@
-"""
-Django settings for resortapi project.
-"""
-
 from pathlib import Path
 import os
 from corsheaders.defaults import default_headers
@@ -95,7 +91,7 @@ MEDIA_ROOT = BASE_DIR
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CORS Configuration
+                    
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:5173',
@@ -120,7 +116,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'content-type',
 ]
 
-# REST Framework settings
+                         
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -131,7 +127,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-# SimpleJWT — 5 min access token (matches idle timeout), 1 day refresh
+                                                                      
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),

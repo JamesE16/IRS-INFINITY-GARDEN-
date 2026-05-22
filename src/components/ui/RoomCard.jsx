@@ -20,7 +20,7 @@ export default function RoomCard({ room }) {
     Room: styles.badgeRoom,
     Cottage: styles.badgeCottage,
     Gazebo: styles.badgeGazebo,
-    Pavilion: styles.badgePavilion,
+    Pavilion: styles.badgePavilion
   }[room.type] || styles.badgeRoom;
 
   const visibleTags = room.amenities.slice(0, 4);
@@ -33,20 +33,20 @@ export default function RoomCard({ room }) {
           src={room.img}
           alt={room.name}
           className={`${styles.img} ${isReserved ? styles.imgDark : ''}`}
-          loading="lazy"
-        />
+          loading="lazy" />
+        
 
         <span className={`${styles.typeBadge} ${badgeClass}`}>
           {room.subtype}
         </span>
 
-        {isReserved && room.availability_status?.current_reservation && (
-          <div className={styles.reservedOverlay}>
+        {isReserved && room.availability_status?.current_reservation &&
+        <div className={styles.reservedOverlay}>
             <span className={styles.reservedLabel}>
               Reserved until {new Date(room.availability_status.current_reservation.check_out).toLocaleDateString()}
             </span>
           </div>
-        )}
+        }
       </div>
 
       <div className={styles.body}>
@@ -63,12 +63,12 @@ export default function RoomCard({ room }) {
         </div>
 
         <div className={styles.tags}>
-          {visibleTags.map((a) => (
-            <span key={a} className={styles.tag}>{a}</span>
-          ))}
-          {extraCount > 0 && (
-            <span className={styles.tag}>+{extraCount} more</span>
+          {visibleTags.map((a) =>
+          <span key={a} className={styles.tag}>{a}</span>
           )}
+          {extraCount > 0 &&
+          <span className={styles.tag}>+{extraCount} more</span>
+          }
         </div>
 
         <div className={styles.footer}>
@@ -80,12 +80,12 @@ export default function RoomCard({ room }) {
             className={`${styles.viewBtn} ${isReserved ? styles.viewBtnDisabled : ''}`}
             onClick={handleView}
             disabled={isReserved}
-            title={isReserved ? `Reserved until ${room.availability_status?.blocked_until}` : 'View details'}
-          >
+            title={isReserved ? `Reserved until ${room.availability_status?.blocked_until}` : 'View details'}>
+            
             {isReserved ? 'Reserved' : 'View Details'}
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

@@ -66,7 +66,7 @@ img {
   max-width: 100%;
 }
 
-/* ---- SHARED UTILITY CLASSES ---- */
+
 .page {
   padding-top: var(--navbar-h);
   min-height: 100vh;
@@ -100,7 +100,7 @@ img {
   font-size: 0.95rem;
 }
 
-/* ---- SHARED BUTTONS ---- */
+
 .btn-red {
   display: inline-flex;
   align-items: center;
@@ -169,7 +169,7 @@ img {
   text-align: center;
 }
 
-/* ---- BACK BUTTON BAR ---- */
+
 .back-bar {
   background: #fff;
   border-bottom: 1px solid var(--border);
@@ -191,14 +191,14 @@ img {
 }
 .back-btn:hover { color: var(--navy); }
 
-/* ---- DIVIDER ---- */
+
 .divider {
   border: none;
   border-top: 1px solid var(--border);
   margin: 1.5rem 0;
 }
 
-/* Global scrollbar styling */
+
 html, body, * {
   scrollbar-width: thin;
   scrollbar-color: #94a3b8 transparent;

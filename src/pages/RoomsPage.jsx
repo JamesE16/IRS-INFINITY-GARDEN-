@@ -9,9 +9,9 @@ export default function RoomsPage() {
   const { filter, facilities, facilitiesLoading } = useBooking();
 
   const filtered = useMemo(() => {
-    return filter === 'All'
-      ? facilities
-      : facilities.filter((facility) => facility.type === filter);
+    return filter === 'All' ?
+    facilities :
+    facilities.filter((facility) => facility.type === filter);
   }, [facilities, filter]);
 
   return (
@@ -26,19 +26,19 @@ export default function RoomsPage() {
 
       <FilterTabs />
 
-      {facilitiesLoading ? (
-        <div className={styles.grid}>
+      {facilitiesLoading ?
+      <div className={styles.grid}>
           <p>Loading facilities...</p>
+        </div> :
+
+      <div className={styles.grid}>
+          {filtered.map((room) =>
+        <RoomCard key={room.id} room={room} />
+        )}
         </div>
-      ) : (
-        <div className={styles.grid}>
-          {filtered.map((room) => (
-            <RoomCard key={room.id} room={room} />
-          ))}
-        </div>
-      )}
+      }
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 }

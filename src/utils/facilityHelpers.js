@@ -6,18 +6,18 @@ const roomCatalogByName = new Map(ROOMS.map((room) => [room.name, room]));
 const toArray = (value) => {
   if (Array.isArray(value)) return value;
   if (typeof value === 'string') {
-    return value
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean);
+    return value.
+    split(',').
+    map((item) => item.trim()).
+    filter(Boolean);
   }
   return [];
 };
 
 const findCatalogRoom = (facility) =>
-  roomCatalogByExternalId.get(facility.external_id || facility.externalId) ||
-  roomCatalogByName.get(facility.name) ||
-  null;
+roomCatalogByExternalId.get(facility.external_id || facility.externalId) ||
+roomCatalogByName.get(facility.name) ||
+null;
 
 export const normalizeFacility = (facility) => {
   if (!facility) return null;
@@ -48,7 +48,7 @@ export const normalizeFacility = (facility) => {
     features: toArray(facility.features).length ? toArray(facility.features) : catalogRoom?.features || [],
     img: facility.image_url || facility.img || catalogRoom?.img || '',
     isDynamic: true,
-    canBook: true,
+    canBook: true
   };
 };
 
@@ -69,7 +69,7 @@ export const buildGuestFacilities = (backendFacilities = []) => {
         publicId: room.id,
         externalId: room.id,
         backendId: matchedBackend.backendId,
-        canBook: true,
+        canBook: true
       };
     }
 
@@ -80,17 +80,17 @@ export const buildGuestFacilities = (backendFacilities = []) => {
       backendId: null,
       isDynamic: false,
       canBook: false,
-      availability_status: null,
+      availability_status: null
     };
   });
 
-  const backendOnly = normalizedBackend
-    .filter((room) => !roomCatalogByExternalId.has(room.externalId) && !roomCatalogByName.has(room.name))
-    .map((room) => ({
-      ...room,
-      publicId: room.publicId || room.externalId,
-      canBook: true,
-    }));
+  const backendOnly = normalizedBackend.
+  filter((room) => !roomCatalogByExternalId.has(room.externalId) && !roomCatalogByName.has(room.name)).
+  map((room) => ({
+    ...room,
+    publicId: room.publicId || room.externalId,
+    canBook: true
+  }));
 
   return [...mergedCatalog, ...backendOnly];
 };
@@ -100,6 +100,6 @@ export const getCatalogRoom = (roomRef) => {
   return (
     roomCatalogByExternalId.get(roomRef.externalId || roomRef.external_id || roomRef.publicId || roomRef.id) ||
     roomCatalogByName.get(roomRef.name) ||
-    null
-  );
+    null);
+
 };

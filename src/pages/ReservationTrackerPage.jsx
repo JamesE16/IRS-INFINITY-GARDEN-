@@ -70,8 +70,8 @@ export default function ReservationTrackerPage() {
               id="reservationId"
               value={reservationId}
               onChange={(event) => setReservationId(event.target.value)}
-              placeholder="Enter your reservation ID"
-            />
+              placeholder="Enter your reservation ID" />
+            
             <button type="submit" disabled={isLoading}>
               {isLoading ? 'Searching...' : 'Search'}
             </button>
@@ -80,8 +80,8 @@ export default function ReservationTrackerPage() {
 
         {error && <div className={styles.error}>{error}</div>}
 
-        {reservation && (
-          <article className={styles.result}>
+        {reservation &&
+        <article className={styles.result}>
             <div className={styles.resultHeader}>
               <div>
                 <span className={styles.resultLabel}>Reservation ID</span>
@@ -119,15 +119,15 @@ export default function ReservationTrackerPage() {
               </div>
             </div>
 
-            {showRejectionMessage && (
-              <div className={styles.messageBox}>
+            {showRejectionMessage &&
+          <div className={styles.messageBox}>
                 <span>Message from Staff</span>
                 <p>{reservation.review_notes}</p>
               </div>
-            )}
+          }
           </article>
-        )}
+        }
       </section>
-    </main>
-  );
+    </main>);
+
 }

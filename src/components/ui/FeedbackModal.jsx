@@ -3,10 +3,10 @@ import { adminAPI, reservationsAPI } from '../../utils/api';
 import styles from '../../styles/FeedbackModal.module.css';
 
 const getFacilityName = (reservationData) =>
-  reservationData?.facility?.name || reservationData?.facility_name || 'Reserved facility';
+reservationData?.facility?.name || reservationData?.facility_name || 'Reserved facility';
 
 const canReviewReservation = (reservationData) =>
-  (reservationData?.status || '').toLowerCase() === 'confirmed';
+(reservationData?.status || '').toLowerCase() === 'confirmed';
 
 const alreadyHasFeedback = (reservationData) => Boolean(reservationData?.has_feedback);
 
@@ -25,7 +25,7 @@ export default function FeedbackModal({ onClose, onSubmit }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: name === 'rating' ? parseInt(value) : value
     }));
@@ -36,7 +36,7 @@ export default function FeedbackModal({ onClose, onSubmit }) {
   };
 
   const handleRatingChange = (rating) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       rating
     }));
@@ -118,7 +118,7 @@ export default function FeedbackModal({ onClose, onSubmit }) {
     setError('');
 
     try {
-      const linkedReservation = reservation || await reservationsAPI.trackByReservationId(formData.reservation_id.trim());
+      const linkedReservation = reservation || (await reservationsAPI.trackByReservationId(formData.reservation_id.trim()));
       if (!canReviewReservation(linkedReservation)) {
         setError('Only confirmed reservations can submit feedback.');
         return;
@@ -163,38 +163,38 @@ export default function FeedbackModal({ onClose, onSubmit }) {
               value={formData.reservation_id}
               onChange={handleChange}
               placeholder="Paste your reservation ID"
-              disabled={isSubmitting}
-            />
+              disabled={isSubmitting} />
+            
             {isVerifying && <div className={styles.lookupStatus}>Checking reservation...</div>}
-            {reservation && (
-              <div className={alreadyHasFeedback(reservation) ? styles.reservationBlocked : styles.reservationMatch}>
+            {reservation &&
+            <div className={alreadyHasFeedback(reservation) ? styles.reservationBlocked : styles.reservationMatch}>
                 <span>Feedback for</span>
                 <strong>{getFacilityName(reservation)}</strong>
-                {alreadyHasFeedback(reservation) && (
-                  <em>This reservation already has recorded feedback.</em>
-                )}
+                {alreadyHasFeedback(reservation) &&
+              <em>This reservation already has recorded feedback.</em>
+              }
               </div>
-            )}
+            }
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="rating">Rating</label>
             <div className={styles.ratingContainer}>
               <div className={styles.stars} id="rating" role="radiogroup" aria-label="Rating">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    type="button"
-                    className={`${styles.star} ${star <= formData.rating ? styles.filled : ''}`}
-                    onClick={() => handleRatingChange(star)}
-                    disabled={isSubmitting}
-                    role="radio"
-                    aria-checked={formData.rating === star}
-                    aria-label={`${star} star${star > 1 ? 's' : ''}`}
-                  >
+                {[1, 2, 3, 4, 5].map((star) =>
+                <button
+                  key={star}
+                  type="button"
+                  className={`${styles.star} ${star <= formData.rating ? styles.filled : ''}`}
+                  onClick={() => handleRatingChange(star)}
+                  disabled={isSubmitting}
+                  role="radio"
+                  aria-checked={formData.rating === star}
+                  aria-label={`${star} star${star > 1 ? 's' : ''}`}>
+                  
                     ★
                   </button>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -208,31 +208,31 @@ export default function FeedbackModal({ onClose, onSubmit }) {
               onChange={handleChange}
               placeholder="Tell us about your experience..."
               rows="5"
-              disabled={isSubmitting}
-            />
+              disabled={isSubmitting} />
+            
           </div>
 
           {error && <div className={styles.error}>{error}</div>}
 
           <div className={styles.actions}>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className={styles.cancelBtn}
               onClick={onClose}
-              disabled={isSubmitting}
-            >
+              disabled={isSubmitting}>
+              
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className={styles.submitBtn}
-              disabled={isSubmitting || isVerifying || alreadyHasFeedback(reservation)}
-            >
+              disabled={isSubmitting || isVerifying || alreadyHasFeedback(reservation)}>
+              
               {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </button>
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
+
 }

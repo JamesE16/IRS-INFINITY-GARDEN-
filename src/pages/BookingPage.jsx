@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../context/BookingContext';
-import BookingForm    from '../components/booking/BookingForm';
+import BookingForm from '../components/booking/BookingForm';
 import BookingSummary from '../components/booking/BookingSummary';
-import Footer         from '../components/layout/Footer';
+import Footer from '../components/layout/Footer';
 import styles from "../styles/BookingPage.module.css";
 
 
@@ -13,15 +13,15 @@ export default function BookingPage() {
   const { selectedRoom, facilitiesLoading } = useBooking();
 
   const [pricing, setPricing] = useState({
-    nights: 0, subtotal: 0, tax: 0, total: 0, guests: 1, unitLabel: 'night',
+    nights: 0, subtotal: 0, tax: 0, total: 0, guests: 1, unitLabel: 'night'
   });
 
   if (facilitiesLoading && !selectedRoom) {
     return (
       <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
         <h2>Loading booking details...</h2>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!selectedRoom) {
@@ -31,12 +31,12 @@ export default function BookingPage() {
         <button
           className="btn-red"
           onClick={() => navigate('/rooms')}
-          style={{ marginTop: '1rem' }}
-        >
+          style={{ marginTop: '1rem' }}>
+          
           Browse Rooms
         </button>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
@@ -58,6 +58,6 @@ export default function BookingPage() {
       </div>
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 }

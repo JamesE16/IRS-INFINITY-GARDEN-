@@ -77,14 +77,14 @@ export default function AdminLoginPage() {
       const message = 'This account does not have admin or staff access.';
       setErrors({
         email: message,
-        password: message,
+        password: message
       });
       showToast(message, 'error');
     } catch {
       const message = 'Incorrect email/username or password. Please try again.';
       setErrors({
         email: message,
-        password: message,
+        password: message
       });
       showToast(message, 'error');
     } finally {
@@ -122,8 +122,8 @@ export default function AdminLoginPage() {
               value={formData.email}
               onChange={handleChange}
               className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-              disabled={isLoading}
-            />
+              disabled={isLoading} />
+            
             {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
           </div>
 
@@ -137,8 +137,8 @@ export default function AdminLoginPage() {
               value={formData.password}
               onChange={handleChange}
               className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-              disabled={isLoading}
-            />
+              disabled={isLoading} />
+            
             {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
           </div>
 
@@ -152,6 +152,6 @@ export default function AdminLoginPage() {
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
+
 }

@@ -10,9 +10,9 @@ from .models import (
 )
 
 
-# ============================================================
-# USER SERIALIZERS
-# ============================================================
+                                                              
+                  
+                                                              
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -41,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating new users (admin/staff/client registration)"""
+                                                                             
     password = serializers.CharField(write_only=True, min_length=8)
     role = serializers.ChoiceField(choices=['admin', 'staff', 'client'], default='client')
     phone = serializers.CharField(required=False, allow_blank=True)
@@ -62,14 +62,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
 
-        # Keep Django auth flags aligned with the app role so new staff/admin
-        # accounts can immediately access protected backend endpoints.
+                                                                             
+                                                                      
         user.is_staff = role in ['staff', 'admin']
         user.is_superuser = role == 'admin'
         user.save(update_fields=['is_staff', 'is_superuser'])
 
-        # A post_save signal may already create the profile when the User is
-        # saved, so update_or_create prevents duplicate one-to-one inserts.
+                                                                            
+                                                                           
         UserProfile.objects.update_or_create(
             user=user,
             defaults={
@@ -81,9 +81,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-# ============================================================
-# FACILITY SERIALIZERS
-# ============================================================
+                                                              
+                      
+                                                              
 
 class FacilitySerializer(serializers.ModelSerializer):
     type = serializers.CharField(required=False, allow_blank=True)
@@ -197,12 +197,12 @@ class BlackoutDateSerializer(serializers.ModelSerializer):
         ]
 
 
-# ============================================================
-# RESERVATION SERIALIZERS
-# ============================================================
+                                                              
+                         
+                                                              
 
 class ReservationListSerializer(serializers.ModelSerializer):
-    """Simplified serializer for listing"""
+                                           
     facility_name = serializers.CharField(source='facility.name', read_only=True)
     facility_type = serializers.CharField(source='facility.room_type.name', read_only=True)
     facility_image = serializers.SerializerMethodField()
@@ -240,7 +240,7 @@ class ReservationListSerializer(serializers.ModelSerializer):
 
 
 class ReservationDetailSerializer(serializers.ModelSerializer):
-    """Full serializer with all details"""
+                                          
     facility = FacilitySerializer(read_only=True)
     reviewed_by_username = serializers.CharField(source='reviewed_by.username', read_only=True, allow_null=True)
     payment_method = serializers.CharField(source='payment.payment_method', read_only=True, allow_null=True)
@@ -263,7 +263,7 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
 
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating reservations"""
+                                              
     payment_method = serializers.ChoiceField(choices=Payment.PAYMENT_METHOD_CHOICES, write_only=True)
     receipt_image = serializers.FileField(write_only=True, required=False, allow_null=True)
 
@@ -277,14 +277,14 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
 
 
 class ReservationApproveSerializer(serializers.Serializer):
-    """Serializer for admin approving reservations"""
+                                                     
     review_notes = serializers.CharField(required=False, allow_blank=True)
     status = serializers.ChoiceField(choices=['confirmed', 'cancelled'])
 
 
-# ============================================================
-# PAYMENT SERIALIZERS
-# ============================================================
+                                                              
+                     
+                                                              
 
 class PaymentSerializer(serializers.ModelSerializer):
     reservation_reservation_id = serializers.CharField(source='reservation.reservation_id', read_only=True)
@@ -376,12 +376,12 @@ class FeedbackSerializer(serializers.ModelSerializer):
         return None
 
 
-# ============================================================
-# REPORT SERIALIZERS
-# ============================================================
+                                                              
+                    
+                                                              
 
 class ReservationReportSerializer(serializers.Serializer):
-    """For generating reports"""
+                                
     total_reservations = serializers.IntegerField()
     approved_count = serializers.IntegerField()
     pending_count = serializers.IntegerField()

@@ -4,9 +4,9 @@ export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
 const CSRF_SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
 
 const getCookie = (name) => {
-  const match = document.cookie
-    .split('; ')
-    .find((cookie) => cookie.startsWith(`${name}=`));
+  const match = document.cookie.
+  split('; ').
+  find((cookie) => cookie.startsWith(`${name}=`));
 
   return match ? decodeURIComponent(match.split('=').slice(1).join('=')) : null;
 };
@@ -19,7 +19,7 @@ const ensureCsrfCookie = async () => {
 
   const response = await fetch(`${API_BASE_URL}/users/csrf/`, {
     method: 'GET',
-    credentials: 'include',
+    credentials: 'include'
   });
 
   if (!response.ok) {
@@ -37,7 +37,7 @@ const ensureCsrfCookie = async () => {
 const getAuthHeaders = async (method = 'GET') => {
   const token = localStorage.getItem('access_token');
   const headers = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
   };
 
   if (!CSRF_SAFE_METHODS.has(method.toUpperCase())) {
@@ -62,11 +62,11 @@ const apiRequest = async (path, options = {}, _isRetry = false) => {
     method,
     headers: {
       ...headers,
-      ...(options.headers || {}),
-    },
+      ...(options.headers || {})
+    }
   });
 
-  // On 401, try to refresh the token once then retry
+
   if (response.status === 401 && !_isRetry) {
     const refreshed = await refreshAccessToken();
     if (refreshed) {
@@ -87,8 +87,8 @@ const readErrorPayload = async (response, fallbackMessage) => {
       error?.error ||
       error?.message ||
       JSON.stringify(error) ||
-      fallbackMessage
-    );
+      fallbackMessage);
+
   }
 
   const text = await response.text();
@@ -99,11 +99,11 @@ const readErrorPayload = async (response, fallbackMessage) => {
 
   return text || fallbackMessage;
 };
-//Token Refresh
-/**
- * Silently exchanges the stored refresh token for a new access token.
- * Returns true on success, false if refresh fails (user must re-login).
- */
+
+
+
+
+
 let _isRefreshing = false;
 export const refreshAccessToken = async () => {
   if (_isRefreshing) return false;
@@ -115,7 +115,7 @@ export const refreshAccessToken = async () => {
     const res = await fetch(`${API_BASE_URL}/token/refresh/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh: refreshToken }),
+      body: JSON.stringify({ refresh: refreshToken })
     });
     if (!res.ok) {
       localStorage.removeItem('access_token');
@@ -143,8 +143,8 @@ export const authAPI = {
         first_name: firstName,
         last_name: lastName,
         password,
-        role: 'client',
-      }),
+        role: 'client'
+      })
     });
 
     if (!response.ok) {
@@ -157,7 +157,7 @@ export const authAPI = {
   login: async (email, password) => {
     const response = await apiRequest('/users/login/', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password })
     });
 
     if (!response.ok) {
@@ -166,7 +166,7 @@ export const authAPI = {
 
     const data = await response.json();
 
-    // Store JWT tokens returned by the backend
+
     if (data.access) localStorage.setItem('access_token', data.access);
     if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
 
@@ -182,7 +182,7 @@ export const authAPI = {
   logout: async () => {
     try {
       await apiRequest('/users/logout/', { method: 'POST' });
-    } catch { /* ignore */ }
+    } catch {}
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('isAdminLoggedIn');
@@ -192,7 +192,7 @@ export const authAPI = {
     localStorage.removeItem('adminEmail');
     localStorage.removeItem('staffEmail');
     return true;
-  },
+  }
 };
 
 export const facilitiesAPI = {
@@ -212,7 +212,7 @@ export const facilitiesAPI = {
     const params = new URLSearchParams({
       check_in: checkIn,
       check_out: checkOut,
-      type,
+      type
     });
 
     const response = await apiRequest(`/facilities/available/?${params}`);
@@ -232,7 +232,7 @@ export const facilitiesAPI = {
     const isFormData = typeof FormData !== 'undefined' && facilityData instanceof FormData;
     const response = await apiRequest('/facilities/', {
       method: 'POST',
-      body: isFormData ? facilityData : JSON.stringify(facilityData),
+      body: isFormData ? facilityData : JSON.stringify(facilityData)
     });
     if (!response.ok) {
       throw new Error(await readErrorPayload(response, 'Failed to create facility.'));
@@ -244,7 +244,7 @@ export const facilitiesAPI = {
     const isFormData = typeof FormData !== 'undefined' && facilityData instanceof FormData;
     const response = await apiRequest(`/facilities/${id}/`, {
       method: 'PUT',
-      body: isFormData ? facilityData : JSON.stringify(facilityData),
+      body: isFormData ? facilityData : JSON.stringify(facilityData)
     });
     if (!response.ok) {
       throw new Error(await readErrorPayload(response, 'Failed to update facility.'));
@@ -254,10 +254,10 @@ export const facilitiesAPI = {
 
   delete: async (id) => {
     const response = await apiRequest(`/facilities/${id}/`, {
-      method: 'DELETE',
+      method: 'DELETE'
     });
     return response.ok;
-  },
+  }
 };
 
 export const reservationsAPI = {
@@ -265,9 +265,9 @@ export const reservationsAPI = {
     const response = await apiRequest('/reservations/', {
       method: 'POST',
       body:
-        typeof FormData !== 'undefined' && reservationData instanceof FormData
-          ? reservationData
-          : JSON.stringify(reservationData),
+      typeof FormData !== 'undefined' && reservationData instanceof FormData ?
+      reservationData :
+      JSON.stringify(reservationData)
     });
 
     if (!response.ok) {
@@ -303,9 +303,9 @@ export const reservationsAPI = {
     const list = Array.isArray(reservations) ? reservations : reservations.results ?? [];
 
     return list.filter((reservation) =>
-      ['confirmed', 'approved', 'checked_in'].includes(
-        (reservation.status || '').toString().toLowerCase()
-      )
+    ['confirmed', 'approved', 'checked_in'].includes(
+      (reservation.status || '').toString().toLowerCase()
+    )
     );
   },
 
@@ -326,7 +326,7 @@ export const reservationsAPI = {
 
   cancel: async (id) => {
     const response = await apiRequest(`/reservations/${id}/cancel/`, {
-      method: 'POST',
+      method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to cancel reservation');
     return response.json();
@@ -343,8 +343,8 @@ export const reservationsAPI = {
       method: 'POST',
       body: JSON.stringify({
         status,
-        review_notes: reviewNotes,
-      }),
+        review_notes: reviewNotes
+      })
     });
     if (!response.ok) throw new Error('Failed to approve reservation');
     return response.json();
@@ -352,7 +352,7 @@ export const reservationsAPI = {
 
   archive: async (id) => {
     const response = await apiRequest(`/reservations/${id}/archive/`, {
-      method: 'POST',
+      method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to archive reservation');
     return response.json();
@@ -361,13 +361,13 @@ export const reservationsAPI = {
   getByDateRange: async (startDate, endDate) => {
     const params = new URLSearchParams({
       start_date: startDate,
-      end_date: endDate,
+      end_date: endDate
     });
 
     const response = await apiRequest(`/reservations/by_date_range/?${params}`);
     if (!response.ok) throw new Error('Failed to fetch reservations');
     return response.json();
-  },
+  }
 };
 
 export const adminAPI = {
@@ -380,7 +380,7 @@ export const adminAPI = {
   createStaffUser: async (userData) => {
     const response = await apiRequest('/users/create_staff/', {
       method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(userData)
     });
     if (!response.ok) {
       throw new Error(await readErrorPayload(response, 'Failed to create staff user'));
@@ -391,7 +391,7 @@ export const adminAPI = {
   setUserRole: async (userId, role) => {
     const response = await apiRequest(`/users/${userId}/set_role/`, {
       method: 'POST',
-      body: JSON.stringify({ role }),
+      body: JSON.stringify({ role })
     });
     if (!response.ok) throw new Error('Failed to set user role');
     return response.json();
@@ -451,7 +451,7 @@ export const adminAPI = {
 
   markNotificationRead: async (id) => {
     const response = await apiRequest(`/notifications/${id}/mark_read/`, {
-      method: 'POST',
+      method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to mark notification as read');
     return response.json();
@@ -459,7 +459,7 @@ export const adminAPI = {
 
   markAllNotificationsRead: async () => {
     const response = await apiRequest('/notifications/mark_all_read/', {
-      method: 'POST',
+      method: 'POST'
     });
     if (!response.ok) throw new Error('Failed to mark notifications as read');
     return response.json();
@@ -469,8 +469,8 @@ export const adminAPI = {
     const response = await apiRequest(`/payments/${id}/`, {
       method: 'PATCH',
       body: JSON.stringify({
-        verification_status: 'verified',
-      }),
+        verification_status: 'verified'
+      })
     });
     if (!response.ok) throw new Error('Failed to verify payment');
     return response.json();
@@ -495,7 +495,7 @@ export const adminAPI = {
   createFeedback: async (feedbackData) => {
     const response = await apiRequest('/feedbacks/', {
       method: 'POST',
-      body: JSON.stringify(feedbackData),
+      body: JSON.stringify(feedbackData)
     });
     if (!response.ok) {
       throw new Error(await readErrorPayload(response, 'Failed to submit feedback'));
@@ -506,7 +506,7 @@ export const adminAPI = {
   updateFeedbackStatus: async (id, status) => {
     const response = await apiRequest(`/feedbacks/${id}/update_status/`, {
       method: 'PATCH',
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status })
     });
     if (!response.ok) throw new Error('Failed to update feedback status');
     return response.json();
@@ -521,7 +521,7 @@ export const adminAPI = {
     return response.json();
   },
 
-  // ── Calendar: fetch all reservations and map to { date, room } ──────────────
+
   getCalendarReservations: async () => {
     const response = await apiRequest('/reservations/');
     if (!response.ok) throw new Error('Failed to fetch calendar reservations');
@@ -529,23 +529,23 @@ export const adminAPI = {
     const data = await response.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
 
-    // Only show approved/confirmed/checked_in reservations on the calendar
+
     const active = list.filter((r) =>
-      ['approved', 'confirmed', 'checked_in'].includes(
-        (r.status || '').toLowerCase()
-      )
+    ['approved', 'confirmed', 'checked_in'].includes(
+      (r.status || '').toLowerCase()
+    )
     );
 
-    // Map each reservation to { date, room }
-    // Supports multi-night stays by expanding check_in → check_out range
+
+
     const entries = [];
     active.forEach((r) => {
       const facilityName =
-        r.facility_name ||
-        r.facility?.name ||
-        r.room_name ||
-        r.room ||
-        'Reserved';
+      r.facility_name ||
+      r.facility?.name ||
+      r.room_name ||
+      r.room ||
+      'Reserved';
 
       const checkIn = r.check_in || r.check_in_date || r.date;
       const checkOut = r.check_out || r.check_out_date || r.date;
@@ -553,20 +553,20 @@ export const adminAPI = {
       if (!checkIn) return;
 
       if (checkOut && checkOut !== checkIn) {
-        // Expand multi-night stays so every night shows on the calendar
+
         let current = new Date(checkIn);
         const end = new Date(checkOut);
         while (current < end) {
           entries.push({
             date: current.toISOString().split('T')[0],
-            room: facilityName,
+            room: facilityName
           });
           current.setDate(current.getDate() + 1);
         }
       } else {
         entries.push({
           date: checkIn,
-          room: facilityName,
+          room: facilityName
         });
       }
     });
@@ -574,7 +574,7 @@ export const adminAPI = {
     return entries;
   },
 
-  // ── Availability: count available facilities by type ────────────────────────
+
   getAvailability: async () => {
     const response = await apiRequest('/facilities/');
     if (!response.ok) throw new Error('Failed to fetch facilities for availability');
@@ -583,31 +583,31 @@ export const adminAPI = {
     const list = Array.isArray(data) ? data : data.results ?? [];
 
     const available = list.filter((f) => {
-      const status = (
-        f.availability_status?.is_available ??
-        f.is_available ??
-        f.available ??
-        true
-      );
+      const status =
+      f.availability_status?.is_available ??
+      f.is_available ??
+      f.available ??
+      true;
+
       return status === true;
     });
 
     const count = (keyword) =>
-      available.filter((f) =>
-        (f.type || f.name || '').toLowerCase().includes(keyword)
-      ).length;
+    available.filter((f) =>
+    (f.type || f.name || '').toLowerCase().includes(keyword)
+    ).length;
 
     return {
       availableRooms: count('room'),
       availableCottages: count('cottage'),
-      availablePavilion: count('pavilion'),
+      availablePavilion: count('pavilion')
     };
-  },
+  }
 };
 
 export default {
   authAPI,
   facilitiesAPI,
   reservationsAPI,
-  adminAPI,
+  adminAPI
 };

@@ -4,11 +4,11 @@ export const formatDate = (dateStr) => {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
-    year: 'numeric',
+    year: 'numeric'
   });
 };
 
-//Calculatess the number of nights between two date strings
+
 export const calcNights = (checkin, checkout) => {
   if (!checkin || !checkout) return 0;
   const diff = new Date(checkout) - new Date(checkin);
@@ -17,12 +17,12 @@ export const calcNights = (checkin, checkout) => {
 
 export const calcTotal = (pricePerNight, nights) => {
   const subtotal = pricePerNight * nights;
-  const tax      = subtotal * 0.15;
-  const total    = subtotal + tax;
+  const tax = subtotal * 0.15;
+  const total = subtotal + tax;
   return { subtotal, tax, total };
 };
 
-// Generates a unique booking ID
+
 export const generateBookingId = () => 'BK' + Date.now();
 
 export const todayStr = () => new Date().toISOString().split('T')[0];

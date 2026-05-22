@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBooking } from '../../context/BookingContext';
 import { authAPI } from '../../utils/api';
 import styles from '../../styles/AdminLoginPage.module.css';
-import logo from '../../assets/logo.png'; // ✅ added
+import logo from '../../assets/logo.png';
 
 export default function StaffLoginPage() {
   const navigate = useNavigate();
@@ -18,9 +18,9 @@ export default function StaffLoginPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -40,7 +40,7 @@ export default function StaffLoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       showToast('Please fix errors and try again', 'error');
       return;
@@ -68,14 +68,14 @@ export default function StaffLoginPage() {
       const message = 'This account does not have staff access.';
       setErrors({
         email: message,
-        password: message,
+        password: message
       });
       showToast(message, 'error');
     } catch {
       const message = 'Incorrect email/username or password. Please try again.';
       setErrors({
         email: message,
-        password: message,
+        password: message
       });
       showToast(message, 'error');
     } finally {
@@ -90,15 +90,12 @@ export default function StaffLoginPage() {
       <div className={styles.overlay} onClick={handleCancel} />
       
       <div className={styles.modal}>
-        {/* Close button */}
         <button className={styles.closeBtn} onClick={handleCancel}>
           ✕
         </button>
 
-        {/* Header */}
         <div className={styles.header}>
 
-          {/* ✅ ADDED (logo + title ONLY) */}
           <div className={styles.brand}>
             <img src={logo} alt="Infinity Garden Logo" />
             <div>
@@ -123,8 +120,8 @@ export default function StaffLoginPage() {
               value={formData.email}
               onChange={handleChange}
               className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-              disabled={isLoading}
-            />
+              disabled={isLoading} />
+            
             {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
           </div>
 
@@ -138,16 +135,16 @@ export default function StaffLoginPage() {
               value={formData.password}
               onChange={handleChange}
               className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-              disabled={isLoading}
-            />
+              disabled={isLoading} />
+            
             {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
           </div>
 
           <div className={styles.infoBanner}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12"/>
-              <line x1="12" y1="8" x2="12.01" y2="8"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
             <p>This login is protected. Only authorized staff can access.</p>
           </div>
@@ -162,6 +159,6 @@ export default function StaffLoginPage() {
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>);
+
 }

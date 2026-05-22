@@ -4,27 +4,27 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminUserManagement.module.css';
 
 const demoUsers = [
-  { id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', role: 'Admin', isActive: true },
-  { id: 2, firstName: 'Eigmar Clarence', lastName: 'Zamora', email: 'eigclarence@gmail.com', role: 'Staff', isActive: true },
-  { id: 3, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', role: 'Staff', isActive: true },
-  { id: 4, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', role: 'Staff', isActive: true },
-  { id: 5, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', role: 'Staff', isActive: true },
-  { id: 6, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', role: 'Staff', isActive: true }
-];
+{ id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', role: 'Admin', isActive: true },
+{ id: 2, firstName: 'Eigmar Clarence', lastName: 'Zamora', email: 'eigclarence@gmail.com', role: 'Staff', isActive: true },
+{ id: 3, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', role: 'Staff', isActive: true },
+{ id: 4, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', role: 'Staff', isActive: true },
+{ id: 5, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', role: 'Staff', isActive: true },
+{ id: 6, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', role: 'Staff', isActive: true }];
+
 
 const demoGuests = [
-  { id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', phone: '+63 912 345 6789', isActive: true },
-  { id: 2, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', phone: '+63 923 456 7890', isActive: true },
-  { id: 3, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', phone: '+63 934 567 8901', isActive: true },
-  { id: 4, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', phone: '+63 945 678 9012', isActive: true },
-  { id: 5, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', phone: '+63 956 789 0123', isActive: true }
-];
+{ id: 1, firstName: 'Cristalyn Grace', lastName: 'Llarenas', email: 'cristalgrace@gmail.com', phone: '+63 912 345 6789', isActive: true },
+{ id: 2, firstName: 'James Elmar', lastName: 'Higoy', email: 'jamelmar@gmail.com', phone: '+63 923 456 7890', isActive: true },
+{ id: 3, firstName: 'Joanna Dane', lastName: 'Cooper', email: 'joandane@gmail.com', phone: '+63 934 567 8901', isActive: true },
+{ id: 4, firstName: 'Sheena May', lastName: 'Emperador', email: 'sheenamay@gmail.com', phone: '+63 945 678 9012', isActive: true },
+{ id: 5, firstName: 'Zean', lastName: 'Marquez', email: 'zeanm@gmail.com', phone: '+63 956 789 0123', isActive: true }];
+
 
 const statusTabs = [
-  { key: 'all', label: 'All Users' },
-  { key: 'active', label: 'Active' },
-  { key: 'inactive', label: 'Inactive' }
-];
+{ key: 'all', label: 'All Users' },
+{ key: 'active', label: 'Active' },
+{ key: 'inactive', label: 'Inactive' }];
+
 
 function normalizeUser(user) {
   const profileRole = user.profile?.role || user.role;
@@ -33,13 +33,13 @@ function normalizeUser(user) {
     firstName: user.first_name || user.firstName || '',
     lastName: user.last_name || user.lastName || '',
     email: user.email || '',
-    role: profileRole
-      ? String(profileRole).charAt(0).toUpperCase() + String(profileRole).slice(1)
-      : user.is_superuser
-      ? 'Admin'
-      : user.is_staff
-      ? 'Staff'
-      : 'Client',
+    role: profileRole ?
+    String(profileRole).charAt(0).toUpperCase() + String(profileRole).slice(1) :
+    user.is_superuser ?
+    'Admin' :
+    user.is_staff ?
+    'Staff' :
+    'Client',
     isActive: user.is_active ?? true
   };
 }
@@ -63,8 +63,8 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // Custom Confirmation Modal States
+
+
   const [confirmDeactivateUser, setConfirmDeactivateUser] = useState(null);
 
   const [form, setForm] = useState({
@@ -86,9 +86,9 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
     try {
       const data = isGuestMode ? await adminAPI.getAllGuests() : await adminAPI.getAllUsers();
       if (Array.isArray(data) && data.length > 0) {
-        const normalized = data
-          .map(isGuestMode ? normalizeGuest : normalizeUser)
-          .sort((a, b) => (a.id ?? Number.MAX_SAFE_INTEGER) - (b.id ?? Number.MAX_SAFE_INTEGER));
+        const normalized = data.
+        map(isGuestMode ? normalizeGuest : normalizeUser).
+        sort((a, b) => (a.id ?? Number.MAX_SAFE_INTEGER) - (b.id ?? Number.MAX_SAFE_INTEGER));
         setUsers(normalized);
       } else {
         throw new Error('No data returned');
@@ -114,7 +114,7 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
 
   const filteredUsers = useMemo(() => {
     if (filter === 'all') return users;
-    return users.filter((user) => (filter === 'active' ? user.isActive : !user.isActive));
+    return users.filter((user) => filter === 'active' ? user.isActive : !user.isActive);
   }, [filter, users]);
 
   const handleInput = (field, value) => {
@@ -149,11 +149,11 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
 
   const confirmToggleStatus = () => {
     if (!confirmDeactivateUser) return;
-    
+
     setUsers((prev) =>
-      prev.map((user) =>
-        user.id === confirmDeactivateUser.id ? { ...user, isActive: !user.isActive } : user
-      )
+    prev.map((user) =>
+    user.id === confirmDeactivateUser.id ? { ...user, isActive: !user.isActive } : user
+    )
     );
     setConfirmDeactivateUser(null);
   };
@@ -161,12 +161,12 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
   const handleRowAction = (user) => {
     if (isAdmin && !isGuestMode) {
       if (user.isActive) {
-        // Open custom confirmation dialog modal
+
         setConfirmDeactivateUser(user);
       } else {
-        // Activate immediately without prompt
+
         setUsers((prev) =>
-          prev.map((u) => (u.id === user.id ? { ...u, isActive: true } : u))
+        prev.map((u) => u.id === user.id ? { ...u, isActive: true } : u)
         );
       }
       return;
@@ -183,20 +183,20 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
             <div className={styles.title}>
               <h1>{isGuestMode ? 'Guest Management' : 'User Management'}</h1>
               <p>
-                {isAdmin
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort Management System - Staff View'}
+                {isAdmin ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
-            {isAdmin && !isGuestMode && (
-              <button className={styles.headerBtn} onClick={() => setShowModal(true)}>
+            {isAdmin && !isGuestMode &&
+            <button className={styles.headerBtn} onClick={() => setShowModal(true)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="12" y1="5" x2="12" y2="19"/>
-                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 Add User
               </button>
-            )}
+            }
           </div>
         </div>
 
@@ -207,32 +207,32 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
         </div>
 
         <div className={styles.filterTabs}>
-          {statusTabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
-              onClick={() => setFilter(tab.key)}
-            >
+          {statusTabs.map((tab) =>
+          <button
+            key={tab.key}
+            className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
+            onClick={() => setFilter(tab.key)}>
+            
               {tab.label} ({counts[tab.key]})
             </button>
-          ))}
+          )}
         </div>
 
         <div className={styles.container}>
           {error && <div className={styles.errorBanner}>{error}</div>}
 
-          {isLoading ? (
-            <div className={styles.emptyState}>
+          {isLoading ?
+          <div className={styles.emptyState}>
               <h3>Loading users…</h3>
               <p>Please wait while the list is loaded.</p>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className={styles.emptyState}>
+            </div> :
+          filteredUsers.length === 0 ?
+          <div className={styles.emptyState}>
               <h3>No users found</h3>
               <p>Try another filter or add a new user.</p>
-            </div>
-          ) : (
-            <div className={styles.tableWrapper}>
+            </div> :
+
+          <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
@@ -245,8 +245,8 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user, index) => (
-                    <tr key={user.id ?? user.email ?? index}>
+                  {filteredUsers.map((user, index) =>
+                <tr key={user.id ?? user.email ?? index}>
                       <td>{user.id == null ? String(index + 1).padStart(2, '0') : String(user.id).padStart(2, '0')}</td>
                       <td>
                         <div className={styles.userName}>{user.firstName} {user.lastName}</div>
@@ -255,11 +255,11 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                         <div className={styles.userEmail}>{user.email}</div>
                       </td>
                       <td>
-                        {isGuestMode ? (
-                          <div className={styles.userPhone}>{user.phone}</div>
-                        ) : (
-                          <span className={styles.roleBadge}>{user.role}</span>
-                        )}
+                        {isGuestMode ?
+                    <div className={styles.userPhone}>{user.phone}</div> :
+
+                    <span className={styles.roleBadge}>{user.role}</span>
+                    }
                       </td>
                       <td>
                         <span className={`${styles.status} ${user.isActive ? styles.statusActive : styles.statusInactive}`}>
@@ -268,22 +268,22 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                       </td>
                       <td>
                         <button
-                          className={styles.actionBtn}
-                          onClick={() => handleRowAction(user)}
-                        >
-                          {isAdmin && !isGuestMode ? (user.isActive ? 'Deactivate' : 'Activate') : 'View Details'}
+                      className={styles.actionBtn}
+                      onClick={() => handleRowAction(user)}>
+                      
+                          {isAdmin && !isGuestMode ? user.isActive ? 'Deactivate' : 'Activate' : 'View Details'}
                         </button>
                       </td>
                     </tr>
-                  ))}
+                )}
                 </tbody>
               </table>
             </div>
-          )}
+          }
         </div>
 
-        {showModal && (
-          <div className={styles.modalOverlay}>
+        {showModal &&
+        <div className={styles.modalOverlay}>
             <div className={styles.modalPanel}>
               <div className={styles.modalHeader}>
                 <h2 className={styles.modalTitle}>Add User</h2>
@@ -293,55 +293,55 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                 <div className={styles.formGroup}>
                   <label htmlFor="firstName">First name</label>
                   <input
-                    id="firstName"
-                    className={styles.input}
-                    type="text"
-                    value={form.firstName}
-                    onChange={(event) => handleInput('firstName', event.target.value)}
-                    required
-                  />
+                  id="firstName"
+                  className={styles.input}
+                  type="text"
+                  value={form.firstName}
+                  onChange={(event) => handleInput('firstName', event.target.value)}
+                  required />
+                
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="lastName">Last name</label>
                   <input
-                    id="lastName"
-                    className={styles.input}
-                    type="text"
-                    value={form.lastName}
-                    onChange={(event) => handleInput('lastName', event.target.value)}
-                    required
-                  />
+                  id="lastName"
+                  className={styles.input}
+                  type="text"
+                  value={form.lastName}
+                  onChange={(event) => handleInput('lastName', event.target.value)}
+                  required />
+                
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="email">Email</label>
                   <input
-                    id="email"
-                    className={styles.input}
-                    type="email"
-                    value={form.email}
-                    onChange={(event) => handleInput('email', event.target.value)}
-                    required
-                  />
+                  id="email"
+                  className={styles.input}
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => handleInput('email', event.target.value)}
+                  required />
+                
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="password">Password</label>
                   <input
-                    id="password"
-                    className={styles.input}
-                    type="password"
-                    value={form.password}
-                    onChange={(event) => handleInput('password', event.target.value)}
-                    required
-                  />
+                  id="password"
+                  className={styles.input}
+                  type="password"
+                  value={form.password}
+                  onChange={(event) => handleInput('password', event.target.value)}
+                  required />
+                
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="role">Role</label>
                   <select
-                    id="role"
-                    className={styles.select}
-                    value={form.role}
-                    onChange={(event) => handleInput('role', event.target.value)}
-                  >
+                  id="role"
+                  className={styles.select}
+                  value={form.role}
+                  onChange={(event) => handleInput('role', event.target.value)}>
+                  
                     <option value="Staff">Staff</option>
                     <option value="Admin">Admin</option>
                   </select>
@@ -355,10 +355,10 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
               </form>
             </div>
           </div>
-        )}
+        }
 
-        {selectedUser && (
-          <div className={styles.modalOverlay}>
+        {selectedUser &&
+        <div className={styles.modalOverlay}>
             <div className={styles.modalPanel}>
               <div className={styles.modalHeader}>
                 <h2 className={styles.modalTitle}>{isGuestMode ? 'Guest Details' : 'User Details'}</h2>
@@ -373,17 +373,17 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
                   <label>Email</label>
                   <input className={styles.input} value={selectedUser.email} readOnly />
                 </div>
-                {isGuestMode ? (
-                  <div className={styles.formGroup}>
+                {isGuestMode ?
+              <div className={styles.formGroup}>
                     <label>Phone</label>
                     <input className={styles.input} value={selectedUser.phone || 'N/A'} readOnly />
-                  </div>
-                ) : (
-                  <div className={styles.formGroup}>
+                  </div> :
+
+              <div className={styles.formGroup}>
                     <label>Role</label>
                     <input className={styles.input} value={selectedUser.role} readOnly />
                   </div>
-                )}
+              }
                 <div className={styles.formGroup}>
                   <label>Status</label>
                   <input className={styles.input} value={selectedUser.isActive ? 'Active' : 'Inactive'} readOnly />
@@ -394,19 +394,19 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
               </div>
             </div>
           </div>
-        )}
+        }
 
-        {/* CUSTOM CONFIRM DEACTIVATE MODAL (MATCHES ARCHIVE MODAL STYLE) */}
-        {confirmDeactivateUser && (
-          <div className={styles.modalOverlay}>
+        {}
+        {confirmDeactivateUser &&
+        <div className={styles.modalOverlay}>
             <div className={styles.confirmModalPanel}>
               <button className={styles.confirmModalClose} onClick={() => setConfirmDeactivateUser(null)}>✕</button>
               
               <div className={styles.confirmIconContainer}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
                 </svg>
               </div>
 
@@ -425,8 +425,8 @@ export default function AdminUserManagement({ role = 'admin', mode = 'users' }) 
               </div>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }

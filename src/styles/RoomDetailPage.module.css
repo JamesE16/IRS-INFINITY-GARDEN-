@@ -26,7 +26,7 @@
   object-fit: cover;
 }
 .imageContainer {
-  position: sticky; /*  */
+  position: sticky; 
   top: 2rem;
   height: fit-content;
 }

@@ -29,7 +29,7 @@ from .serializers import (
 
 
 class IsStaffOrAdminRole(BasePermission):
-    """Allow Django staff/admin users and app profile staff/admin users."""
+                                                                           
 
     def has_permission(self, request, view):
         user = request.user
@@ -43,12 +43,12 @@ class IsStaffOrAdminRole(BasePermission):
         return getattr(profile, 'role', None) in ['staff', 'admin']
 
 
-# ============================================================
-# USER MANAGEMENT
-# ============================================================
+                                                              
+                 
+                                                              
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Manage users (admin/staff/clients)"""
+                                            
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -61,7 +61,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
-        """Register a new client"""
+                                   
         serializer = UserCreateSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -70,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
-        """Authenticate a user and return JWT tokens + user profile"""
+                                                                      
         email = request.data.get('email')
         password = request.data.get('password')
         if not email or not password:
@@ -82,7 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         login(request, user)
 
-        # Generate JWT tokens
+                             
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
@@ -102,12 +102,12 @@ class UserViewSet(viewsets.ModelViewSet):
     @method_decorator(ensure_csrf_cookie)
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def csrf(self, request):
-        """Set the CSRF cookie for SPA clients and return the current token."""
+                                                                               
         return Response({'csrfToken': get_token(request)}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], permission_classes=[IsAdminUser])
     def create_staff(self, request):
-        """Admin creating admin/staff accounts"""
+                                                 
         data = request.data.copy()
         requested_role = (data.get('role') or 'staff').lower()
         if requested_role not in ['admin', 'staff']:
@@ -125,13 +125,13 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def me(self, request):
-        """Get current user profile"""
+                                      
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
     
     @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
     def set_role(self, request, pk=None):
-        """Admin changing user role"""
+                                      
         user = self.get_object()
         role = request.data.get('role')
         
@@ -154,7 +154,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
-    """View and manage user profiles"""
+                                       
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -166,12 +166,12 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         return UserProfile.objects.filter(user=user)
 
 
-# ============================================================
-# FACILITY MANAGEMENT
-# ============================================================
+                                                              
+                     
+                                                              
 
 class FacilityViewSet(viewsets.ModelViewSet):
-    """Manage facilities (rooms, cottages, pavilions, gazebos)"""
+                                                                 
     queryset = Facility.objects.filter(is_active=True)
     serializer_class = FacilitySerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -185,7 +185,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def available(self, request):
-        """Get available facilities for date range"""
+                                                     
         check_in = request.query_params.get('check_in')
         check_out = request.query_params.get('check_out')
         facility_type = request.query_params.get('type', 'All')
@@ -201,7 +201,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
         if facility_type != 'All':
             facilities = facilities.filter(type=facility_type)
         
-        # Exclude facilities with overlapping confirmed reservations
+                                                                    
         booked = Reservation.objects.filter(
             status__in=['confirmed', 'checked_in'],
             check_in__lt=check_out,
@@ -214,7 +214,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def reservations(self, request, pk=None):
-        """Get all reservations for a facility"""
+                                                 
         facility = self.get_object()
         reservations = facility.reservations.all()
         serializer = ReservationListSerializer(reservations, many=True)
@@ -222,7 +222,7 @@ class FacilityViewSet(viewsets.ModelViewSet):
 
 
 class BlackoutDateViewSet(viewsets.ModelViewSet):
-    """Manage blackout dates"""
+                               
     queryset = BlackoutDate.objects.all()
     serializer_class = BlackoutDateSerializer
     permission_classes = [IsAdminUser]
@@ -245,12 +245,12 @@ class BlackoutDateViewSet(viewsets.ModelViewSet):
         ])
 
 
-# ============================================================
-# RESERVATION MANAGEMENT
-# ============================================================
+                                                              
+                        
+                                                              
 
 class ReservationViewSet(viewsets.ModelViewSet):
-    """Manage reservations"""
+                             
     queryset = Reservation.objects.all()
 
     def is_staff_or_admin_user(self, user):
@@ -261,7 +261,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return getattr(profile, 'role', None) in ['staff', 'admin']
     
     def get_permissions(self):
-        """Allow unauthenticated users to create reservations"""
+                                                                
         if self.action in ['create', 'track']:
             permission_classes = [AllowAny]
         elif self.action in ['approve', 'archive', 'pending', 'by_date_range']:
@@ -282,22 +282,22 @@ class ReservationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        # Admin/Staff can see all reservations
+                                              
         if self.is_staff_or_admin_user(user):
             queryset = Reservation.objects.all()
             if self.action in ['list', 'pending']:
                 queryset = queryset.filter(is_archived=False)
             return queryset
         
-        # Authenticated clients see their own reservations
+                                                          
         if user.is_authenticated:
             return Reservation.objects.filter(guest=user)
         
-        # Unauthenticated users see nothing
+                                           
         return Reservation.objects.none()
     
     def create(self, request, *args, **kwargs):
-        """Client creating a reservation"""
+                                           
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             payment_method = serializer.validated_data.pop('payment_method')
@@ -306,7 +306,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
             check_in = serializer.validated_data['check_in']
             check_out = serializer.validated_data['check_out']
             
-            # Check for conflicts
+                                 
             conflict = Reservation.objects.filter(
                 facility_id=facility_id,
                 status__in=['confirmed', 'checked_in'],
@@ -320,7 +320,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_409_CONFLICT
                 )
             
-            # Calculate nights from check_in and check_out
+                                                          
             check_in_date = check_in if isinstance(check_in, type(check_in)) else datetime.strptime(str(check_in), '%Y-%m-%d').date()
             check_out_date = check_out if isinstance(check_out, type(check_out)) else datetime.strptime(str(check_out), '%Y-%m-%d').date()
             nights = (check_out_date - check_in_date).days
@@ -331,7 +331,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Create reservation
+                                
             reservation = Reservation.objects.create(
                 guest=request.user if request.user.is_authenticated else None,
                 nights=nights,
@@ -355,7 +355,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 )
             )
             
-            # Log transaction
+                             
             TransactionLog.objects.create(
                 action='reservation_created',
                 reservation=reservation,
@@ -369,7 +369,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[IsStaffOrAdminRole])
     def approve(self, request, pk=None):
-        """Admin approving/rejecting reservation"""
+                                                   
         reservation = self.get_object()
         serializer = self.get_serializer(data=request.data)
         
@@ -407,7 +407,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
                 except Payment.DoesNotExist:
                     pass
             
-            # Log transaction
+                             
             action_name = 'reservation_confirmed' if new_status == 'confirmed' else 'reservation_cancelled'
             TransactionLog.objects.create(
                 user=request.user,
@@ -423,7 +423,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[IsStaffOrAdminRole])
     def archive(self, request, pk=None):
-        """Hide a reservation from the reservation management list."""
+                                                                      
         reservation = self.get_object()
         reservation.is_archived = True
         reservation.save(update_fields=['is_archived', 'updated_at'])
@@ -433,10 +433,10 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def cancel(self, request, pk=None):
-        """Cancel a reservation"""
+                                  
         reservation = self.get_object()
         
-        # Only guest or admin can cancel
+                                        
         if request.user != reservation.guest and not request.user.is_staff:
             return Response(
                 {'error': 'Permission denied'},
@@ -460,7 +460,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         except Payment.DoesNotExist:
             pass
         
-        # Log transaction
+                         
         TransactionLog.objects.create(
             user=request.user,
             action='reservation_cancelled',
@@ -470,9 +470,9 @@ class ReservationViewSet(viewsets.ModelViewSet):
         serializer = ReservationDetailSerializer(reservation)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])  # ✅ ADD permission_classes
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])                            
     def my_bookings(self, request):
-        """Get current user's bookings"""
+                                         
         if not request.user.is_authenticated:
             return Response(
                 {'error': 'Authentication required'},
@@ -484,7 +484,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
     def track(self, request):
-        """Public reservation lookup by reservation ID."""
+                                                          
         reservation_id = (request.query_params.get('reservation_id') or '').strip()
 
         if not reservation_id:
@@ -506,14 +506,14 @@ class ReservationViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'], permission_classes=[IsStaffOrAdminRole])
     def pending(self, request):
-        """Get pending reservations (for admin review)"""
+                                                         
         reservations = Reservation.objects.filter(status='pending').order_by('created_at')
         serializer = ReservationDetailSerializer(reservations, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'], permission_classes=[IsStaffOrAdminRole])
     def by_date_range(self, request):
-        """Get reservations for a date range"""
+                                               
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -533,12 +533,12 @@ class ReservationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# ============================================================
-# PAYMENT MANAGEMENT
-# ============================================================
+                                                              
+                    
+                                                              
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    """Manage payments"""
+                         
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminUser]
@@ -563,7 +563,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['get'])
     def by_status(self, request):
-        """Get payments by status"""
+                                    
         status_filter = request.query_params.get('status')
         if status_filter:
             payments = Payment.objects.filter(verification_status=status_filter)
@@ -575,7 +575,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
-    """Reservation notifications for admin and staff."""
+                                                        
     queryset = Notification.objects.select_related('reservation', 'reservation__facility', 'reservation__payment').all()
     serializer_class = NotificationSerializer
     permission_classes = [IsStaffOrAdminRole]
@@ -602,13 +602,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
-    """Manage guest feedback submissions"""
+                                           
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
     permission_classes = [IsAdminUser]
 
     def get_permissions(self):
-        """Allow public feedback submission while keeping management admin-only."""
+                                                                                   
         if self.action == 'create':
             permission_classes = [AllowAny]
         else:
@@ -653,12 +653,12 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# ============================================================
-# REPORTING
-# ============================================================
+                                                              
+           
+                                                              
 
 class ReportViewSet(viewsets.ViewSet):
-    """Generate reports"""
+                          
     permission_classes = [IsStaffOrAdminRole]
 
     def get_filtered_reservations(self, request):
@@ -686,7 +686,7 @@ class ReportViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def reservation_summary(self, request):
-        """Get reservation summary report"""
+                                            
         query = self.get_filtered_reservations(request)
         
         total_reservations = query.count()
@@ -715,7 +715,7 @@ class ReportViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def reservation_detail(self, request):
-        """Get full database-backed reservation report data."""
+                                                               
         query = self.get_filtered_reservations(request)
 
         total_reservations = query.count()
@@ -760,7 +760,7 @@ class ReportViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def facility_utilization(self, request):
-        """Get facility utilization report"""
+                                             
         facilities = Facility.objects.filter(is_active=True)
         
         data = []
@@ -784,7 +784,7 @@ class ReportViewSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def guest_report(self, request):
-        """Get guest statistics"""
+                                  
         total_guests = Reservation.objects.values('email').distinct().count()
         repeat_guests = Reservation.objects.values('email').annotate(
             count=Count('id')
@@ -798,14 +798,14 @@ class ReportViewSet(viewsets.ViewSet):
 
 
 class TransactionLogViewSet(viewsets.ModelViewSet):
-    """View transaction logs"""
+                               
     queryset = TransactionLog.objects.all()
     serializer_class = TransactionLogSerializer
     permission_classes = [IsAdminUser]
     
     @action(detail=False, methods=['get'])
     def by_action(self, request):
-        """Get logs by action type"""
+                                     
         action = request.query_params.get('action')
         if action:
             logs = TransactionLog.objects.filter(action=action).order_by('-created_at')

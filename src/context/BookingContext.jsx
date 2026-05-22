@@ -25,22 +25,22 @@ export function BookingProvider({ children }) {
       const roomId = booking.roomId || booking.room || booking.facility || booking.facility_id;
       const matchedFacility = facilities.find(
         (facility) =>
-          String(facility.backendId ?? facility.id) === String(roomId) ||
-          String(facility.publicId) === String(roomId) ||
-          String(facility.externalId) === String(booking.externalId)
+        String(facility.backendId ?? facility.id) === String(roomId) ||
+        String(facility.publicId) === String(roomId) ||
+        String(facility.externalId) === String(booking.externalId)
       );
       const catalogRoom = getCatalogRoom(matchedFacility || booking);
       const roomPrice = Number(booking.roomPrice ?? matchedFacility?.price ?? catalogRoom?.price ?? 0);
       const checkin = booking.checkin || booking.check_in || '';
       const checkout = booking.checkout || booking.check_out || '';
       const nights = Number(
-        booking.nights ??
-          (checkin && checkout
-            ? Math.max(
-                0,
-                Math.floor((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24))
-              )
-            : 0)
+        booking.nights ?? (
+        checkin && checkout ?
+        Math.max(
+          0,
+          Math.floor((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24))
+        ) :
+        0)
       );
       const subtotal = Number(booking.subtotal ?? roomPrice * nights);
       const tax = Number(booking.tax ?? subtotal * 0.15);
@@ -52,28 +52,28 @@ export function BookingProvider({ children }) {
         ...booking,
         id: booking.id ?? `TEMP-${Date.now()}`,
         reservationId:
-          booking.reservationId ||
-          booking.reservation_id ||
-          booking.booking_id ||
-          booking.id ||
-          `TEMP-${Date.now()}`,
+        booking.reservationId ||
+        booking.reservation_id ||
+        booking.booking_id ||
+        booking.id ||
+        `TEMP-${Date.now()}`,
         roomId: roomId ?? matchedFacility?.id ?? null,
         externalId: matchedFacility?.externalId || catalogRoom?.id || booking.externalId || null,
         roomName:
-          booking.roomName ||
-          booking.room_name ||
-          booking.facility_name ||
-          matchedFacility?.name ||
-          catalogRoom?.name ||
-          'Selected Room',
+        booking.roomName ||
+        booking.room_name ||
+        booking.facility_name ||
+        matchedFacility?.name ||
+        catalogRoom?.name ||
+        'Selected Room',
         roomType,
         roomImg:
-          booking.roomImg ||
-          booking.room_image ||
-          booking.facility_image ||
-          matchedFacility?.img ||
-          catalogRoom?.img ||
-          '',
+        booking.roomImg ||
+        booking.room_image ||
+        booking.facility_image ||
+        matchedFacility?.img ||
+        catalogRoom?.img ||
+        '',
         roomPrice,
         name: booking.name || booking.guest_full_name || booking.guest_name || '',
         email: booking.email || booking.guest_email || '',
@@ -88,7 +88,7 @@ export function BookingProvider({ children }) {
         tax,
         total,
         status: (booking.status || 'pending').toString().toLowerCase(),
-        reviewNotes: booking.reviewNotes || booking.review_notes || '',
+        reviewNotes: booking.reviewNotes || booking.review_notes || ''
       };
     },
     [facilities]
@@ -99,7 +99,7 @@ export function BookingProvider({ children }) {
     try {
       const data = await facilitiesAPI.getAll();
       const list = Array.isArray(data) ? data : data.results ?? [];
-        setFacilities(buildGuestFacilities(list));
+      setFacilities(buildGuestFacilities(list));
     } catch (error) {
       console.error('Error loading facilities:', error.message);
       showToast('Failed to load facilities from the booking server.', 'error');
@@ -142,13 +142,13 @@ export function BookingProvider({ children }) {
 
   const cancelBooking = useCallback((id) => {
     setBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status: 'cancelled' } : b))
+    prev.map((b) => b.id === id ? { ...b, status: 'cancelled' } : b)
     );
   }, []);
 
   const updateBookingStatus = useCallback((id, newStatus) => {
     setBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+    prev.map((b) => b.id === id ? { ...b, status: newStatus } : b)
     );
   }, []);
 
@@ -159,7 +159,7 @@ export function BookingProvider({ children }) {
         const normalizedBooking = normalizeBooking({
           ...clientBooking,
           ...response,
-          status: response.status || clientBooking.status || 'pending',
+          status: response.status || clientBooking.status || 'pending'
         });
 
         setBookings((prev) => [...prev, normalizedBooking]);
@@ -188,9 +188,9 @@ export function BookingProvider({ children }) {
         const status = (b.status || '').toString().toLowerCase();
 
         return (
-          parseInt(bookingRoomId, 10) === parseInt(roomId, 10) &&
-          (status === 'approved' || status === 'confirmed' || status === 'checked_in')
-        );
+          parseInt(bookingRoomId, 10) === parseInt(roomId, 10) && (
+          status === 'approved' || status === 'confirmed' || status === 'checked_in'));
+
       });
     },
     [bookings]
@@ -216,12 +216,12 @@ export function BookingProvider({ children }) {
         updateBookingStatus,
         submitBooking,
         refreshBookings,
-        isRoomReserved,
-      }}
-    >
+        isRoomReserved
+      }}>
+      
       {children}
-    </BookingContext.Provider>
-  );
+    </BookingContext.Provider>);
+
 }
 
 export function useBooking() {

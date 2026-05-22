@@ -9,16 +9,16 @@ export default function BookingSummary({ room, pricing }) {
     <div className={styles.card}>
       <h3 className={styles.title}>Booking Summary</h3>
 
-      {/* Room image */}
+      {}
       <img className={styles.img} src={room.img} alt={room.name} />
 
-      {/* Room info */}
+      {}
       <p className={styles.roomName}>{room.name}</p>
       <p className={styles.roomType}>{room.type}</p>
 
       <hr className={styles.divider} />
 
-      {/* Guests */}
+      {}
       <div className={styles.line}>
         <span className={styles.lineLabel}>Guests</span>
         <span className={styles.lineValue}>{guests}</span>
@@ -26,7 +26,7 @@ export default function BookingSummary({ room, pricing }) {
 
       <hr className={styles.divider} />
 
-      {/* Price breakdown */}
+      {}
       <div className={styles.line}>
         <span className={styles.lineLabel}>
           {room.price} × {nights} {unitLabel}{nights !== 1 ? 's' : ''}
@@ -41,11 +41,11 @@ export default function BookingSummary({ room, pricing }) {
 
       <hr className={styles.divider} />
 
-      {/* Total */}
+      {}
       <div className={styles.total}>
         <span>Total</span>
         <span>₱{total.toFixed(2)}</span>
       </div>
-    </div>
-  );
+    </div>);
+
 }

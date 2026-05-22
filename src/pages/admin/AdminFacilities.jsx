@@ -130,8 +130,8 @@ export default function AdminFacilities({ role = 'admin' }) {
   };
 
   const handleImagePaste = (event) => {
-    const item = Array.from(event.clipboardData?.items || [])
-      .find((clipboardItem) => clipboardItem.type.startsWith('image/'));
+    const item = Array.from(event.clipboardData?.items || []).
+    find((clipboardItem) => clipboardItem.type.startsWith('image/'));
     const file = item?.getAsFile();
 
     if (file) {
@@ -142,8 +142,8 @@ export default function AdminFacilities({ role = 'admin' }) {
 
   const handleImageDrop = (event) => {
     event.preventDefault();
-    const file = Array.from(event.dataTransfer?.files || [])
-      .find((droppedFile) => droppedFile.type.startsWith('image/'));
+    const file = Array.from(event.dataTransfer?.files || []).
+    find((droppedFile) => droppedFile.type.startsWith('image/'));
     handleImageFile(file);
   };
 
@@ -213,7 +213,7 @@ export default function AdminFacilities({ role = 'admin' }) {
 
       if (editedFacility) {
         setFacilities((prev) => prev.map((facility) =>
-          facility.id === editedFacility.id ? normalizeFacility(saved) : facility
+        facility.id === editedFacility.id ? normalizeFacility(saved) : facility
         ));
         setSelectedFacility(normalizeFacility(saved));
       } else {
@@ -232,8 +232,8 @@ export default function AdminFacilities({ role = 'admin' }) {
 
   const facilityCounts = useMemo(() => {
     const filtered = facilities.filter((facility) =>
-      (filterType === 'All' || facility.type === filterType) &&
-      facility.name.toLowerCase().includes(searchQuery.toLowerCase())
+    (filterType === 'All' || facility.type === filterType) &&
+    facility.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     return {
       all: facilities.length,
@@ -245,7 +245,7 @@ export default function AdminFacilities({ role = 'admin' }) {
     return facilities.filter((facility) => {
       const matchesType = filterType === 'All' || facility.type === filterType;
       const matchesQuery = facility.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        facility.description.toLowerCase().includes(searchQuery.toLowerCase());
+      facility.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesType && matchesQuery;
     });
   }, [facilities, filterType, searchQuery]);
@@ -261,22 +261,22 @@ export default function AdminFacilities({ role = 'admin' }) {
             <div className={styles.title}>
               <h1>{isAdmin ? 'Facilities & Rooms' : 'Resort Facilities'}</h1>
               <p>
-                {isAdmin
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort Management System - Staff View'}
+                {isAdmin ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
-            {isAdmin && (
-              <div className={styles.headerActions}>
-                <button className={styles.headerBtn} onClick={() => { resetForm(); setShowForm(true); }}>
+            {isAdmin &&
+            <div className={styles.headerActions}>
+                <button className={styles.headerBtn} onClick={() => {resetForm();setShowForm(true);}}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   Add Facility
                 </button>
               </div>
-            )}
+            }
           </div>
         </div>
 
@@ -286,23 +286,23 @@ export default function AdminFacilities({ role = 'admin' }) {
             </div>
             <div className={styles.filters}>
               <div className={styles.filterTabs}>
-                {['All', ...facilityTypes].map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    className={`${styles.tab} ${filterType === type ? styles.active : ''}`}
-                    onClick={() => setFilterType(type)}
-                  >
+                {['All', ...facilityTypes].map((type) =>
+              <button
+                key={type}
+                type="button"
+                className={`${styles.tab} ${filterType === type ? styles.active : ''}`}
+                onClick={() => setFilterType(type)}>
+                
                     {type === 'All' ? 'All Types' : type}
                   </button>
-                ))}
+              )}
               </div>
               <input
-                type="text"
-                placeholder="Search facility or room"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
+              type="text"
+              placeholder="Search facility or room"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)} />
+            
             </div>
           </div>
 
@@ -311,17 +311,17 @@ export default function AdminFacilities({ role = 'admin' }) {
 
           <div className={styles.grid}>
             <div className={styles.listPanel}>
-              {isLoading ? (
-                <div className={styles.emptyState}>
+              {isLoading ?
+              <div className={styles.emptyState}>
                   <h3>Loading facilities...</h3>
-                </div>
-              ) : visibleFacilities.length === 0 ? (
-                <div className={styles.emptyState}>
+                </div> :
+              visibleFacilities.length === 0 ?
+              <div className={styles.emptyState}>
                   <h3>No facilities found</h3>
                   <p>Adjust your search or add a new facility.</p>
-                </div>
-              ) : (
-                <table className={styles.table}>
+                </div> :
+
+              <table className={styles.table}>
                   <thead>
                     <tr>
                       <th>Name</th>
@@ -333,8 +333,8 @@ export default function AdminFacilities({ role = 'admin' }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {visibleFacilities.map((facility) => (
-                      <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
+                    {visibleFacilities.map((facility) =>
+                  <tr key={facility.id} className={selectedFacility?.id === facility.id ? styles.selectedRow : ''}>
                         <td>{facility.name}</td>
                         <td>{facility.type}</td>
                         <td>{facility.guests}</td>
@@ -350,15 +350,15 @@ export default function AdminFacilities({ role = 'admin' }) {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                  )}
                   </tbody>
                 </table>
-              )}
+              }
             </div>
 
           </div>
-          {selectedFacility && (
-            <div className={styles.previewBackdrop}>
+          {selectedFacility &&
+          <div className={styles.previewBackdrop}>
               <div className={styles.previewModal}>
                 <div className={styles.previewHeader}>
                   <div>
@@ -367,13 +367,13 @@ export default function AdminFacilities({ role = 'admin' }) {
                   </div>
                 </div>
                 <div className={styles.previewContent}>
-                  {selectedFacility.img ? (
-                    <div className={styles.previewImageWrapper}>
+                  {selectedFacility.img ?
+                <div className={styles.previewImageWrapper}>
                       <img src={selectedFacility.img} alt={selectedFacility.name} />
-                    </div>
-                  ) : (
-                    <div className={styles.previewNoImage}>No image available</div>
-                  )}
+                    </div> :
+
+                <div className={styles.previewNoImage}>No image available</div>
+                }
                   <div className={styles.previewDetails}>
                     <p>{selectedFacility.description}</p>
                     <div className={styles.previewGrid}>
@@ -389,24 +389,24 @@ export default function AdminFacilities({ role = 'admin' }) {
                   </div>
                 </div>
                 <div className={styles.previewFooter}>
-                  {isAdmin && (
-                    <button className={styles.editPreviewBtn} onClick={() => handleEditFacility(selectedFacility)}>
+                  {isAdmin &&
+                <button className={styles.editPreviewBtn} onClick={() => handleEditFacility(selectedFacility)}>
                       Edit
                     </button>
-                  )}
+                }
                   <button className={styles.cancelBtn} onClick={handleClosePreview}>
                     Close
                   </button>
                 </div>
               </div>
             </div>
-          )}
-          {isAdmin && showForm && (
-            <div className={styles.modalBackdrop}>
+          }
+          {isAdmin && showForm &&
+          <div className={styles.modalBackdrop}>
               <div className={styles.modal}>
                 <div className={styles.modalHeader}>
                   <h2>{editedFacility ? 'Edit Facility' : 'Add Facility'}</h2>
-                  <button className={styles.closeBtn} onClick={() => { setShowForm(false); resetForm(); }}>
+                  <button className={styles.closeBtn} onClick={() => {setShowForm(false);resetForm();}}>
                     ×
                   </button>
                 </div>
@@ -420,9 +420,9 @@ export default function AdminFacilities({ role = 'admin' }) {
                     <div className={styles.field}>
                       <label>Type</label>
                       <select value={form.type} onChange={(event) => handleInput('type', event.target.value)}>
-                        {facilityTypes.map((type) => (
-                          <option key={type} value={type}>{type}</option>
-                        ))}
+                        {facilityTypes.map((type) =>
+                      <option key={type} value={type}>{type}</option>
+                      )}
                       </select>
                     </div>
                     <div className={styles.field}>
@@ -467,39 +467,39 @@ export default function AdminFacilities({ role = 'admin' }) {
                     <div className={styles.fieldWide}>
                       <label>Facility Image</label>
                       <div
-                        className={styles.imagePasteBox}
-                        tabIndex="0"
-                        role="button"
-                        onPaste={handleImagePaste}
-                        onDrop={handleImageDrop}
-                        onDragOver={(event) => event.preventDefault()}
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        {form.imagePreview ? (
-                          <img className={styles.imagePreview} src={form.imagePreview} alt="Facility preview" />
-                        ) : (
-                          <div className={styles.imagePlaceholder}>
+                      className={styles.imagePasteBox}
+                      tabIndex="0"
+                      role="button"
+                      onPaste={handleImagePaste}
+                      onDrop={handleImageDrop}
+                      onDragOver={(event) => event.preventDefault()}
+                      onClick={() => fileInputRef.current?.click()}>
+                      
+                        {form.imagePreview ?
+                      <img className={styles.imagePreview} src={form.imagePreview} alt="Facility preview" /> :
+
+                      <div className={styles.imagePlaceholder}>
                             <strong>Paste or upload an image</strong>
                             <span>Click to choose a file, or focus this area and paste a copied image.</span>
                           </div>
-                        )}
+                      }
                       </div>
                       <div className={styles.imageActions}>
                         <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          onChange={(event) => handleImageFile(event.target.files?.[0])}
-                        />
-                        {form.imagePreview && (
-                          <button type="button" className={styles.cancelBtn} onClick={clearImageFile}>
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => handleImageFile(event.target.files?.[0])} />
+                      
+                        {form.imagePreview &&
+                      <button type="button" className={styles.cancelBtn} onClick={clearImageFile}>
                             Clear
                           </button>
-                        )}
+                      }
                       </div>
                     </div>
                     <div className={styles.formActions}>
-                      <button type="button" className={styles.cancelBtn} onClick={() => { setShowForm(false); resetForm(); }}>
+                      <button type="button" className={styles.cancelBtn} onClick={() => {setShowForm(false);resetForm();}}>
                         Cancel
                       </button>
                       <button type="submit" className={styles.saveBtn} disabled={isSaving}>
@@ -511,9 +511,9 @@ export default function AdminFacilities({ role = 'admin' }) {
 
               </div>
             </div>
-          )}
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

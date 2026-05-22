@@ -466,7 +466,7 @@
 }
 .blkDelBtn:hover { background: #fecaca; }
 
-/* ── LOADING / ERROR ── */
+
 .loadingState {
   padding: 40px;
   text-align: center;

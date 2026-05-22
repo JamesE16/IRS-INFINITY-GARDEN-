@@ -6,4 +6,4 @@ class CoreConfig(AppConfig):
     name = 'resortapi.core'
 
     def ready(self):
-        import resortapi.core.signals  # noqa: F401
+        import resortapi.core.signals              

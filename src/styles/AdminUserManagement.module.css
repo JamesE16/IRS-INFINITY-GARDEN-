@@ -189,7 +189,7 @@
   transform: none;
 }
 
-/* ===== FILTER TABS ===== */
+
 .filterTabs {
   max-width: 1400px;  
   width: 100%;
@@ -224,7 +224,7 @@
   color: var(--navy);
 }
 
-/* ===== CONTAINER ===== */
+
 .container {
   max-width: 1400px;  
   margin: 0 auto;
@@ -375,7 +375,7 @@
   color: #991b1b;
 }
 
-/* ===== EMPTY STATE ===== */
+
 .emptyState {
   background: #fff;
   border: 1px solid var(--border);
@@ -499,7 +499,7 @@
   font-size: 0.92rem;
 }
 
-/* ===== CUSTOM CONFIRMATION DIALOG MODAL LAYOUT ===== */
+
 .confirmModalPanel {
   background: #fff;
   border-radius: 16px;
@@ -600,7 +600,7 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
 }
 
-/* ===== RESPONSIVE ===== */
+
 @media (max-width: 960px) {
   .pageHeader,
   .actionBar {

@@ -1,19 +1,15 @@
 #!/bin/bash
 
-# Infinity Garden Resort - Complete Setup Script
-# This script sets up both frontend and backend
 
 echo "🏰 Infinity Garden Resort Reservation System Setup"
 echo "=================================================="
 echo ""
 
-# Check if Node.js is installed
 if ! command -v node &> /dev/null; then
     echo "❌ Node.js not found. Please install Node.js 16+ first."
     exit 1
 fi
 
-# Check if Python is installed
 if ! command -v python &> /dev/null; then
     echo "❌ Python not found. Please install Python 3.8+ first."
     exit 1
@@ -23,26 +19,20 @@ echo "✅ Node.js version: $(node --version)"
 echo "✅ Python version: $(python --version)"
 echo ""
 
-# Setup Frontend
 echo "📦 Setting up Frontend (React)..."
 npm install
 echo "✅ Frontend dependencies installed"
 echo ""
 
-# Setup Backend
 echo "📦 Setting up Backend (Django)..."
 cd backend
 
-# Create virtual environment
 echo "Creating virtual environment..."
 python -m venv venv
 
-# Activate according to OS
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
-    # Windows
     source venv/Scripts/activate
 else
-    # Mac/Linux
     source venv/bin/activate
 fi
 

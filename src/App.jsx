@@ -3,21 +3,21 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-route
 import { BookingProvider } from './context/BookingContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { StaffProtectedRoute } from './components/StaffProtectedRoute';
-import NavBar            from './components/layout/NavBar';
-import HomePage          from './pages/HomePage';
-import RoomsPage         from './pages/RoomsPage';
-import RoomDetailPage    from './pages/RoomDetailPage';
-import BookingPage       from './pages/BookingPage';
+import NavBar from './components/layout/NavBar';
+import HomePage from './pages/HomePage';
+import RoomsPage from './pages/RoomsPage';
+import RoomDetailPage from './pages/RoomDetailPage';
+import BookingPage from './pages/BookingPage';
 import BookingConfirmedPage from './pages/BookingConfirmedPage';
 import ReservationTrackerPage from './pages/ReservationTrackerPage';
-import AdminLoginPage    from './pages/admin/AdminLoginPage';
-import AdminDashboard    from './pages/admin/AdminDashboard';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminReservations from './pages/admin/AdminReservations';
-import AdminFacilities   from './pages/admin/AdminFacilities';
+import AdminFacilities from './pages/admin/AdminFacilities';
 import AdminUserManagement from './pages/admin/AdminUserManagement';
 import AdminFeedbackManagement from './pages/admin/AdminFeedbackManagement';
 import AdminPlaceholderPage from './pages/admin/AdminPlaceholderPage';
-import Toast             from './components/ui/Toast';
+import Toast from './components/ui/Toast';
 import AdminPaymentManagement from './pages/admin/AdminPaymentManagement';
 import AdminReports from './pages/admin/AdminReports';
 import AdminScheduleManagement from "./pages/admin/AdminScheduleManagement";
@@ -36,8 +36,8 @@ export default function App() {
         <AppRoutes />
         <Toast />
       </BookingProvider>
-    </BrowserRouter>
-  );
+    </BrowserRouter>);
+
 }
 
 function AppRoutes() {
@@ -53,21 +53,21 @@ function AppRoutes() {
     <>
       {!isAdminRoute && !isStaffRoute && <NavBar />}
       <Routes>
-        {/* Public routes */}
-        <Route path="/"                  element={<HomePage />} />
-        <Route path="/rooms"             element={<RoomsPage />} />
-        <Route path="/rooms/:id"         element={<RoomDetailPage />} />
-        <Route path="/booking"           element={<BookingPage />} />
+        {}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/rooms" element={<RoomsPage />} />
+        <Route path="/rooms/:id" element={<RoomDetailPage />} />
+        <Route path="/booking" element={<BookingPage />} />
         <Route path="/booking/confirmed" element={<BookingConfirmedPage />} />
-        <Route path="/my-bookings"       element={<ReservationTrackerPage />} />
+        <Route path="/my-bookings" element={<ReservationTrackerPage />} />
         <Route path="/track-reservation" element={<Navigate to="/my-bookings" replace />} />
         
-        {/* Shared login page for admin and staff */}
+        {}
         <Route path="/login" element={<AdminLoginPage />} />
         <Route path="/admin/login" element={<Navigate to="/login" replace />} />
         <Route path="/staff/login" element={<Navigate to="/login" replace />} />
 
-        {/* Protected admin routes */}
+        {}
         <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/reservations" element={<ProtectedRoute><AdminReservations /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute><AdminUserManagement /></ProtectedRoute>} />
@@ -78,7 +78,7 @@ function AppRoutes() {
         <Route path="/admin/logs" element={<ProtectedRoute><AdminPlaceholderPage /></ProtectedRoute>} />
         <Route path="/admin/schedule" element={<ProtectedRoute><AdminScheduleManagement /></ProtectedRoute>} />
 
-        {/* Protected staff routes */}
+        {}
         <Route path="/staff/dashboard" element={<StaffProtectedRoute><StaffDashboard /></StaffProtectedRoute>} />
         <Route path="/staff/reservations" element={<StaffProtectedRoute><StaffReservations /></StaffProtectedRoute>} />
         <Route path="/staff/payments" element={<StaffProtectedRoute><StaffPaymentManagement /></StaffProtectedRoute>} />
@@ -87,6 +87,6 @@ function AppRoutes() {
         <Route path="/staff/schedule" element={<StaffProtectedRoute><StaffScheduleMonitoring /></StaffProtectedRoute>} />
         <Route path="/staff/reports" element={<StaffProtectedRoute><StaffReports /></StaffProtectedRoute>} />
       </Routes>
-    </>
-  );
+    </>);
+
 }

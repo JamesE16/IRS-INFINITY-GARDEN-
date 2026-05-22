@@ -30,7 +30,7 @@ const normalizeReservation = (reservation) => ({
   review_notes: reservation.review_notes || '',
   reviewed_at: reservation.reviewed_at || '',
   created_at: reservation.created_at,
-  status: (reservation.status || 'pending').toLowerCase(),
+  status: (reservation.status || 'pending').toLowerCase()
 });
 
 const toReceiptSrc = (url) => {
@@ -43,11 +43,11 @@ const isPdfReceipt = (url) => /\.pdf($|\?)/i.test(url || '');
 
 const reservationStatusLabels = {
   confirmed: 'Approved',
-  cancelled: 'Declined',
+  cancelled: 'Declined'
 };
 
 const formatReservationStatus = (status) =>
-  reservationStatusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1);
+reservationStatusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1);
 
 export default function AdminReservations({ role = 'admin' }) {
   const [reservations, setReservations] = useState([]);
@@ -66,14 +66,14 @@ export default function AdminReservations({ role = 'admin' }) {
       setIsLoading(true);
       try {
         const [data, notificationData] = await Promise.all([
-          reservationsAPI.getAll(),
-          adminAPI.getNotifications(true),
-        ]);
+        reservationsAPI.getAll(),
+        adminAPI.getNotifications(true)]
+        );
         const list = Array.isArray(data) ? data : data.results ?? [];
         setReservations(list.map(normalizeReservation));
-        const unread = Array.isArray(notificationData)
-          ? notificationData
-          : notificationData.results ?? [];
+        const unread = Array.isArray(notificationData) ?
+        notificationData :
+        notificationData.results ?? [];
         setNotifications(unread);
         setError('');
       } catch (err) {
@@ -114,9 +114,9 @@ export default function AdminReservations({ role = 'admin' }) {
       }
 
       setReservations((prev) =>
-        prev.map((reservation) =>
-          reservation.id === id ? { ...reservation, status, review_notes: reviewNotes } : reservation
-        )
+      prev.map((reservation) =>
+      reservation.id === id ? { ...reservation, status, review_notes: reviewNotes } : reservation
+      )
       );
       setRejectTarget(null);
       setRejectMessage('');
@@ -179,24 +179,24 @@ export default function AdminReservations({ role = 'admin' }) {
             <div>
               <h1>Reservation Management</h1>
               <p>
-                {isAdmin
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort Management System - Staff View'}
+                {isAdmin ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
           </div>
         </div>
 
         <div className={styles.filterTabs}>
-          {['pending', 'confirmed', 'cancelled', 'all'].map((tab) => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
-              onClick={() => setFilter(tab)}
-            >
+          {['pending', 'confirmed', 'cancelled', 'all'].map((tab) =>
+          <button
+            key={tab}
+            className={`${styles.tab} ${filter === tab ? styles.active : ''}`}
+            onClick={() => setFilter(tab)}>
+            
               {tab === 'all' ? 'All' : formatReservationStatus(tab)} ({getCount(tab)})
             </button>
-          ))}
+          )}
         </div>
 
         <div className={styles.container}>
@@ -215,17 +215,17 @@ export default function AdminReservations({ role = 'admin' }) {
               </thead>
 
               <tbody>
-                {isLoading ? (
-                  <tr>
+                {isLoading ?
+                <tr>
                     <td colSpan={filter !== 'all' ? 6 : 5}>Loading reservations...</td>
-                  </tr>
-                ) : filteredReservations.length === 0 ? (
-                  <tr>
+                  </tr> :
+                filteredReservations.length === 0 ?
+                <tr>
                     <td colSpan={filter !== 'all' ? 6 : 5}>No reservations found.</td>
-                  </tr>
-                ) : (
-                  filteredReservations.map((reservation) => (
-                    <tr key={reservation.id}>
+                  </tr> :
+
+                filteredReservations.map((reservation) =>
+                <tr key={reservation.id}>
                       <td title={reservation.booking_id}>
                         <div className={styles.idCell}>
                           {unreadByReservation[reservation.id] && <span className={styles.unreadDot} />}
@@ -241,59 +241,59 @@ export default function AdminReservations({ role = 'admin' }) {
                         </span>
                       </td>
 
-                      {filter !== 'all' && (
-                        <td className={styles.actions}>
+                      {filter !== 'all' &&
+                  <td className={styles.actions}>
                           <button
-                            className={styles.viewBtn}
-                            onClick={() => handleViewReservation(reservation)}
-                          >
+                      className={styles.viewBtn}
+                      onClick={() => handleViewReservation(reservation)}>
+                      
                             View
                           </button>
 
-                          {reservation.status === 'confirmed' && (
-                            <button
-                              className={styles.cancelBtnSmall}
-                              onClick={() => handleArchive(reservation.id)}
-                            >
+                          {reservation.status === 'confirmed' &&
+                    <button
+                      className={styles.cancelBtnSmall}
+                      onClick={() => handleArchive(reservation.id)}>
+                      
                               Archive
                             </button>
-                          )}
+                    }
 
-                          {reservation.status === 'pending' && (
-                            <>
+                          {reservation.status === 'pending' &&
+                    <>
                               <button
-                                className={styles.approveBtn}
-                                onClick={() => updateReservationStatus(reservation.id, 'confirmed')}
-                              >
+                        className={styles.approveBtn}
+                        onClick={() => updateReservationStatus(reservation.id, 'confirmed')}>
+                        
                                 Approve
                               </button>
                               <button
-                                className={styles.cancelBtnSmall}
-                                onClick={() => openRejectDialog(reservation)}
-                              >
+                        className={styles.cancelBtnSmall}
+                        onClick={() => openRejectDialog(reservation)}>
+                        
                                 Decline
                               </button>
                             </>
-                          )}
+                    }
                         </td>
-                      )}
+                  }
                     </tr>
-                  ))
-                )}
+                )
+                }
               </tbody>
             </table>
           </div>
         </div>
 
-        {selectedReservation && (
-          <div className={styles.modalOverlay}>
+        {selectedReservation &&
+        <div className={styles.modalOverlay}>
             <div className={`${styles.modalBox} ${styles.largeModal}`}>
               <div className={styles.modalHeader}>
                 <h3>Reservation Details</h3>
                 <button
-                  className={styles.closeBtn}
-                  onClick={() => setSelectedReservation(null)}
-                >
+                className={styles.closeBtn}
+                onClick={() => setSelectedReservation(null)}>
+                
                   x
                 </button>
               </div>
@@ -352,64 +352,64 @@ export default function AdminReservations({ role = 'admin' }) {
                     <label>Special Requests</label>
                     <input value={selectedReservation.special_requests || 'None'} readOnly />
                   </div>
-                  {selectedReservation.status === 'cancelled' && (
-                    <div className={styles.fullRow}>
+                  {selectedReservation.status === 'cancelled' &&
+                <div className={styles.fullRow}>
                       <label>Rejection Message</label>
                       <textarea value={selectedReservation.review_notes || 'No rejection message was added.'} readOnly />
                     </div>
-                  )}
+                }
                 </div>
 
                 <div className={styles.receiptPanel}>
                   <div className={styles.receiptHeader}>
                     <strong>Attached Payment Receipt</strong>
-                    {selectedReservation.receipt_url && (
-                      <a href={toReceiptSrc(selectedReservation.receipt_url)} target="_blank" rel="noreferrer">
+                    {selectedReservation.receipt_url &&
+                  <a href={toReceiptSrc(selectedReservation.receipt_url)} target="_blank" rel="noreferrer">
                         Open file
                       </a>
-                    )}
+                  }
                   </div>
-                  {selectedReservation.receipt_url ? (
-                    isPdfReceipt(selectedReservation.receipt_url) ? (
-                      <iframe
-                        className={styles.receiptFrame}
-                        src={toReceiptSrc(selectedReservation.receipt_url)}
-                        title="Payment receipt"
-                      />
-                    ) : (
-                      <img
-                        className={styles.receiptImage}
-                        src={toReceiptSrc(selectedReservation.receipt_url)}
-                        alt="Payment receipt"
-                      />
-                    )
-                  ) : (
-                    <p className={styles.noReceipt}>No receipt image was attached to this reservation.</p>
-                  )}
+                  {selectedReservation.receipt_url ?
+                isPdfReceipt(selectedReservation.receipt_url) ?
+                <iframe
+                  className={styles.receiptFrame}
+                  src={toReceiptSrc(selectedReservation.receipt_url)}
+                  title="Payment receipt" /> :
+
+
+                <img
+                  className={styles.receiptImage}
+                  src={toReceiptSrc(selectedReservation.receipt_url)}
+                  alt="Payment receipt" /> :
+
+
+
+                <p className={styles.noReceipt}>No receipt image was attached to this reservation.</p>
+                }
                 </div>
               </div>
 
               <div className={styles.modalFooter}>
                 <button
-                  onClick={() => setSelectedReservation(null)}
-                  className={styles.cancelBtn}
-                >
+                onClick={() => setSelectedReservation(null)}
+                className={styles.cancelBtn}>
+                
                   Close
                 </button>
               </div>
             </div>
           </div>
-        )}
+        }
 
-        {rejectTarget && (
-          <div className={styles.modalOverlay}>
+        {rejectTarget &&
+        <div className={styles.modalOverlay}>
             <div className={styles.modalBox}>
               <div className={styles.modalHeader}>
                 <h3>Reject Reservation</h3>
                 <button
-                  className={styles.closeBtn}
-                  onClick={() => setRejectTarget(null)}
-                >
+                className={styles.closeBtn}
+                onClick={() => setRejectTarget(null)}>
+                
                   x
                 </button>
               </div>
@@ -419,32 +419,32 @@ export default function AdminReservations({ role = 'admin' }) {
                 </p>
                 <label>Message to Guest</label>
                 <textarea
-                  value={rejectMessage}
-                  onChange={(event) => setRejectMessage(event.target.value)}
-                  placeholder="Example: Your proof of payment could not be verified. Please contact the resort for assistance."
-                  rows={5}
-                />
+                value={rejectMessage}
+                onChange={(event) => setRejectMessage(event.target.value)}
+                placeholder="Example: Your proof of payment could not be verified. Please contact the resort for assistance."
+                rows={5} />
+              
               </div>
               <div className={styles.modalFooter}>
                 <button
-                  onClick={() => setRejectTarget(null)}
-                  className={styles.cancelBtn}
-                  disabled={isSavingStatus}
-                >
+                onClick={() => setRejectTarget(null)}
+                className={styles.cancelBtn}
+                disabled={isSavingStatus}>
+                
                   Close
                 </button>
                 <button
-                  onClick={submitRejection}
-                  className={styles.submitBtn}
-                  disabled={isSavingStatus}
-                >
+                onClick={submitRejection}
+                className={styles.submitBtn}
+                disabled={isSavingStatus}>
+                
                   {isSavingStatus ? 'Saving...' : 'Reject Reservation'}
                 </button>
               </div>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }

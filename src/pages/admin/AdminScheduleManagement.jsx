@@ -13,8 +13,8 @@ import {
   subMonths,
   isSameMonth,
   isSameDay,
-  parseISO,
-} from "date-fns";
+  parseISO } from
+"date-fns";
 
 
 function fmtDate(dateStr) {
@@ -23,7 +23,7 @@ function fmtDate(dateStr) {
 }
 
 function expandBlackout(raw) {
-  const b = normalizeBlackout(raw); 
+  const b = normalizeBlackout(raw);
   const entries = [];
   if (!b.startDate) return entries;
   try {
@@ -45,25 +45,25 @@ function humanizeOptionValue(value) {
   const text = (value || "").toString().trim();
   if (!text) return "";
   if (!text.includes("_") && text[0] === text[0]?.toUpperCase()) return text;
-  return text
-    .split("_")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+  return text.
+  split("_").
+  filter(Boolean).
+  map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
+  join(" ");
 }
 
 function normalizeStatusKey(value) {
-  return (value || "")
-    .toString()
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "_");
+  return (value || "").
+  toString().
+  trim().
+  toLowerCase().
+  replace(/\s+/g, "_");
 }
 
 function authHeaders() {
   return {
     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-    "Content-Type": "application/json",
+    "Content-Type": "application/json"
   };
 }
 
@@ -71,15 +71,15 @@ function authHeaders() {
 function normalizeBlackout(b) {
   return {
     ...b,
-    facilityId:      b.facilityId      || b.facility_id || b.facility?.id || (typeof b.facility === "number" ? b.facility : ""),
-    facility:        b.facility_name   || b.facilityLabel || b.facility?.name || (typeof b.facility === "string" ? b.facility : ""),
+    facilityId: b.facilityId || b.facility_id || b.facility?.id || (typeof b.facility === "number" ? b.facility : ""),
+    facility: b.facility_name || b.facilityLabel || b.facility?.name || (typeof b.facility === "string" ? b.facility : ""),
     maintenanceType: b.maintenanceType || b.maintenance_type_display || humanizeOptionValue(b.maintenance_type) || b.reason || "",
-    startDate:       b.startDate       || b.start_date       || "",
-    endDate:         b.endDate         || b.end_date         || b.startDate || b.start_date || "",
-    startTime:       b.startTime       || b.start_time       || "",
-    endTime:         b.endTime         || b.end_time         || "",
-    status:          b.statusDisplay || b.status_display || humanizeOptionValue(b.status) || "Scheduled",
-    notes:           b.notes           || "",
+    startDate: b.startDate || b.start_date || "",
+    endDate: b.endDate || b.end_date || b.startDate || b.start_date || "",
+    startTime: b.startTime || b.start_time || "",
+    endTime: b.endTime || b.end_time || "",
+    status: b.statusDisplay || b.status_display || humanizeOptionValue(b.status) || "Scheduled",
+    notes: b.notes || ""
   };
 }
 
@@ -87,20 +87,20 @@ async function fetchFacilities() {
   try {
     const res = await fetch(`${API_BASE}/facilities/`, {
       credentials: "include",
-      headers: authHeaders(),
+      headers: authHeaders()
     });
     if (!res.ok) throw new Error("Failed to fetch facilities");
     const data = await res.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
-    return list
-      .map((f) => {
-        if (typeof f === "string") return { id: f, name: f };
-        const id = f.id ?? f.value ?? f.facility_id;
-        const name = f.name || f.facility_name || f.label || "";
-        if (id == null || !name) return null;
-        return { id, name };
-      })
-      .filter(Boolean);
+    return list.
+    map((f) => {
+      if (typeof f === "string") return { id: f, name: f };
+      const id = f.id ?? f.value ?? f.facility_id;
+      const name = f.name || f.facility_name || f.label || "";
+      if (id == null || !name) return null;
+      return { id, name };
+    }).
+    filter(Boolean);
   } catch {
     return [];
   }
@@ -110,13 +110,13 @@ async function fetchMaintenanceTypes() {
   try {
     const res = await fetch(`${API_BASE}/blackout-dates/maintenance_types/`, {
       credentials: "include",
-      headers: authHeaders(),
+      headers: authHeaders()
     });
     if (!res.ok) throw new Error("Failed to fetch maintenance types");
     const data = await res.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
     return list.map((item) =>
-      typeof item === "string" ? item : item.label || item.name || item.value || ""
+    typeof item === "string" ? item : item.label || item.name || item.value || ""
     ).filter(Boolean);
   } catch {
     return ["Maintenance"];
@@ -127,13 +127,13 @@ async function fetchStatusOptions() {
   try {
     const res = await fetch(`${API_BASE}/blackout-dates/status_options/`, {
       credentials: "include",
-      headers: authHeaders(),
+      headers: authHeaders()
     });
     if (!res.ok) throw new Error("Failed to fetch status options");
     const data = await res.json();
     const list = Array.isArray(data) ? data : data.results ?? [];
     return list.map((item) =>
-      typeof item === "string" ? item : item.label || item.name || item.value || ""
+    typeof item === "string" ? item : item.label || item.name || item.value || ""
     ).filter(Boolean);
   } catch {
     return ["Scheduled"];
@@ -143,7 +143,7 @@ async function fetchStatusOptions() {
 async function fetchAllReservations() {
   const response = await fetch(`${API_BASE}/reservations/`, {
     credentials: "include",
-    headers: authHeaders(),
+    headers: authHeaders()
   });
   if (!response.ok) throw new Error("Failed to fetch reservations");
   const data = await response.json();
@@ -152,32 +152,32 @@ async function fetchAllReservations() {
   const normalized = [];
   list.forEach((r) => {
     const facilityName =
-      r.facility_name || r.facility?.name || r.room_name || r.room || "Reserved";
+    r.facility_name || r.facility?.name || r.room_name || r.room || "Reserved";
     const customerName =
-      r.guest_name || r.customer_name || r.user_name ||
-      r.user?.full_name || r.user?.email || "Guest";
-    const checkIn  = r.check_in  || r.check_in_date  || r.date;
+    r.guest_name || r.customer_name || r.user_name ||
+    r.user?.full_name || r.user?.email || "Guest";
+    const checkIn = r.check_in || r.check_in_date || r.date;
     const checkOut = r.check_out || r.check_out_date || null;
-    const status   = (r.status || "pending").toLowerCase();
-    const guests   = r.guests ?? r.guest_count ?? r.num_guests ?? 1;
+    const status = (r.status || "pending").toLowerCase();
+    const guests = r.guests ?? r.guest_count ?? r.num_guests ?? 1;
 
     if (!checkIn) return;
 
     if (checkOut && checkOut !== checkIn) {
       let current = new Date(checkIn);
-      const end   = new Date(checkOut);
+      const end = new Date(checkOut);
       while (current < end) {
         normalized.push({
           id: r.id, date: current.toISOString().split("T")[0],
           label: facilityName, customer: customerName,
-          status, guests, _type: "reservation",
+          status, guests, _type: "reservation"
         });
         current.setDate(current.getDate() + 1);
       }
     } else {
       normalized.push({
         id: r.id, date: checkIn, label: facilityName,
-        customer: customerName, status, guests, _type: "reservation",
+        customer: customerName, status, guests, _type: "reservation"
       });
     }
   });
@@ -189,7 +189,7 @@ async function fetchBlackoutSchedules() {
   try {
     const response = await fetch(`${API_BASE}/blackout-dates/`, {
       credentials: "include",
-      headers: authHeaders(),
+      headers: authHeaders()
     });
 
     if (response.status === 403) {
@@ -217,7 +217,7 @@ async function createBlackout(payload) {
     method: "POST",
     credentials: "include",
     headers: authHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   if (!res.ok) {
     const detail = await res.text();
@@ -231,7 +231,7 @@ async function updateBlackout(id, payload) {
     method: "PUT",
     credentials: "include",
     headers: authHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
   if (!res.ok) {
     const detail = await res.text();
@@ -244,7 +244,7 @@ async function deleteBlackout(id) {
   const res = await fetch(`${API_BASE}/blackout-dates/${id}/`, {
     method: "DELETE",
     credentials: "include",
-    headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` },
+    headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
   });
   if (!res.ok) throw new Error("Failed to delete blackout");
 }
@@ -253,40 +253,40 @@ export default function AdminScheduleManagement({ role = "admin" }) {
   const isAdmin = role === "admin";
 
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab]     = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
 
-  const [facilityOptions, setFacilityOptions]   = useState([]);
+  const [facilityOptions, setFacilityOptions] = useState([]);
   const [maintenanceTypes, setMaintenanceTypes] = useState([]);
-  const [statusOptions, setStatusOptions]       = useState([]);
-  const [optionsLoading, setOptionsLoading]     = useState(true);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
 
   const [reservations, setReservations] = useState([]);
-  const [blackouts, setBlackouts]       = useState([]);
-  const [isLoading, setIsLoading]       = useState(true);
-  const [error, setError]               = useState(null);
+  const [blackouts, setBlackouts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [selectedDay, setSelectedDay] = useState(null);
 
-  const [showForm, setShowForm]     = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [form, setForm]             = useState({
+  const [form, setForm] = useState({
     facility: "", maintenanceType: "", startDate: "", endDate: "",
-    startTime: "08:00", endTime: "17:00", status: "", notes: "",
+    startTime: "08:00", endTime: "17:00", status: "", notes: ""
   });
-  const [isSaving, setIsSaving]   = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formError, setFormError] = useState(null);
 
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const makeEmptyForm = (facilities, types, statuses) => ({
-    facility:        facilities[0]?.id ?? "",
-    maintenanceType: types[0]      ?? "",
-    startDate:  "",
-    endDate:    "",
-    startTime:  "08:00",
-    endTime:    "17:00",
-    status:     statuses[0] ?? "",
-    notes:      "",
+    facility: facilities[0]?.id ?? "",
+    maintenanceType: types[0] ?? "",
+    startDate: "",
+    endDate: "",
+    startTime: "08:00",
+    endTime: "17:00",
+    status: statuses[0] ?? "",
+    notes: ""
   });
 
   const loadScheduleData = async (refreshOptions = false) => {
@@ -298,9 +298,9 @@ export default function AdminScheduleManagement({ role = "admin" }) {
 
     try {
       const requests = [
-        fetchAllReservations(),
-        fetchBlackoutSchedules(),
-      ];
+      fetchAllReservations(),
+      fetchBlackoutSchedules()];
+
 
       if (refreshOptions) {
         requests.push(fetchFacilities(), fetchMaintenanceTypes(), fetchStatusOptions());
@@ -319,7 +319,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
         setStatusOptions(nextStatuses);
         setForm((prev) => ({
           ...makeEmptyForm(nextFacilities, nextTypes, nextStatuses),
-          ...prev,
+          ...prev
         }));
       }
 
@@ -364,18 +364,18 @@ export default function AdminScheduleManagement({ role = "admin" }) {
   };
 
   const filteredReservations = reservations.filter((r) => {
-    const sameMonth  = isSameMonth(new Date(r.date), currentDate);
+    const sameMonth = isSameMonth(new Date(r.date), currentDate);
     const statusMatch = matchesTabStatus(r.status, activeTab);
     return sameMonth && statusMatch;
   });
 
   const getCount = (type) =>
-    reservations.filter((r) => {
-      const sameMonth = isSameMonth(new Date(r.date), currentDate);
-      return sameMonth && matchesTabStatus(r.status, type);
-    }).length;
+  reservations.filter((r) => {
+    const sameMonth = isSameMonth(new Date(r.date), currentDate);
+    return sameMonth && matchesTabStatus(r.status, type);
+  }).length;
 
-  // ── Status helpers ──
+
   const getStatusClass = (status) => {
     if (["approved", "confirmed", "paid"].includes(status)) return styles.statusApproved;
     if (["cancelled", "canceled", "declined", "rejected", "inactive"].includes(status)) return styles.statusCancelled;
@@ -392,32 +392,32 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     const grouped = { confirmed: [], pending: [], cancelled: [] };
     list.forEach((r) => grouped[getStatusGroup(r.status)].push(r));
     return [
-      { key: "confirmed", label: "Confirmed", items: grouped.confirmed },
-      { key: "pending",   label: "Pending",   items: grouped.pending   },
-      { key: "cancelled", label: "Cancelled", items: grouped.cancelled },
-    ].filter((g) => g.items.length > 0);
+    { key: "confirmed", label: "Confirmed", items: grouped.confirmed },
+    { key: "pending", label: "Pending", items: grouped.pending },
+    { key: "cancelled", label: "Cancelled", items: grouped.cancelled }].
+    filter((g) => g.items.length > 0);
   };
 
-  // ── Form handlers ──
+
   const resetForm = () => {
     setForm(makeEmptyForm(facilityOptions, maintenanceTypes, statusOptions));
     setEditTarget(null);
     setFormError(null);
   };
 
-  const openAdd = () => { resetForm(); setShowForm(true); };
+  const openAdd = () => {resetForm();setShowForm(true);};
 
   const openEdit = (b) => {
     setEditTarget(b);
     setForm({
-      facility:        b.facilityId      || facilityOptions[0]?.id || "",
-      maintenanceType: b.maintenanceType || humanizeOptionValue(b.maintenance_type) || maintenanceTypes[0]  || "",
+      facility: b.facilityId || facilityOptions[0]?.id || "",
+      maintenanceType: b.maintenanceType || humanizeOptionValue(b.maintenance_type) || maintenanceTypes[0] || "",
       startDate: b.startDate || b.start_date || "",
-      endDate:   b.endDate   || b.end_date   || "",
+      endDate: b.endDate || b.end_date || "",
       startTime: b.startTime || b.start_time || "08:00",
-      endTime:   b.endTime   || b.end_time   || "17:00",
-      status:    b.statusDisplay || humanizeOptionValue(b.status) || statusOptions[0] || "",
-      notes:     b.notes     || "",
+      endTime: b.endTime || b.end_time || "17:00",
+      status: b.statusDisplay || humanizeOptionValue(b.status) || statusOptions[0] || "",
+      notes: b.notes || ""
     });
     setSelectedDay(null);
     setShowForm(true);
@@ -436,44 +436,44 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     }
 
     const payload = {
-      facility:         selectedFacility.id,
-      start_date:       form.startDate,
-      end_date:         form.startDate,
+      facility: selectedFacility.id,
+      start_date: form.startDate,
+      end_date: form.startDate,
       maintenance_type: form.maintenanceType.toLowerCase().replace(/\s+/g, "_"),
-      status:           form.status.toLowerCase().replace(/\s+/g, "_"),
-      reason:           form.notes || form.maintenanceType || "Maintenance",
+      status: form.status.toLowerCase().replace(/\s+/g, "_"),
+      reason: form.notes || form.maintenanceType || "Maintenance"
     };
 
     const legacyPayload = {
-      facility:   selectedFacility.id,
+      facility: selectedFacility.id,
       start_date: form.startDate,
-      end_date:   form.startDate,
-      reason:     form.notes || form.maintenanceType || "Maintenance",
+      end_date: form.startDate,
+      reason: form.notes || form.maintenanceType || "Maintenance"
     };
 
     try {
       let saved;
 
       try {
-        saved = editTarget
-          ? await updateBlackout(editTarget.id, payload)
-          : await createBlackout(payload);
+        saved = editTarget ?
+        await updateBlackout(editTarget.id, payload) :
+        await createBlackout(payload);
       } catch (primaryError) {
         console.warn("Blackout save with dynamic fields failed, retrying with legacy payload.", primaryError);
-        saved = editTarget
-          ? await updateBlackout(editTarget.id, legacyPayload)
-          : await createBlackout(legacyPayload);
+        saved = editTarget ?
+        await updateBlackout(editTarget.id, legacyPayload) :
+        await createBlackout(legacyPayload);
       }
 
       if (editTarget) {
         setBlackouts((prev) =>
-          prev.map((b) => (b.id === editTarget.id ? normalizeBlackout({
-            ...saved,
-            facility_name: selectedFacility.name,
-            maintenanceType: form.maintenanceType,
-            status: form.status,
-            notes: form.notes,
-          }) : b))
+        prev.map((b) => b.id === editTarget.id ? normalizeBlackout({
+          ...saved,
+          facility_name: selectedFacility.name,
+          maintenanceType: form.maintenanceType,
+          status: form.status,
+          notes: form.notes
+        }) : b)
         );
       } else {
         setBlackouts((prev) => [normalizeBlackout({
@@ -481,7 +481,7 @@ export default function AdminScheduleManagement({ role = "admin" }) {
           facility_name: selectedFacility.name,
           maintenanceType: form.maintenanceType,
           status: form.status,
-          notes: form.notes,
+          notes: form.notes
         }), ...prev]);
       }
       setShowForm(false);
@@ -506,80 +506,80 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     setSelectedDay(null);
   };
 
-  const renderHeader = () => (
-    <div className={styles.calHeader}>
+  const renderHeader = () =>
+  <div className={styles.calHeader}>
       <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className={styles.navBtn}>◀</button>
       <h2>{format(currentDate, "MMMM yyyy")}</h2>
       <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className={styles.navBtn}>▶</button>
-    </div>
-  );
+    </div>;
+
 
   const renderDays = () => {
     const startDate = startOfWeek(currentDate);
     return (
       <div className={styles.daysRow}>
-        {[...Array(7)].map((_, i) => (
-          <div key={i} className={styles.dayName}>
+        {[...Array(7)].map((_, i) =>
+        <div key={i} className={styles.dayName}>
             {format(addDays(startDate, i), "EEE").toUpperCase()}
           </div>
-        ))}
-      </div>
-    );
+        )}
+      </div>);
+
   };
 
   const renderCells = () => {
     const monthStart = startOfMonth(currentDate);
-    const monthEnd   = endOfMonth(monthStart);
-    const startDate  = startOfWeek(monthStart);
-    const endDate    = endOfWeek(monthEnd);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart);
+    const endDate = endOfWeek(monthEnd);
 
     const rows = [];
     let days = [];
-    let day  = startDate;
+    let day = startDate;
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         const dayRes = filteredReservations.filter((r) => isSameDay(new Date(r.date), day));
         const dayBlk = expandedBlackouts.filter((b) => isSameDay(parseISO(b.date), day));
-        const isDisabled  = !isSameMonth(day, monthStart);
-        const hasEvent    = dayRes.length > 0;
+        const isDisabled = !isSameMonth(day, monthStart);
+        const hasEvent = dayRes.length > 0;
         const hasBlackout = dayBlk.length > 0;
-        const hasAny      = hasEvent || hasBlackout;
+        const hasAny = hasEvent || hasBlackout;
         const hasFinishedBlackout = hasBlackout && dayBlk.every((b) => normalizeStatusKey(b.status) === "finished");
 
         days.push(
           <div
             key={day.toString()}
             className={[
-              styles.cell,
-              isDisabled ? styles.disabled : "",
-              hasEvent && !hasBlackout ? styles.hasEvent : "",
-              hasBlackout && !hasEvent ? (hasFinishedBlackout ? styles.hasBlackoutFinished : styles.hasBlackout) : "",
-              hasEvent && hasBlackout ? (hasFinishedBlackout ? styles.hasBothFinished : styles.hasBoth) : "",
-            ].join(" ")}
-            onClick={() => hasAny && setSelectedDay({ date: day, reservations: dayRes, blackouts: dayBlk })}
-          >
+            styles.cell,
+            isDisabled ? styles.disabled : "",
+            hasEvent && !hasBlackout ? styles.hasEvent : "",
+            hasBlackout && !hasEvent ? hasFinishedBlackout ? styles.hasBlackoutFinished : styles.hasBlackout : "",
+            hasEvent && hasBlackout ? hasFinishedBlackout ? styles.hasBothFinished : styles.hasBoth : ""].
+            join(" ")}
+            onClick={() => hasAny && setSelectedDay({ date: day, reservations: dayRes, blackouts: dayBlk })}>
+            
             <span className={styles.date}>{format(day, "d")}</span>
 
-            {dayRes.slice(0, hasBlackout ? 1 : 2).map((event, idx) => (
-              <div key={`r-${idx}`} className={styles.event}>
+            {dayRes.slice(0, hasBlackout ? 1 : 2).map((event, idx) =>
+            <div key={`r-${idx}`} className={styles.event}>
                 <span className={styles.dot}></span>
                 {event.label}
               </div>
-            ))}
+            )}
 
-            {hasBlackout && (
-              <div className={`${styles.blackoutChip} ${hasFinishedBlackout ? styles.blackoutChipFinished : ""}`}>
+            {hasBlackout &&
+            <div className={`${styles.blackoutChip} ${hasFinishedBlackout ? styles.blackoutChipFinished : ""}`}>
                 <span className={styles.blackoutDot}></span>
                 {dayBlk[0].facility || dayBlk[0].facility_name}
               </div>
-            )}
+            }
 
-            {(dayRes.length + dayBlk.length) > 2 && (
-              <div className={styles.moreEvents}>
+            {dayRes.length + dayBlk.length > 2 &&
+            <div className={styles.moreEvents}>
                 +{dayRes.length + dayBlk.length - 2} more
               </div>
-            )}
+            }
           </div>
         );
 
@@ -595,11 +595,11 @@ export default function AdminScheduleManagement({ role = "admin" }) {
     return <div>{rows}</div>;
   };
 
-  
+
   const monthBlackouts = blackouts.filter((b) => {
     if (!b.startDate) return false;
-    try { return isSameMonth(parseISO(b.startDate), currentDate); }
-    catch { return false; }
+    try {return isSameMonth(parseISO(b.startDate), currentDate);}
+    catch {return false;}
   });
 
   return (
@@ -613,36 +613,36 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             <div>
               <h1>Schedule Management</h1>
               <p>
-                {isAdmin
-                  ? "Infinity Garden Resort Reservation Management System"
-                  : "Infinity Garden Resort Management System - Staff View"}
+                {isAdmin ?
+                "Infinity Garden Resort Reservation Management System" :
+                "Infinity Garden Resort Management System - Staff View"}
               </p>
             </div>
-            {isAdmin && (
-              <div style={{ display: "flex", gap: 10 }}>
+            {isAdmin &&
+            <div style={{ display: "flex", gap: 10 }}>
                 <button className={styles.headerBtn} onClick={openAdd}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   Add Blackout Date
                 </button>
               </div>
-            )}
+            }
           </div>
         </div>
 
         <div className={styles.container}>
 
           <div className={styles.tabs}>
-            {["all", "pending", "approved"].map((tab) => (
-              <button
-                key={tab}
-                className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
-                onClick={() => setActiveTab(tab)}
-              >
+            {["all", "pending", "approved"].map((tab) =>
+            <button
+              key={tab}
+              className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+              onClick={() => setActiveTab(tab)}>
+              
                 {tab.charAt(0).toUpperCase() + tab.slice(1)} ({getCount(tab)})
               </button>
-            ))}
+            )}
           </div>
 
           <div className={styles.calendarBox}>
@@ -661,23 +661,23 @@ export default function AdminScheduleManagement({ role = "admin" }) {
               </div>
             </div>
 
-            {error && (
-              <div className={styles.errorBanner}><p>{error}</p></div>
-            )}
+            {error &&
+            <div className={styles.errorBanner}><p>{error}</p></div>
+            }
 
-            {isLoading ? (
-              <div className={styles.loadingState}><p>Loading schedule...</p></div>
-            ) : (
-              <div className={styles.calendar}>
+            {isLoading ?
+            <div className={styles.loadingState}><p>Loading schedule...</p></div> :
+
+            <div className={styles.calendar}>
                 {renderHeader()}
                 {renderDays()}
                 {renderCells()}
               </div>
-            )}
+            }
           </div>
 
-          {isAdmin && (
-            <div className={styles.blackoutPanel}>
+          {isAdmin &&
+          <div className={styles.blackoutPanel}>
               <div className={styles.blackoutPanelHeader}>
                 <h3>
                   Maintenance Blackouts — {format(currentDate, "MMMM yyyy")}
@@ -685,12 +685,12 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                 </h3>
               </div>
 
-              {monthBlackouts.length === 0 ? (
-                <div className={styles.blackoutEmpty}>
+              {monthBlackouts.length === 0 ?
+            <div className={styles.blackoutEmpty}>
                   No maintenance blackouts this month.
-                </div>
-              ) : (
-                <div className={styles.blackoutTable}>
+                </div> :
+
+            <div className={styles.blackoutTable}>
                   <table>
                     <thead>
                       <tr>
@@ -703,12 +703,12 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {monthBlackouts.map((b) => (
-                        <tr key={b.id}>
+                      {monthBlackouts.map((b) =>
+                  <tr key={b.id}>
                           <td><strong>{b.facility || b.facility_name}</strong></td>
                           <td>{b.maintenanceType || b.maintenance_type}</td>
                           <td>{fmtDate(b.startDate || b.start_date)}</td>
-                          <td>{fmtDate(b.endDate   || b.end_date)}</td>
+                          <td>{fmtDate(b.endDate || b.end_date)}</td>
 
                           <td>
                             <span className={`${styles.blkBadge} ${styles["blkStatus_" + (b.status || "Scheduled").replace(/ /g, "")]}`}>
@@ -722,28 +722,28 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                  )}
                     </tbody>
                   </table>
                 </div>
-              )}
+            }
             </div>
-          )}
+          }
 
         </div>
       </div>
 
-      {selectedDay && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
+      {selectedDay &&
+      <div className={styles.modalOverlay} onClick={() => setSelectedDay(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
 
             <div className={styles.modalHeader}>
               <h3>
-                {selectedDay.blackouts.length > 0 && selectedDay.reservations.length > 0
-                  ? "Reservations & Maintenance"
-                  : selectedDay.blackouts.length > 0
-                  ? "Maintenance Blackout"
-                  : "Reserved Facilities"}
+                {selectedDay.blackouts.length > 0 && selectedDay.reservations.length > 0 ?
+              "Reservations & Maintenance" :
+              selectedDay.blackouts.length > 0 ?
+              "Maintenance Blackout" :
+              "Reserved Facilities"}
               </h3>
               <p className={styles.modalSubtitle}>
                 {format(selectedDay.date, "MMMM d, yyyy")}
@@ -751,20 +751,20 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             </div>
 
             <button
-              className={styles.modalClose}
-              onClick={() => setSelectedDay(null)}
-              aria-label="Close Modal"
-            >✕</button>
+            className={styles.modalClose}
+            onClick={() => setSelectedDay(null)}
+            aria-label="Close Modal">
+            ✕</button>
 
             <div className={styles.modalBody}>
 
-              {selectedDay.blackouts.length > 0 && (
-                <div className={styles.modalGroup}>
+              {selectedDay.blackouts.length > 0 &&
+            <div className={styles.modalGroup}>
                   <div className={`${styles.modalGroupLabel} ${styles.groupLabel_blackout}`}>
                     🔧 Maintenance ({selectedDay.blackouts.length})
                   </div>
-                  {selectedDay.blackouts.map((b, idx) => (
-                    <div key={idx} className={`${styles.modalItem} ${styles.modalItem_blackout}`}>
+                  {selectedDay.blackouts.map((b, idx) =>
+              <div key={idx} className={`${styles.modalItem} ${styles.modalItem_blackout}`}>
                       <div className={styles.modalRow}>
                         <span>Facility</span>
                         <strong>{b.facility || b.facility_name}</strong>
@@ -782,31 +782,31 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                           </span>
                         </strong>
                       </div>
-                      {b.notes && (
-                        <div className={styles.modalRow}>
+                      {b.notes &&
+                <div className={styles.modalRow}>
                           <span>Notes</span>
                           <strong style={{ textAlign: "right", maxWidth: "55%", fontWeight: 400 }}>{b.notes}</strong>
                         </div>
-                      )}
-                      {isAdmin && (
-                        <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 6 }}>
+                }
+                      {isAdmin &&
+                <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 6 }}>
                           <button className={styles.blkEditBtn} onClick={() => openEdit(b)}>Edit</button>
                           <button className={styles.blkDelBtn} onClick={() => setDeleteConfirm(b)}>Delete</button>
                         </div>
-                      )}
+                }
                     </div>
-                  ))}
-                </div>
               )}
+                </div>
+            }
 
               {selectedDay.reservations.length > 0 &&
-                groupReservations(selectedDay.reservations).map((group) => (
-                  <div key={group.key} className={styles.modalGroup}>
+            groupReservations(selectedDay.reservations).map((group) =>
+            <div key={group.key} className={styles.modalGroup}>
                     <div className={`${styles.modalGroupLabel} ${styles["groupLabel_" + group.key]}`}>
                       {group.label} ({group.items.length})
                     </div>
-                    {group.items.map((r, idx) => (
-                      <div key={idx} className={`${styles.modalItem} ${styles["modalItem_" + getStatusGroup(r.status)]}`}>
+                    {group.items.map((r, idx) =>
+              <div key={idx} className={`${styles.modalItem} ${styles["modalItem_" + getStatusGroup(r.status)]}`}>
                         <div className={styles.modalRow}>
                           <span>Room / Facility</span>
                           <strong>{r.label}</strong>
@@ -818,10 +818,10 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                           </strong>
                         </div>
                       </div>
-                    ))}
+              )}
                   </div>
-                ))
-              }
+            )
+            }
 
             </div>
 
@@ -830,25 +830,25 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             </button>
           </div>
         </div>
-      )}
+      }
 
      
-      {isAdmin && showForm && (
-        <div className={styles.modalOverlay} onClick={() => { setShowForm(false); resetForm(); }}>
+      {isAdmin && showForm &&
+      <div className={styles.modalOverlay} onClick={() => {setShowForm(false);resetForm();}}>
           <div className={styles.formModal} onClick={(e) => e.stopPropagation()}>
 
             <div className={styles.modalHeader}>
               <h3>{editTarget ? "Edit Blackout Schedule" : "New Blackout Date"}</h3>
               <p className={styles.modalSubtitle}>
-                {editTarget
-                  ? "Update the maintenance blackout details"
-                  : "Block dates for facility maintenance"}
+                {editTarget ?
+              "Update the maintenance blackout details" :
+              "Block dates for facility maintenance"}
               </p>
             </div>
             <button
-              className={styles.modalClose}
-              onClick={() => { setShowForm(false); resetForm(); }}
-            >✕</button>
+            className={styles.modalClose}
+            onClick={() => {setShowForm(false);resetForm();}}>
+            ✕</button>
 
             {formError && <p className={styles.formError}>{formError}</p>}
 
@@ -857,124 +857,124 @@ export default function AdminScheduleManagement({ role = "admin" }) {
 
                 <div className={styles.formFieldWide}>
                   <label className={styles.formLabel}>Facility</label>
-                  {optionsLoading ? (
-                    <select className={styles.formInput} disabled>
+                  {optionsLoading ?
+                <select className={styles.formInput} disabled>
                       <option>Loading facilities…</option>
-                    </select>
-                  ) : facilityOptions.length === 0 ? (
-                    <input
-                      className={styles.formInput}
-                      type="text"
-                      placeholder="No facilities available"
-                      value={form.facility}
-                      disabled
-                      readOnly
-                    />
-                  ) : (
-                    <select
-                      className={styles.formInput}
-                      value={form.facility}
-                      onChange={(e) => setForm((p) => ({ ...p, facility: e.target.value }))}
-                      required
-                    >
+                    </select> :
+                facilityOptions.length === 0 ?
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  placeholder="No facilities available"
+                  value={form.facility}
+                  disabled
+                  readOnly /> :
+
+
+                <select
+                  className={styles.formInput}
+                  value={form.facility}
+                  onChange={(e) => setForm((p) => ({ ...p, facility: e.target.value }))}
+                  required>
+                  
                       {facilityOptions.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}
                     </select>
-                  )}
+                }
                 </div>
 
                 <div className={styles.formFieldWide}>
                   <label className={styles.formLabel}>Maintenance Type</label>
-                  {optionsLoading ? (
-                    <select className={styles.formInput} disabled>
+                  {optionsLoading ?
+                <select className={styles.formInput} disabled>
                       <option>Loading types…</option>
-                    </select>
-                  ) : maintenanceTypes.length === 0 ? (
-                    <input
-                      className={styles.formInput}
-                      type="text"
-                      placeholder="Enter maintenance type"
-                      value={form.maintenanceType}
-                      onChange={(e) => setForm((p) => ({ ...p, maintenanceType: e.target.value }))}
-                      required
-                    />
-                  ) : (
-                    <select
-                      className={styles.formInput}
-                      value={form.maintenanceType}
-                      onChange={(e) => setForm((p) => ({ ...p, maintenanceType: e.target.value }))}
-                      required
-                    >
+                    </select> :
+                maintenanceTypes.length === 0 ?
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  placeholder="Enter maintenance type"
+                  value={form.maintenanceType}
+                  onChange={(e) => setForm((p) => ({ ...p, maintenanceType: e.target.value }))}
+                  required /> :
+
+
+                <select
+                  className={styles.formInput}
+                  value={form.maintenanceType}
+                  onChange={(e) => setForm((p) => ({ ...p, maintenanceType: e.target.value }))}
+                  required>
+                  
                       {maintenanceTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
-                  )}
+                }
                 </div>
 
                 <div className={styles.formFieldWide}>
                   <label className={styles.formLabel}>Maintenance Date</label>
                   <input
-                    className={styles.formInput}
-                    type="date"
-                    required
-                    value={form.startDate}
-                    onChange={(e) => setForm((p) => ({
-                      ...p,
-                      startDate: e.target.value,
-                      endDate: e.target.value,
-                    }))}
-                  />
+                  className={styles.formInput}
+                  type="date"
+                  required
+                  value={form.startDate}
+                  onChange={(e) => setForm((p) => ({
+                    ...p,
+                    startDate: e.target.value,
+                    endDate: e.target.value
+                  }))} />
+                
                 </div>
 
                 <div className={styles.formField}>
                   <label className={styles.formLabel}>Status</label>
-                  {optionsLoading ? (
-                    <select className={styles.formInput} disabled>
+                  {optionsLoading ?
+                <select className={styles.formInput} disabled>
                       <option>Loading statuses…</option>
-                    </select>
-                  ) : statusOptions.length === 0 ? (
-                    <input
-                      className={styles.formInput}
-                      type="text"
-                      placeholder="Enter status"
-                      value={form.status}
-                      onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
-                      required
-                    />
-                  ) : (
-                    <select
-                      className={styles.formInput}
-                      value={form.status}
-                      onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
-                      required
-                    >
+                    </select> :
+                statusOptions.length === 0 ?
+                <input
+                  className={styles.formInput}
+                  type="text"
+                  placeholder="Enter status"
+                  value={form.status}
+                  onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                  required /> :
+
+
+                <select
+                  className={styles.formInput}
+                  value={form.status}
+                  onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                  required>
+                  
                       {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
-                  )}
+                }
                 </div>
 
                 <div className={styles.formFieldWide}>
                   <label className={styles.formLabel}>Notes / Details</label>
                   <textarea
-                    className={styles.formInput}
-                    style={{ minHeight: 68, resize: "vertical", fontFamily: "inherit" }}
-                    value={form.notes}
-                    onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                    placeholder="Describe the maintenance work…"
-                  />
+                  className={styles.formInput}
+                  style={{ minHeight: 68, resize: "vertical", fontFamily: "inherit" }}
+                  value={form.notes}
+                  onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                  placeholder="Describe the maintenance work…" />
+                
                 </div>
 
                 <div className={styles.formActions}>
                   <button
-                    type="button"
-                    className={styles.formCancelBtn}
-                    onClick={() => { setShowForm(false); resetForm(); }}
-                  >
+                  type="button"
+                  className={styles.formCancelBtn}
+                  onClick={() => {setShowForm(false);resetForm();}}>
+                  
                     Cancel
                   </button>
                   <button
-                    type="submit"
-                    className={styles.formSaveBtn}
-                    disabled={isSaving || optionsLoading}
-                  >
+                  type="submit"
+                  className={styles.formSaveBtn}
+                  disabled={isSaving || optionsLoading}>
+                  
                     {isSaving ? "Saving…" : editTarget ? "Save Changes" : "Create Blackout"}
                   </button>
                 </div>
@@ -983,11 +983,11 @@ export default function AdminScheduleManagement({ role = "admin" }) {
             </div>
           </div>
         </div>
-      )}
+      }
 
 
-      {deleteConfirm && (
-        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+      {deleteConfirm &&
+      <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
           <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: "2.2rem", marginBottom: 10 }}>🗑️</div>
@@ -1002,19 +1002,18 @@ export default function AdminScheduleManagement({ role = "admin" }) {
                   Cancel
                 </button>
                 <button
-                  className={styles.formSaveBtn}
-                  style={{ background: "#dc2626" }}
-                  onClick={() => handleDelete(deleteConfirm.id)}
-                >
+                className={styles.formSaveBtn}
+                style={{ background: "#dc2626" }}
+                onClick={() => handleDelete(deleteConfirm.id)}>
+                
                   Delete
                 </button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      }
 
-    </div>
-  );
+    </div>);
+
 }
-

@@ -20,6 +20,6 @@ export default function Modal({ title, message, confirmLabel = 'Confirm', onConf
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

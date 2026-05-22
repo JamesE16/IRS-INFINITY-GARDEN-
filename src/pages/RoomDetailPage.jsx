@@ -11,7 +11,7 @@ export default function RoomDetailPage() {
 
   const room = facilities.find(
     (facility) =>
-      String(facility.publicId || facility.externalId || facility.id) === String(id)
+    String(facility.publicId || facility.externalId || facility.id) === String(id)
   );
 
   useEffect(() => {
@@ -22,8 +22,8 @@ export default function RoomDetailPage() {
     return (
       <div className="page" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
         <h2>Loading room details...</h2>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!room) {
@@ -33,8 +33,8 @@ export default function RoomDetailPage() {
         <button className="btn-red" onClick={() => navigate('/rooms')} style={{ marginTop: '1rem' }}>
           Back to Rooms
         </button>
-      </div>
-    );
+      </div>);
+
   }
 
   const handleBook = () => {
@@ -46,17 +46,17 @@ export default function RoomDetailPage() {
 
   const half = (arr) => ({
     col1: arr.filter((_, i) => i % 2 === 0),
-    col2: arr.filter((_, i) => i % 2 === 1),
+    col2: arr.filter((_, i) => i % 2 === 1)
   });
 
   const amenCols = half(room.amenities);
   const featCols = half(room.features);
 
-  const CheckIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  );
+  const CheckIcon = () =>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>;
+
 
   return (
     <div className="page">
@@ -96,18 +96,18 @@ export default function RoomDetailPage() {
             <h4>Amenities</h4>
             <div className={styles.featureGrid}>
               <div>
-                {amenCols.col1.map((a) => (
-                  <div key={a} className={styles.featureItem}>
+                {amenCols.col1.map((a) =>
+                <div key={a} className={styles.featureItem}>
                     <CheckIcon /> {a}
                   </div>
-                ))}
+                )}
               </div>
               <div>
-                {amenCols.col2.map((a) => (
-                  <div key={a} className={styles.featureItem}>
+                {amenCols.col2.map((a) =>
+                <div key={a} className={styles.featureItem}>
                     <CheckIcon /> {a}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -116,18 +116,18 @@ export default function RoomDetailPage() {
             <h4>Features</h4>
             <div className={styles.featureGrid}>
               <div>
-                {featCols.col1.map((f) => (
-                  <div key={f} className={styles.featureItem}>
+                {featCols.col1.map((f) =>
+                <div key={f} className={styles.featureItem}>
                     <CheckIcon /> {f}
                   </div>
-                ))}
+                )}
               </div>
               <div>
-                {featCols.col2.map((f) => (
-                  <div key={f} className={styles.featureItem}>
+                {featCols.col2.map((f) =>
+                <div key={f} className={styles.featureItem}>
                     <CheckIcon /> {f}
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>
@@ -144,14 +144,14 @@ export default function RoomDetailPage() {
           <button
             className={`${styles.bookBtn} ${!room.available ? styles.bookBtnDisabled : ''}`}
             onClick={handleBook}
-            disabled={!room.available}
-          >
+            disabled={!room.available}>
+            
             {room.available ? `Book This ${facilityType}` : 'Currently Unavailable'}
           </button>
         </div>
       </div>
 
       <Footer />
-    </div>
-  );
+    </div>);
+
 }

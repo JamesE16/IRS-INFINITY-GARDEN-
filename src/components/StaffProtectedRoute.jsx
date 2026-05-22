@@ -18,7 +18,7 @@ export function StaffProtectedRoute({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token');
-    const role  = localStorage.getItem('staffRole');
+    const role = localStorage.getItem('staffRole');
 
     if (isTokenValid(token) && role === 'staff') {
       setAuthState('ok');
@@ -38,6 +38,6 @@ export function StaffProtectedRoute({ children }) {
   useIdleTimeout(authState === 'ok');
 
   if (authState === 'checking') return null;
-  if (authState === 'denied')   return <Navigate to="/login" replace />;
+  if (authState === 'denied') return <Navigate to="/login" replace />;
   return children;
 }

@@ -192,7 +192,7 @@
   color: var(--text-mid);
 }
 
-/* ── CTA BAND ── */
+
 .ctaBand {
   background: var(--navy-dark);
   padding: 40px 2rem 20px;
@@ -211,7 +211,7 @@
   font-size: 0.95rem;
 }
 
-/* ── FEEDBACK SECTION ── */
+
 .feedbackSection {
   background: var(--navy-dark);
   padding: 20px 2rem 40px;

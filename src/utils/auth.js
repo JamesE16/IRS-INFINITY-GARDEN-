@@ -1,13 +1,13 @@
 export const AUTH_STORAGE_KEYS = [
-  'adminEmail',
-  'isAdminLoggedIn',
-  'adminSession',
-  'adminRole',
-  'staffEmail',
-  'isStaffLoggedIn',
-  'staffRole',
-  'access_token',
-];
+'adminEmail',
+'isAdminLoggedIn',
+'adminSession',
+'adminRole',
+'staffEmail',
+'isStaffLoggedIn',
+'staffRole',
+'access_token'];
+
 
 export const clearAuthStorage = () => {
   AUTH_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));

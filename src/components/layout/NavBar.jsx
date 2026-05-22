@@ -8,11 +8,11 @@ import logo from '../../assets/logo.png';
 export default function NavBar() {
   const navigate = useNavigate();
 
-      useEffect(() => {
-        const handleKeyDown = (e) => {
-          if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
-            e.preventDefault();
-            navigate('/login');
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        navigate('/login');
       }
     };
 
@@ -43,30 +43,30 @@ export default function NavBar() {
           to="/"
           end
           className={({ isActive }) =>
-            `${styles.link} ${isActive ? styles.active : ''}`
-          }
-        >
+          `${styles.link} ${isActive ? styles.active : ''}`
+          }>
+          
           Home
         </NavLink>
 
         <NavLink
           to="/rooms"
           className={({ isActive }) =>
-            `${styles.link} ${isActive ? styles.active : ''}`
-          }
-        >
+          `${styles.link} ${isActive ? styles.active : ''}`
+          }>
+          
           Rooms
         </NavLink>
 
         <NavLink
           to="/my-bookings"
           className={({ isActive }) =>
-            `${styles.link} ${isActive ? styles.active : ''}`
-          }
-        >
+          `${styles.link} ${isActive ? styles.active : ''}`
+          }>
+          
           My Bookings
         </NavLink>
       </div>
-    </nav>
-  );
+    </nav>);
+
 }

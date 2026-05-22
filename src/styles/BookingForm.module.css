@@ -175,9 +175,7 @@
 }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   DATE PICKER  (react-datepicker — styled to match your inputs)
-   ═══════════════════════════════════════════════════════════════ */
+
 
 .datePickerWrapper {
   position: relative;
@@ -221,7 +219,7 @@
   cursor: not-allowed;
 }
 
-/* Calendar popup — using :global because react-datepicker injects these */
+
 :global(.react-datepicker) {
   font-family: 'DM Sans', sans-serif !important;
   border: 1.5px solid var(--border) !important;
@@ -279,7 +277,7 @@
   font-weight: 700 !important;
 }
 
-/* Blocked/reserved dates — grayed with a red dot */
+
 :global(.react-datepicker__day--excluded) {
   color: #d1d5db !important;
   background: #fafafa !important;
@@ -319,9 +317,7 @@
 }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   PAYMENT METHOD CARDS
-   ═══════════════════════════════════════════════════════════════ */
+
 
 .paymentOptions {
   display: flex;
@@ -388,9 +384,7 @@
 }
 
 
-/* ═══════════════════════════════════════════════════════════════
-   RECEIPT UPLOADER
-   ═══════════════════════════════════════════════════════════════ */
+
 
 .receiptZone {
   border: 2px dashed var(--border);

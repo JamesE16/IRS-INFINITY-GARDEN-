@@ -20,6 +20,6 @@ export default function AdminPlaceholderPage() {
           Back to Dashboard
         </button>
       </div>
-    </div>
-  );
+    </div>);
+
 }

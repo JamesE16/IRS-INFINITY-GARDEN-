@@ -12,8 +12,8 @@ import {
   FaEye,
   FaMoneyBillWave,
   FaPrint,
-  FaTimesCircle,
-} from 'react-icons/fa';
+  FaTimesCircle } from
+'react-icons/fa';
 
 
 
@@ -27,10 +27,10 @@ const shortenId = (value) => {
 const formatPaymentMethod = (value, fallbackLabel = '') => {
   if (fallbackLabel) return fallbackLabel;
   if (!value) return 'N/A';
-  return value
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
+  return value.
+  split('_').
+  map((part) => part.charAt(0).toUpperCase() + part.slice(1)).
+  join(' ');
 };
 
 const normalizeTransaction = (payment) => ({
@@ -43,11 +43,11 @@ const normalizeTransaction = (payment) => ({
   date: payment.paid_at || payment.created_at,
   payment_method: formatPaymentMethod(
     payment.payment_method,
-    payment.payment_method_display,
+    payment.payment_method_display
   ),
   proof_of_payment: payment.proof_of_payment || '',
   reservation_id: payment.reservation_reservation_id || '',
-  reservation_id_short: shortenId(payment.reservation_reservation_id || ''),
+  reservation_id_short: shortenId(payment.reservation_reservation_id || '')
 });
 
 const normalizeStatus = (status) => {
@@ -63,28 +63,28 @@ const generateReceiptHTML = (transaction) => {
   const now = new Date();
   const topBarTime = now.toLocaleString('en-US', {
     month: 'numeric', day: 'numeric', year: '2-digit',
-    hour: 'numeric', minute: '2-digit', hour12: true,
-  });
-  
-  const generatedOnTime = now.toLocaleString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-    hour: 'numeric', minute: '2-digit', hour12: true,
+    hour: 'numeric', minute: '2-digit', hour12: true
   });
 
-  const transactionDate = transaction.date
-    ? new Date(transaction.date).toLocaleString('en-US', {
-        month: 'long', day: 'numeric', year: 'numeric',
-        hour: 'numeric', minute: '2-digit', hour12: true,
-      })
-    : 'N/A';
+  const generatedOnTime = now.toLocaleString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true
+  });
+
+  const transactionDate = transaction.date ?
+  new Date(transaction.date).toLocaleString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true
+  }) :
+  'N/A';
 
   const status = normalizeStatus(transaction.status);
   const amount = Number(transaction.amount || 0).toLocaleString();
 
   const statusColor =
-    status === 'paid' ? '#166534' : status === 'pending' ? '#92400e' : '#991b1b';
+  status === 'paid' ? '#166534' : status === 'pending' ? '#92400e' : '#991b1b';
   const statusBg =
-    status === 'paid' ? '#dcfce7' : status === 'pending' ? '#fef9c3' : '#fee2e2';
+  status === 'paid' ? '#dcfce7' : status === 'pending' ? '#fef9c3' : '#fee2e2';
 
   return `
 <!DOCTYPE html>
@@ -380,8 +380,8 @@ const printReceiptAsPDF = (transaction) => {
 
 
 
-const StatCard = ({ icon, label, value, iconBg, iconColor }) => (
-  <div className={styles.statCard}>
+const StatCard = ({ icon, label, value, iconBg, iconColor }) =>
+<div className={styles.statCard}>
     <div className={styles.statIcon} style={{ background: iconBg }}>
       {React.cloneElement(icon, { color: iconColor })}
     </div>
@@ -389,8 +389,8 @@ const StatCard = ({ icon, label, value, iconBg, iconColor }) => (
       <p className={styles.statLabel}>{label}</p>
       <p className={styles.statValue}>{value}</p>
     </div>
-  </div>
-);
+  </div>;
+
 
 const StatusBadge = ({ status }) => {
   const normalized = normalizeStatus(status);
@@ -398,13 +398,13 @@ const StatusBadge = ({ status }) => {
     paid: styles.statusPaid,
     pending: styles.statusPending,
     declined: styles.statusDeclined,
-    unknown: styles.statusDeclined,
+    unknown: styles.statusDeclined
   };
   return (
     <span className={`${styles.status} ${classMap[normalized] ?? ''}`}>
       {normalized}
-    </span>
-  );
+    </span>);
+
 };
 
 
@@ -426,27 +426,27 @@ const TransactionModal = ({ transaction, onClose }) => {
   }, [onClose]);
 
   const rows = [
-    {
-      label: 'Transaction ID',
-      value: transaction.transaction_id_short,
-      title: transaction.transaction_id,
-    },
-    {
-      label: 'Reservation ID',
-      value: transaction.reservation_id_short || 'N/A',
-      title: transaction.reservation_id,
-    },
-    { label: 'Guest', value: transaction.guest_name },
-    { label: 'Amount', value: `PHP ${Number(transaction.amount || 0).toLocaleString()}` },
-    { label: 'Payment Method', value: transaction.payment_method },
-    { label: 'Status', value: <StatusBadge status={transaction.status} /> },
-    {
-      label: 'Date',
-      value: transaction.date
-        ? new Date(transaction.date).toLocaleString()
-        : 'N/A',
-    },
-  ];
+  {
+    label: 'Transaction ID',
+    value: transaction.transaction_id_short,
+    title: transaction.transaction_id
+  },
+  {
+    label: 'Reservation ID',
+    value: transaction.reservation_id_short || 'N/A',
+    title: transaction.reservation_id
+  },
+  { label: 'Guest', value: transaction.guest_name },
+  { label: 'Amount', value: `PHP ${Number(transaction.amount || 0).toLocaleString()}` },
+  { label: 'Payment Method', value: transaction.payment_method },
+  { label: 'Status', value: <StatusBadge status={transaction.status} /> },
+  {
+    label: 'Date',
+    value: transaction.date ?
+    new Date(transaction.date).toLocaleString() :
+    'N/A'
+  }];
+
 
   return (
     <div
@@ -454,27 +454,27 @@ const TransactionModal = ({ transaction, onClose }) => {
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
-    >
+      aria-labelledby="modal-title">
+      
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h3 id="modal-title">Transaction Details</h3>
           <button
             className={styles.modalClose}
             onClick={onClose}
-            aria-label="Close modal"
-          >
+            aria-label="Close modal">
+            
             ✕
           </button>
         </div>
 
         <div className={styles.modalBody}>
-          {rows.map(({ label, value, title }) => (
-            <div className={styles.modalRow} key={label}>
+          {rows.map(({ label, value, title }) =>
+          <div className={styles.modalRow} key={label}>
               <span>{label}</span>
               <strong title={title}>{value}</strong>
             </div>
-          ))}
+          )}
         </div>
 
         <div className={styles.modalFooter}>
@@ -486,27 +486,27 @@ const TransactionModal = ({ transaction, onClose }) => {
             onClick={() => isVerified && printReceiptAsPDF(transaction)}
             disabled={!isVerified}
             title={
-              !isVerified
-                ? 'Receipt only available for verified payments'
-                : 'Print / Save as PDF'
-            }
-          >
+            !isVerified ?
+            'Receipt only available for verified payments' :
+            'Print / Save as PDF'
+            }>
+            
             <FaPrint />
             {isVerified ? 'Print Receipt' : 'Not Yet Verified'}
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 
 const FILTER_OPTIONS = [
-  { key: 'all', label: 'All' },
-  { key: 'paid', label: 'Verified' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'declined', label: 'Declined' },
-];
+{ key: 'all', label: 'All' },
+{ key: 'paid', label: 'Verified' },
+{ key: 'pending', label: 'Pending' },
+{ key: 'declined', label: 'Declined' }];
+
 
 const AdminPaymentManagement = ({ role = 'admin' }) => {
   const [transactions, setTransactions] = useState([]);
@@ -524,7 +524,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
       setError(null);
       try {
         const data = await adminAPI.getPayments();
-        const list = Array.isArray(data) ? data : (data.results ?? []);
+        const list = Array.isArray(data) ? data : data.results ?? [];
         if (!cancelled) {
           setTransactions(list.map(normalizeTransaction));
         }
@@ -544,20 +544,20 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
 
   const stats = useMemo(
     () =>
-      transactions.reduce(
-        (acc, t) => {
-          const s = normalizeStatus(t.status);
-          return {
-            total: acc.total + 1,
-            paid: acc.paid + (s === 'paid' ? 1 : 0),
-            pending: acc.pending + (s === 'pending' ? 1 : 0),
-            failed: acc.failed + (s === 'declined' ? 1 : 0),
-            totalAmount: acc.totalAmount + (Number(t.amount) || 0),
-          };
-        },
-        { total: 0, paid: 0, pending: 0, failed: 0, totalAmount: 0 },
-      ),
-    [transactions],
+    transactions.reduce(
+      (acc, t) => {
+        const s = normalizeStatus(t.status);
+        return {
+          total: acc.total + 1,
+          paid: acc.paid + (s === 'paid' ? 1 : 0),
+          pending: acc.pending + (s === 'pending' ? 1 : 0),
+          failed: acc.failed + (s === 'declined' ? 1 : 0),
+          totalAmount: acc.totalAmount + (Number(t.amount) || 0)
+        };
+      },
+      { total: 0, paid: 0, pending: 0, failed: 0, totalAmount: 0 }
+    ),
+    [transactions]
   );
 
   const filteredTransactions = useMemo(() => {
@@ -573,7 +573,7 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
       if (key === 'declined') return stats.failed;
       return 0;
     },
-    [stats],
+    [stats]
   );
 
   const handleView = useCallback((transaction) => {
@@ -594,9 +594,9 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
             <div className={styles.title}>
               <h1>Payment Management</h1>
               <p>
-                {isAdmin
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort – Staff View'}
+                {isAdmin ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort – Staff View'}
               </p>
             </div>
           </div>
@@ -609,61 +609,61 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
               label="Total Transactions"
               value={stats.total}
               iconBg="#dcfce7"
-              iconColor="#10b981"
-            />
+              iconColor="#10b981" />
+            
             <StatCard
               icon={<FaCheckCircle />}
               label="Verified Payments"
               value={stats.paid}
               iconBg="#d1fae5"
-              iconColor="#059669"
-            />
+              iconColor="#059669" />
+            
             <StatCard
               icon={<FaClock />}
               label="Pending"
               value={stats.pending}
               iconBg="#fef3c7"
-              iconColor="#d97706"
-            />
+              iconColor="#d97706" />
+            
             <StatCard
               icon={<FaMoneyBillWave />}
               label="Total Amount"
               value={`PHP ${stats.totalAmount.toLocaleString()}`}
               iconBg="#ede9fe"
-              iconColor="#7c3aed"
-            />
+              iconColor="#7c3aed" />
+            
           </div>
 
           <div className={styles.filterTabs}>
-            {FILTER_OPTIONS.map(({ key, label }) => (
-              <button
-                key={key}
-                className={`${styles.tab} ${filter === key ? styles.active : ''}`}
-                onClick={() => setFilter(key)}
-              >
+            {FILTER_OPTIONS.map(({ key, label }) =>
+            <button
+              key={key}
+              className={`${styles.tab} ${filter === key ? styles.active : ''}`}
+              onClick={() => setFilter(key)}>
+              
                 {label} ({filterCount(key)})
               </button>
-            ))}
+            )}
           </div>
 
-          {error && (
-            <div className={styles.errorBanner} role="alert">
+          {error &&
+          <div className={styles.errorBanner} role="alert">
               <FaTimesCircle />
               <p>{error}</p>
             </div>
-          )}
+          }
 
-          {isLoading ? (
-            <div className={styles.emptyState}>
+          {isLoading ?
+          <div className={styles.emptyState}>
               <h3>Loading transactions…</h3>
-            </div>
-          ) : filteredTransactions.length === 0 ? (
-            <div className={styles.emptyState}>
+            </div> :
+          filteredTransactions.length === 0 ?
+          <div className={styles.emptyState}>
               <h3>No transactions found</h3>
               <p>Try a different filter or check back later.</p>
-            </div>
-          ) : (
-            <div className={styles.tableWrapper}>
+            </div> :
+
+          <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
@@ -676,8 +676,8 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id}>
+                  {filteredTransactions.map((transaction) =>
+                <tr key={transaction.id}>
                       <td title={transaction.transaction_id}>
                         {transaction.transaction_id_short}
                       </td>
@@ -687,36 +687,36 @@ const AdminPaymentManagement = ({ role = 'admin' }) => {
                         <StatusBadge status={transaction.status} />
                       </td>
                       <td>
-                        {transaction.date
-                          ? new Date(transaction.date).toLocaleDateString()
-                          : 'N/A'}
+                        {transaction.date ?
+                    new Date(transaction.date).toLocaleDateString() :
+                    'N/A'}
                       </td>
                       <td>
                         <button
-                          className={styles.viewBtn}
-                          onClick={() => handleView(transaction)}
-                          aria-label={`View details for ${transaction.guest_name}`}
-                        >
+                      className={styles.viewBtn}
+                      onClick={() => handleView(transaction)}
+                      aria-label={`View details for ${transaction.guest_name}`}>
+                      
                           <FaEye /> View
                         </button>
                       </td>
                     </tr>
-                  ))}
+                )}
                 </tbody>
               </table>
             </div>
-          )}
+          }
         </main>
       </div>
 
-      {selectedTransaction && (
-        <TransactionModal
-          transaction={selectedTransaction}
-          onClose={handleCloseModal}
-        />
-      )}
-    </div>
-  );
+      {selectedTransaction &&
+      <TransactionModal
+        transaction={selectedTransaction}
+        onClose={handleCloseModal} />
+
+      }
+    </div>);
+
 };
 
 export default AdminPaymentManagement;

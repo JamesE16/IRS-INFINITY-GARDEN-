@@ -4,13 +4,13 @@ from django.urls import reverse
 from django.utils import timezone
 import uuid
 
-# ============================================================
-# ROOM TYPES
-# ============================================================
+                                                              
+            
+                                                              
 
 class RoomType(models.Model):
-    """Room/Facility classifications"""
-    name = models.CharField(max_length=50, unique=True)  # Room, Cottage, Pavilion, Gazebo
+                                       
+    name = models.CharField(max_length=50, unique=True)                                   
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -21,12 +21,12 @@ class RoomType(models.Model):
         ordering = ['name']
 
 
-# ============================================================
-# USER ROLES / STAFF
-# ============================================================
+                                                              
+                    
+                                                              
 
 class UserProfile(models.Model):
-    """Extended user profile with role information"""
+                                                     
     ROLE_CHOICES = [
         ('client', 'Client'),
         ('staff', 'Staff'),
@@ -47,37 +47,34 @@ class UserProfile(models.Model):
         ordering = ['-created_at']
 
 
-# ============================================================
-# FACILITIES / ROOMS
-# ============================================================
+                                                              
+                    
+                                                              
 
 class Facility(models.Model):
-    """Facilities: Rooms, Cottages, Pavilions, Gazebos"""
+                                                         
     external_id = models.CharField(max_length=50, unique=True, blank=True)
     name = models.CharField(max_length=100)
     room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, related_name='facilities')
     
-    capacity = models.IntegerField()  # max guests
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # price per night
+    capacity = models.IntegerField()              
+    price = models.DecimalField(max_digits=10, decimal_places=2)                   
     description = models.TextField(blank=True)
-    amenities = models.JSONField(default=list)  # ["WiFi", "AC", "Kitchen"]
+    amenities = models.JSONField(default=list)                             
     image_url = models.URLField(blank=True)
     image = models.FileField(upload_to='facilities/', blank=True, null=True)
     
-    is_active = models.BooleanField(default=True)  # Can be booked or not
+    is_active = models.BooleanField(default=True)                        
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     @property
     def availability_status(self):
-        """
-        DYNAMIC availability - computed from database reservations
-        NOT hardcoded, REAL-TIME
-        """
+           
         from django.utils import timezone
         from datetime import date
         
-        # Check for any APPROVED/CONFIRMED/CHECKED_IN reservations
+                                                                  
         confirmed_reservations = Reservation.objects.filter(
             facility=self,
             status__in=['approved', 'confirmed', 'checked_in']
@@ -90,7 +87,7 @@ class Facility(models.Model):
                 'blocked_until': None
             }
         
-        # Get earliest future reservation
+                                         
         today = date.today()
         current_reservation = confirmed_reservations.filter(
             check_out__gt=today
@@ -125,7 +122,7 @@ class Facility(models.Model):
 
 
 class BlackoutDate(models.Model):
-    """Dates when a facility is unavailable (maintenance, etc)"""
+                                                                 
     MAINTENANCE_TYPE_CHOICES = [
         ('maintenance', 'Maintenance'),
         ('deep_cleaning', 'Deep Cleaning'),
@@ -157,12 +154,12 @@ class BlackoutDate(models.Model):
         ordering = ['facility', 'start_date']
 
 
-# ============================================================
-# RESERVATIONS
-# ============================================================
+                                                              
+              
+                                                              
 
 class Reservation(models.Model):
-    """Guest reservations with full workflow"""
+                                               
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -175,10 +172,10 @@ class Reservation(models.Model):
     reservation_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4, editable=False)
     facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name='reservations')
     
-    # Guest can be registered user OR anonymous guest
+                                                     
     guest = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservations')
     
-    # Guest details (captured directly - required for receipts/identification)
+                                                                              
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     contact = models.CharField(max_length=20)
@@ -186,20 +183,20 @@ class Reservation(models.Model):
     address = models.TextField()
     valid_id = models.CharField(max_length=100, blank=True, default='')
     
-    # Reservation dates
+                       
     check_in = models.DateField()
     check_out = models.DateField()
     num_guests = models.IntegerField()
     special_requests = models.TextField(blank=True)
     
-    # Pricing
+             
     nights = models.IntegerField()
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     
-    # Status workflow
+                     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
-    # Admin review
+                  
     reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reservations')
     reviewed_at = models.DateTimeField(null=True, blank=True)
     review_notes = models.TextField(blank=True)
@@ -215,12 +212,12 @@ class Reservation(models.Model):
         ordering = ['-created_at']
 
 
-# ============================================================
-# PAYMENTS
-# ============================================================
+                                                              
+          
+                                                              
 
 class Payment(models.Model):
-    """Payment records linked to reservations"""
+                                                
     PAYMENT_METHOD_CHOICES = [
         ('gcash', 'GCash'),
         ('bank_transfer', 'Bank Transfer'),
@@ -252,12 +249,12 @@ class Payment(models.Model):
         ordering = ['-created_at']
 
 
-# ============================================================
-# NOTIFICATIONS & SCHEDULE
-# ============================================================
+                                                              
+                          
+                                                              
 
 class Notification(models.Model):
-    """Notifications for reservations"""
+                                        
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='notifications')
     message = models.TextField()
     is_read = models.BooleanField(default=False)
@@ -271,7 +268,7 @@ class Notification(models.Model):
 
 
 class Schedule(models.Model):
-    """Schedules linked to reservations"""
+                                          
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='schedules')
     start_date = models.DateField()
     end_date = models.DateField()
@@ -286,12 +283,12 @@ class Schedule(models.Model):
         ordering = ['reservation', 'start_date']
 
 
-# ============================================================
-# TRANSACTION LOG
-# ============================================================
+                                                              
+                 
+                                                              
 
 class TransactionLog(models.Model):
-    """Audit log for all actions"""
+                                   
     ACTION_CHOICES = [
         ('reservation_created', 'Reservation Created'),
         ('reservation_approved', 'Reservation Approved'),
@@ -317,7 +314,7 @@ class TransactionLog(models.Model):
 
 
 class Feedback(models.Model):
-    """Guest feedback"""
+                        
     STATUS_CHOICES = [
         ('new', 'New'),
         ('reviewed', 'Reviewed'),

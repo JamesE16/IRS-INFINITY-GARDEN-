@@ -90,7 +90,7 @@
   overflow: hidden;
 }
 
-/* Quick Report Dashboard */
+
 .quickReportDashboard {
   background: #fff;
   padding: 24px 30px 24px 24px;
@@ -1214,14 +1214,14 @@
   }
 }
 
-/* ===== PRINT STYLES ===== */
+
 @media print {
-  /* Hide everything except print container */
+  
   body > *:not(.printContainer) {
     display: none !important;
   }
 
-  /* Show only the print container */
+  
   .printContainer {
     display: block !important;
     position: static !important;
@@ -1230,7 +1230,7 @@
     overflow: visible !important;
   }
 
-  /* Print page setup */
+  
   @page {
     margin: 0.5in;
     size: A4;
@@ -1254,7 +1254,7 @@
   }
 }
 
-/* ===== PRINT CONTAINER STYLES ===== */
+
 .printContainer {
   font-family: 'DM Sans', sans-serif;
   color: #000;
@@ -1355,7 +1355,7 @@
   background-color: #f8f9fa;
 }
 
-/* Shared management table styling */
+
 .reportTableWrap {
   border: 1px solid #dbe4f0;
   border-radius: 6px;

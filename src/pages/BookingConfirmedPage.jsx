@@ -22,12 +22,12 @@ export default function BookingConfirmedPage() {
         <button
           className="btn-red"
           onClick={() => navigate('/rooms')}
-          style={{ marginTop: '1rem' }}
-        >
+          style={{ marginTop: '1rem' }}>
+          
           Browse Rooms
         </button>
-      </div>
-    );
+      </div>);
+
   }
 
   const b = confirmedBooking;
@@ -41,8 +41,8 @@ export default function BookingConfirmedPage() {
         <div className={styles.successCard}>
           <div className={styles.checkIcon}>
             <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-              <polyline points="22 4 12 14.01 9 11.01"/>
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
           </div>
           <h1>Reservation Pending</h1>
@@ -63,8 +63,8 @@ export default function BookingConfirmedPage() {
               <h3 className={styles.roomName}>{b.roomName}</h3>
               <p className={styles.roomMeta}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
                 </svg>
                 {b.guests} Guest{b.guests > 1 ? 's' : ''}
               </p>
@@ -75,31 +75,31 @@ export default function BookingConfirmedPage() {
             <div className={styles.dateItem}>
               <span className={styles.dateLabel}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6"/>
-                  <line x1="8"  y1="2" x2="8"  y2="6"/>
-                  <line x1="3"  y1="10" x2="21" y2="10"/>
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
                 {isOvernightStay ? 'Check-in' : 'Booking Date'}
               </span>
               <p className={styles.dateVal}>{formatDate(b.checkin)}</p>
               {isOvernightStay && <p className={styles.dateSub}>After 3:00 PM</p>}
             </div>
-            {isOvernightStay && (
-              <div className={styles.dateItem}>
+            {isOvernightStay &&
+            <div className={styles.dateItem}>
                 <span className={styles.dateLabel}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/>
-                    <line x1="8"  y1="2" x2="8"  y2="6"/>
-                    <line x1="3"  y1="10" x2="21" y2="10"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
                   Check-out
                 </span>
                 <p className={styles.dateVal}>{formatDate(b.checkout)}</p>
                 <p className={styles.dateSub}>Before 12:00 PM</p>
               </div>
-            )}
+            }
           </div>
 
           <div className={styles.priceBreakdown}>
@@ -121,8 +121,8 @@ export default function BookingConfirmedPage() {
             <h3>Guest Information</h3>
             <div className={styles.guestItem}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
               <div>
                 <span className={styles.guestLabel}>Name</span>
@@ -131,8 +131,8 @@ export default function BookingConfirmedPage() {
             </div>
             <div className={styles.guestItem}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
               </svg>
               <div>
                 <span className={styles.guestLabel}>Email</span>
@@ -141,7 +141,7 @@ export default function BookingConfirmedPage() {
             </div>
             <div className={styles.guestItem}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.64 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.08 6.08l1.17-1.17a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
               <div>
                 <span className={styles.guestLabel}>Phone</span>
@@ -172,6 +172,6 @@ export default function BookingConfirmedPage() {
 
       </div>
       <Footer />
-    </div>
-  );
+    </div>);
+
 }

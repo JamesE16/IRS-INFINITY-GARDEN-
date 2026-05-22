@@ -6,9 +6,9 @@ import { adminAPI } from '../../utils/api';
 import styles from '../../styles/AdminFeedbackManagement.module.css';
 
 const statusTabs = [
-  { key: 'active', label: 'All' },
-  { key: 'archived', label: 'Archive' }
-];
+{ key: 'active', label: 'All' },
+{ key: 'archived', label: 'Archive' }];
+
 
 const statusLabel = {
   new: 'New',
@@ -72,14 +72,14 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
       const matchesRating = ratingFilter === 'all' || item.rating === parseInt(ratingFilter);
       const query = searchQuery.trim().toLowerCase();
       const matchesSearch = !query || [
-        item.feedback_id,
-        item.first_name,
-        item.last_name,
-        item.email,
-        item.comment,
-        item.reservation_reference,
-        item.facility_name
-      ].some((value) => String(value || '').toLowerCase().includes(query));
+      item.feedback_id,
+      item.first_name,
+      item.last_name,
+      item.email,
+      item.comment,
+      item.reservation_reference,
+      item.facility_name].
+      some((value) => String(value || '').toLowerCase().includes(query));
       return matchesStatus && matchesRating && matchesSearch;
     });
   }, [feedbacks, filter, ratingFilter, searchQuery]);
@@ -126,9 +126,9 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
             <div className={styles.title}>
               <h1>Feedback Management</h1>
               <p>
-                {isAdmin
-                  ? 'Infinity Garden Resort Reservation Management System'
-                  : 'Infinity Garden Resort Management System - Staff View'}
+                {isAdmin ?
+                'Infinity Garden Resort Reservation Management System' :
+                'Infinity Garden Resort Management System - Staff View'}
               </p>
             </div>
           </div>
@@ -170,15 +170,15 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 placeholder="Search feedback, guest, facility..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
+                className={styles.searchInput} />
+              
             </div>
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
               className={styles.filterSelect}
-              title="Filter by rating"
-            >
+              title="Filter by rating">
+              
               <option value="all">All Ratings</option>
               <option value="5">5 Stars</option>
               <option value="4">4 Stars</option>
@@ -192,30 +192,30 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
           </div>
 
           <div className={styles.filterTabs}>
-            {statusTabs.map((tab) => (
-              <button
-                key={tab.key}
-                className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
-                onClick={() => setFilter(tab.key)}
-              >
+            {statusTabs.map((tab) =>
+            <button
+              key={tab.key}
+              className={`${styles.tab} ${filter === tab.key ? styles.active : ''}`}
+              onClick={() => setFilter(tab.key)}>
+              
                 {tab.label} ({counts[tab.key]})
               </button>
-            ))}
+            )}
           </div>
 
           {error && <div className={styles.errorBanner}><p>{error}</p></div>}
 
-          {isLoading ? (
-            <div className={styles.emptyState}>
+          {isLoading ?
+          <div className={styles.emptyState}>
               <h3>Loading feedback submissions...</h3>
-            </div>
-          ) : filteredFeedback.length === 0 ? (
-            <div className={styles.emptyState}>
+            </div> :
+          filteredFeedback.length === 0 ?
+          <div className={styles.emptyState}>
               <h3>No feedback found</h3>
               <p>Try a different search term or refresh the page.</p>
-            </div>
-          ) : (
-            <div className={styles.tableWrapper}>
+            </div> :
+
+          <div className={styles.tableWrapper}>
               <table className={styles.table}>
                 <thead>
                   <tr>
@@ -230,8 +230,8 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredFeedback.map((item) => (
-                    <tr key={item.id}>
+                  {filteredFeedback.map((item) =>
+                <tr key={item.id}>
                       <td title={item.feedback_id}>{shortenReference(item.feedback_id)}</td>
                       <td>
                         <div className={styles.guestInfo}>
@@ -252,22 +252,22 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                       </td>
                       <td style={{ textAlign: 'center' }}>
                         <button
-                          className={styles.actionBtn}
-                          onClick={() => handleOpenFeedback(item)}
-                        >
+                      className={styles.actionBtn}
+                      onClick={() => handleOpenFeedback(item)}>
+                      
                           View
                         </button>
                       </td>
                     </tr>
-                  ))}
+                )}
                 </tbody>
               </table>
             </div>
-          )}
+          }
         </div>
 
-        {selectedFeedback && (
-          <div className={styles.modalOverlay}>
+        {selectedFeedback &&
+        <div className={styles.modalOverlay}>
             <div className={styles.modalPanel}>
               <div className={styles.modalHeader}>
                 <h3>Feedback Details</h3>
@@ -299,20 +299,20 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                   <span>Submitted</span>
                   <strong>{new Date(selectedFeedback.submitted_at).toLocaleString()}</strong>
                 </div>
-                {!isAdmin && (
-                  <div className={styles.modalRow}>
+                {!isAdmin &&
+              <div className={styles.modalRow}>
                     <span>Status</span>
                     <strong>{statusLabel[selectedFeedback.status] || selectedFeedback.status}</strong>
                   </div>
-                )}
+              }
                 <div className={styles.formGroup}>
                   <label>Comment</label>
                   <textarea
-                    className={styles.input}
-                    readOnly
-                    value={selectedFeedback.comment}
-                    rows={6}
-                  />
+                  className={styles.input}
+                  readOnly
+                  value={selectedFeedback.comment}
+                  rows={6} />
+                
                 </div>
               </div>
 
@@ -320,20 +320,20 @@ export default function AdminFeedbackManagement({ role = 'admin' }) {
                 <button className={styles.cancelBtn} onClick={() => setSelectedFeedback(null)}>
                   Close
                 </button>
-                {isAdmin && (
-                  <button
-                    className={styles.submitBtn}
-                    disabled={isSaving}
-                    onClick={handleStatusSave}
-                  >
+                {isAdmin &&
+              <button
+                className={styles.submitBtn}
+                disabled={isSaving}
+                onClick={handleStatusSave}>
+                
                     {isSaving ? 'Archiving...' : 'Archive'}
                   </button>
-                )}
+              }
               </div>
             </div>
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
