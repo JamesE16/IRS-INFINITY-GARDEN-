@@ -1,347 +1,299 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.urls import reverse
-from django.utils import timezone
 import uuid
+from datetime import date
 
-                                                              
-            
-                                                              
+from django.contrib.auth.models import User
+from django.db import models
+
 
 class RoomType(models.Model):
-                                       
-    name = models.CharField(max_length=50, unique=True)                                   
+    name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return self.name
-    
+
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
-
-                                                              
-                    
-                                                              
 
 class UserProfile(models.Model):
-                                                     
     ROLE_CHOICES = [
-        ('client', 'Client'),
-        ('staff', 'Staff'),
-        ('admin', 'Administrator'),
+        ("client", "Client"),
+        ("staff", "Staff"),
+        ("admin", "Administrator"),
     ]
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="client")
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.user.email} ({self.get_role_display()})"
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
-
-                                                              
-                    
-                                                              
 
 class Facility(models.Model):
-                                                         
     external_id = models.CharField(max_length=50, unique=True, blank=True)
     name = models.CharField(max_length=100)
-    room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, related_name='facilities')
-    
-    capacity = models.IntegerField()              
-    price = models.DecimalField(max_digits=10, decimal_places=2)                   
+    room_type = models.ForeignKey(RoomType, on_delete=models.SET_NULL, null=True, related_name="facilities")
+    capacity = models.IntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True)
-    amenities = models.JSONField(default=list)                             
+    amenities = models.JSONField(default=list)
     image_url = models.URLField(blank=True)
-    image = models.FileField(upload_to='facilities/', blank=True, null=True)
-    
-    is_active = models.BooleanField(default=True)                        
+    image = models.FileField(upload_to="facilities/", blank=True, null=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     @property
     def availability_status(self):
-           
-        from django.utils import timezone
-        from datetime import date
-        
-                                                                  
         confirmed_reservations = Reservation.objects.filter(
             facility=self,
-            status__in=['approved', 'confirmed', 'checked_in']
+            status__in=["approved", "confirmed", "checked_in"],
         )
-        
+
         if not confirmed_reservations.exists():
             return {
-                'is_available': True,
-                'current_reservation': None,
-                'blocked_until': None
+                "is_available": True,
+                "current_reservation": None,
+                "blocked_until": None,
             }
-        
-                                         
-        today = date.today()
+
         current_reservation = confirmed_reservations.filter(
-            check_out__gt=today
-        ).order_by('check_in').first()
-        
+            check_out__gt=date.today()
+        ).order_by("check_in").first()
+
         if not current_reservation:
             return {
-                'is_available': True,
-                'current_reservation': None,
-                'blocked_until': None
+                "is_available": True,
+                "current_reservation": None,
+                "blocked_until": None,
             }
-        
+
         return {
-            'is_available': False,
-            'current_reservation': {
-                'id': current_reservation.id,
-                'reservation_id': current_reservation.reservation_id,
-                'check_in': str(current_reservation.check_in),
-                'check_out': str(current_reservation.check_out),
-                'guest_name': f"{current_reservation.first_name} {current_reservation.last_name}",
-                'status': current_reservation.status
+            "is_available": False,
+            "current_reservation": {
+                "id": current_reservation.id,
+                "reservation_id": current_reservation.reservation_id,
+                "check_in": str(current_reservation.check_in),
+                "check_out": str(current_reservation.check_out),
+                "guest_name": f"{current_reservation.first_name} {current_reservation.last_name}",
+                "status": current_reservation.status,
             },
-            'blocked_until': str(current_reservation.check_out)
+            "blocked_until": str(current_reservation.check_out),
         }
-    
+
     def __str__(self):
         return f"{self.name} ({self.room_type})"
-    
+
     class Meta:
-        ordering = ['room_type', 'name']
-        verbose_name_plural = 'Facilities'
+        ordering = ["room_type", "name"]
+        verbose_name_plural = "Facilities"
 
 
 class BlackoutDate(models.Model):
-                                                                 
     MAINTENANCE_TYPE_CHOICES = [
-        ('maintenance', 'Maintenance'),
-        ('deep_cleaning', 'Deep Cleaning'),
-        ('general_cleaning', 'General Cleaning'),
-        ('repair', 'Repair'),
-        ('inspection', 'Inspection'),
-        ('renovation', 'Renovation'),
+        ("maintenance", "Maintenance"),
+        ("deep_cleaning", "Deep Cleaning"),
+        ("general_cleaning", "General Cleaning"),
+        ("repair", "Repair"),
+        ("inspection", "Inspection"),
+        ("renovation", "Renovation"),
     ]
 
     STATUS_CHOICES = [
-        ('scheduled', 'Scheduled'),
-        ('in_progress', 'In Progress'),
-        ('finished', 'Finished'),
+        ("scheduled", "Scheduled"),
+        ("in_progress", "In Progress"),
+        ("finished", "Finished"),
     ]
 
-    facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name='blackout_dates')
+    facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name="blackout_dates")
     start_date = models.DateField()
     end_date = models.DateField()
-    maintenance_type = models.CharField(max_length=40, choices=MAINTENANCE_TYPE_CHOICES, default='maintenance')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
+    maintenance_type = models.CharField(max_length=40, choices=MAINTENANCE_TYPE_CHOICES, default="maintenance")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="scheduled")
     reason = models.CharField(max_length=200, default="Maintenance")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.facility.name} ({self.start_date} to {self.end_date})"
-    
+
     class Meta:
-        ordering = ['facility', 'start_date']
+        ordering = ["facility", "start_date"]
 
-
-                                                              
-              
-                                                              
 
 class Reservation(models.Model):
-                                               
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('confirmed', 'Confirmed'),
-        ('checked_in', 'Checked In'),
-        ('checked_out', 'Checked Out'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("confirmed", "Confirmed"),
+        ("checked_in", "Checked In"),
+        ("checked_out", "Checked Out"),
+        ("cancelled", "Cancelled"),
     ]
-    
+
     reservation_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4, editable=False)
-    facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name='reservations')
-    
-                                                     
-    guest = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reservations')
-    
-                                                                              
+    facility = models.ForeignKey(Facility, on_delete=models.CASCADE, related_name="reservations")
+    guest = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="reservations")
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     contact = models.CharField(max_length=20)
     email = models.EmailField()
     address = models.TextField()
-    valid_id = models.CharField(max_length=100, blank=True, default='')
-    
-                       
+    valid_id = models.CharField(max_length=100, blank=True, default="")
     check_in = models.DateField()
     check_out = models.DateField()
     num_guests = models.IntegerField()
     special_requests = models.TextField(blank=True)
-    
-             
     nights = models.IntegerField()
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    
-                     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    
-                  
-    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_reservations')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_reservations",
+    )
     reviewed_at = models.DateTimeField(null=True, blank=True)
     review_notes = models.TextField(blank=True)
     is_archived = models.BooleanField(default=False)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.reservation_id} - {self.facility.name} ({self.status})"
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
-
-                                                              
-          
-                                                              
 
 class Payment(models.Model):
-                                                
     PAYMENT_METHOD_CHOICES = [
-        ('gcash', 'GCash'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('cash', 'Cash'),
-        ('card', 'Card'),
+        ("gcash", "GCash"),
+        ("bank_transfer", "Bank Transfer"),
+        ("cash", "Cash"),
+        ("card", "Card"),
     ]
 
     VERIFICATION_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('verified', 'Verified'),
-        ('rejected', 'Rejected'),
+        ("pending", "Pending"),
+        ("verified", "Verified"),
+        ("rejected", "Rejected"),
     ]
-    
-    reservation = models.OneToOneField(Reservation, on_delete=models.CASCADE, related_name='payment')
+
+    reservation = models.OneToOneField(Reservation, on_delete=models.CASCADE, related_name="payment")
     amount = models.DecimalField(max_digits=12, decimal_places=2)
-    payment_method = models.CharField(max_length=30, choices=PAYMENT_METHOD_CHOICES, default='bank_transfer')
+    payment_method = models.CharField(max_length=30, choices=PAYMENT_METHOD_CHOICES, default="bank_transfer")
     reference_number = models.CharField(max_length=100, unique=True)
-    proof_of_payment = models.FileField(upload_to='payments/', blank=True, null=True)
-    verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default='pending')
-    
+    proof_of_payment = models.FileField(upload_to="payments/", blank=True, null=True)
+    verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default="pending")
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"Payment for {self.reservation.reservation_id} - {self.verification_status}"
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
-
-                                                              
-                          
-                                                              
 
 class Notification(models.Model):
-                                        
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='notifications')
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="notifications")
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Notification for {self.reservation.reservation_id}"
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
 
 class Schedule(models.Model):
-                                          
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='schedules')
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="schedules")
     start_date = models.DateField()
     end_date = models.DateField()
     reason = models.CharField(max_length=200, default="Extension")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"Schedule for {self.reservation.reservation_id}"
-    
+
     class Meta:
-        ordering = ['reservation', 'start_date']
+        ordering = ["reservation", "start_date"]
 
-
-                                                              
-                 
-                                                              
 
 class TransactionLog(models.Model):
-                                   
     ACTION_CHOICES = [
-        ('reservation_created', 'Reservation Created'),
-        ('reservation_approved', 'Reservation Approved'),
-        ('reservation_confirmed', 'Reservation Confirmed'),
-        ('reservation_cancelled', 'Reservation Cancelled'),
-        ('payment_verified', 'Payment Verified'),
-        ('check_in', 'Check-in'),
-        ('check_out', 'Check-out'),
-        ('extension_requested', 'Extension Requested'),
+        ("reservation_created", "Reservation Created"),
+        ("reservation_approved", "Reservation Approved"),
+        ("reservation_confirmed", "Reservation Confirmed"),
+        ("reservation_cancelled", "Reservation Cancelled"),
+        ("payment_verified", "Payment Verified"),
+        ("check_in", "Check-in"),
+        ("check_out", "Check-out"),
+        ("extension_requested", "Extension Requested"),
     ]
-    
+
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='transaction_logs', null=True, blank=True)
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name="transaction_logs",
+        null=True,
+        blank=True,
+    )
     action = models.CharField(max_length=30, choices=ACTION_CHOICES)
     details = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return f"{self.action} - {self.created_at}"
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ["-created_at"]
 
 
 class Feedback(models.Model):
-                        
     STATUS_CHOICES = [
-        ('new', 'New'),
-        ('reviewed', 'Reviewed'),
-        ('resolved', 'Resolved'),
-        ('archived', 'Archived'),
+        ("new", "New"),
+        ("reviewed", "Reviewed"),
+        ("resolved", "Resolved"),
+        ("archived", "Archived"),
     ]
-    
+
     feedback_id = models.CharField(max_length=50, unique=True, default=uuid.uuid4, editable=False)
-    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True, related_name='feedbacks')
+    reservation = models.ForeignKey(Reservation, on_delete=models.SET_NULL, null=True, blank=True, related_name="feedbacks")
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
     rating = models.PositiveSmallIntegerField(default=5)
     comment = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
     submitted_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.feedback_id} - {self.first_name} {self.last_name}"
-    
+
     class Meta:
-        ordering = ['-submitted_at']
+        ordering = ["-submitted_at"]
         constraints = [
             models.UniqueConstraint(
-                fields=['reservation'],
+                fields=["reservation"],
                 condition=models.Q(reservation__isnull=False),
-                name='unique_feedback_per_reservation',
+                name="unique_feedback_per_reservation",
             )
         ]
